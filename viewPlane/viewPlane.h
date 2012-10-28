@@ -13,11 +13,11 @@ class ViewPlane
         ViewPlane(int resX, int resY, double size[2]){ ViewPlane(resX,resY, size[0], size[1]);};
         ViewPlane(int res[2], double size[2]){ ViewPlane(res[0],res[1], size[0], size[1]);};
         ViewPlane(int res[2], double sizeX, double sizeY){ ViewPlane(res[0],res[1], sizeX, sizeY);};
+        ~ViewPlane(){};
         int getNumPixels(){return m_pixels.size();};
-        Ray getPixelRay(int index);
+        Ray getPixelRay(int index, Point sample);
         void setPixelValue(int index, RGBA color);
         void saveToTiff(const char *filename);
-        ~ViewPlane(){};
 
 		friend std::ostream& operator<<(std::ostream &out, ViewPlane &vp);
     private:

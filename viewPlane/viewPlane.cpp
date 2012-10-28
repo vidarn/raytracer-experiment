@@ -14,12 +14,16 @@ ViewPlane::ViewPlane(int resX, int resY, double sizeX, double sizeY)
     m_pixels.resize(m_resolution[0]*m_resolution[1]);
 }
 
-Ray ViewPlane::getPixelRay(int index)
+Ray ViewPlane::getPixelRay(int index, Point sample)
 {
-    int x = index % m_resolution[0];
-    int y = index / m_resolution[0];
+    double x = index % m_resolution[0];
+    double y = index / m_resolution[0];
+    x += sample[0];
+    y += sample[1];
     double posX = -1.0 + 2.0*((double) x)/((double) m_resolution[0]);
     double posY = -1.0 + 2.0*((double) y)/((double) m_resolution[1]);
+    posX *= m_size[0];
+    posY *= m_size[1];
     Point origin(posX,posY,0.0);
     Vec3 direction(0.0,0.0,1.0);
     Ray ray(origin,direction);

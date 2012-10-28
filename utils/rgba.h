@@ -14,6 +14,12 @@ class RGBA
 		double g(){return m_col[1];};
 		double b(){return m_col[2];};
 		double a(){return m_col[3];};
+		RGBA& operator+=(RGBA &other);
+		RGBA operator+(RGBA &other);
+		RGBA& operator-=(RGBA &other);
+		RGBA operator-(RGBA &other);
+		RGBA& operator*=(double &other);
+		RGBA operator*(double &other);
 
 		friend std::ostream& operator<<(std::ostream &out, RGBA &rgba);
 	private:

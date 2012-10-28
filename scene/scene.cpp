@@ -8,7 +8,7 @@ Scene::~Scene()
 
 void Scene::build()
 {
-	Sphere *obj = new Sphere(0.2);
+	Sphere *obj = new Sphere(0.9);
 	m_objects.push_back(obj);
 }
 

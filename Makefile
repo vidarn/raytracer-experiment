@@ -5,6 +5,7 @@ OBJ += geom/geometricObject.o geom/plane.o geom/sphere.o
 OBJ += scene/scene.o
 OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o
+OBJ += sampler/sampler.o
 FLG = -g
 LIB = -ltiff
 $(OUT):$(OBJ)
