@@ -19,5 +19,7 @@ RGBA Scene::trace(Ray &ray)
     if(m_objects[0]->hit(ray)){
         col[0] = 1.0;
     }
+	col[1] = ray.m_origin[1]*0.5+0.5;
+	col[3] = 1.0;
     return col;
 }

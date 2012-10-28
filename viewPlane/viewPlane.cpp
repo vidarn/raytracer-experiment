@@ -1,4 +1,5 @@
 #include "viewPlane.h"
+#include <cstring>
 
 ViewPlane::ViewPlane(int resX, int resY, double sizeX, double sizeY)
 {
@@ -28,6 +29,44 @@ Ray ViewPlane::getPixelRay(int index)
 void ViewPlane::setPixelValue(int index, RGBA color)
 {
     m_pixels[index] = color;
+}
+
+void ViewPlane::saveToTiff(const char *filename)
+{
+    TIFF* out = TIFFOpen(filename, "w");
+    int sampleperpixel = 4;
+    char *image=new char [m_resolution[0]*m_resolution[1]*sampleperpixel];
+    for(int i = 0;i<m_resolution[0]*m_resolution[1];i++){
+        RGBA pixel = m_pixels[i];
+        image[i*sampleperpixel] = pixel.r()*255;
+        image[i*sampleperpixel+1] = pixel.g()*255;
+        image[i*sampleperpixel+2] = pixel.b()*255;
+        image[i*sampleperpixel+3] = pixel.a()*255;
+    }
+    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, m_resolution[0]);  
+    TIFFSetField(out, TIFFTAG_IMAGELENGTH, m_resolution[1]);    
+    TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, sampleperpixel);   
+    TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);    
+    TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);    
+    TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    tsize_t linebytes = sampleperpixel * m_resolution[0];
+    unsigned char *buf = NULL;        
+    if (TIFFScanlineSize(out) < linebytes)
+        buf =(unsigned char *)_TIFFmalloc(linebytes);
+    else
+        buf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
+
+    TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, m_resolution[0]*sampleperpixel));
+
+    for (uint32 row = 0; row < m_resolution[1]; row++)
+    {
+        memcpy(buf, &image[(m_resolution[1]-row-1)*linebytes], linebytes);    
+        if (TIFFWriteScanline(out, buf, row, 0) < 0)
+        break;
+    }
+
+    TIFFClose(out);
 }
 
 std::ostream& operator<<(std::ostream &out, ViewPlane &vp)

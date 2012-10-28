@@ -6,9 +6,9 @@ OBJ += scene/scene.o
 OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o
 FLG =
-INC =
+LIB = -ltiff
 $(OUT):$(OBJ)
-	g++ -o $(OUT) $(OBJ) $(FLG) $(INC)
+	g++ -o $(OUT) $(OBJ) $(FLG) $(LIB)
 
 %.o : %.cpp %.h
 	g++ $(FLG) $(INC) -c $< -o $@

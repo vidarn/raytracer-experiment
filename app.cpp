@@ -8,8 +8,9 @@ int main(int argc, char** argv)
 {
     Scene scene;
     scene.build();
-    ViewPlane viewPlane(20,20,1.0,1.0);
+    ViewPlane viewPlane(512,512,1.0,1.0);
     Tracer tracer(&scene, &viewPlane);
     tracer.render();
-    std::cout << viewPlane;
+    //std::cout << viewPlane;
+	viewPlane.saveToTiff("out.tif");
 }

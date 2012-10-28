@@ -3,6 +3,8 @@
 #include "../utils/rgba.h"
 #include "../utils/ray.h"
 #include <vector>
+#include <tiffio.h>
+#include <tiffio.hxx>
 
 class ViewPlane
 {
@@ -14,6 +16,7 @@ class ViewPlane
         int getNumPixels(){return m_pixels.size();};
         Ray getPixelRay(int index);
         void setPixelValue(int index, RGBA color);
+        void saveToTiff(const char *filename);
         ~ViewPlane(){};
 
 		friend std::ostream& operator<<(std::ostream &out, ViewPlane &vp);

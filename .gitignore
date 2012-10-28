@@ -1,3 +1,4 @@
 .*.swp
 raytracer
 *.o
+out.tif
