@@ -2,5 +2,5 @@
 
 bool Plane::hit(const Ray &ray) const
 {
-	return false;
+	return true;
 }

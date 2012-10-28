@@ -10,4 +10,14 @@ void Scene::build()
 {
 	Plane *plane = new Plane;
 	m_objects.push_back(plane);
-};
+}
+
+RGBA Scene::trace(Ray &ray)
+{
+    int numObjects = m_objects.size();
+    RGBA col;
+    if(m_objects[0]->hit(ray)){
+        col[0] = 1.0;
+    }
+    return col;
+}
