@@ -1,9 +1,16 @@
 OUT = raytracer
-SRC = app.cpp
-SRC += utils/vec3.cpp utils/point.cpp utils/ray.cpp utils/rgba.cpp utils/normal.cpp
-SRC += geom/geometricObject.cpp geom/plane.cpp
-SRC += scene/scene.cpp
+OBJ = app.o
+OBJ += utils/vec3.o utils/point.o utils/ray.o utils/rgba.o utils/normal.o
+OBJ += geom/geometricObject.o geom/plane.o
+OBJ += scene/scene.o
 FLG =
 INC =
-all:
-	g++ -o $(OUT) $(SRC) $(FLG) $(INC)
+$(OUT):$(OBJ)
+	g++ -o $(OUT) $(OBJ) $(FLG) $(INC)
+
+%.o : %.cpp
+	g++ $(FLG) $(INC) -c $^ -o $@
+
+clean:
+	rm *.o
+	rm */*.o
