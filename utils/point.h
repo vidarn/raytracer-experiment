@@ -20,6 +20,7 @@ class Point
 		Point operator-(Vec3 &vec);
 		Point& operator+=(Vec3 &vec);
 		Point operator+(Vec3 &vec);
+		Vec3 toVec3(){return m_vec;};
 
 		friend std::ostream& operator<<(std::ostream &out, Point &point);
 	private:

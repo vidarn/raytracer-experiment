@@ -1,5 +1,5 @@
 #include "scene.h"
-#include "../geom/plane.h"
+#include "../geom/sphere.h"
 
 Scene::~Scene()
 {
@@ -8,8 +8,8 @@ Scene::~Scene()
 
 void Scene::build()
 {
-	Plane *plane = new Plane;
-	m_objects.push_back(plane);
+	Sphere *obj = new Sphere(0.2);
+	m_objects.push_back(obj);
 }
 
 RGBA Scene::trace(Ray &ray)
@@ -18,8 +18,9 @@ RGBA Scene::trace(Ray &ray)
     RGBA col;
     if(m_objects[0]->hit(ray)){
         col[0] = 1.0;
+        col[1] = 1.0;
+        col[2] = 1.0;
+        col[3] = 1.0;
     }
-	col[1] = ray.m_origin[1]*0.5+0.5;
-	col[3] = 1.0;
     return col;
 }

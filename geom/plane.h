@@ -9,7 +9,7 @@ class Plane: public GeometricObject
 	public:
 		Plane(){};
 		Plane(const Point &point, const Normal &normal):m_point(point),m_normal(normal){};
-		virtual bool hit(const Ray &ray) const;
+		virtual bool hit(Ray &ray) const;
 	private:
 		Point m_point;
 		Normal m_normal;

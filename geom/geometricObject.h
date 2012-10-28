@@ -6,7 +6,7 @@
 class GeometricObject
 {
 	public:
-		virtual bool hit(const Ray &ray) const = 0;
+		virtual bool hit(Ray &ray) const = 0;
 	protected:
 		RGBA m_color;
 };
