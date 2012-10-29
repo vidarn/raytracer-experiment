@@ -1,6 +1,7 @@
 #include "plane.h"
 
-bool Plane::hit(Ray &ray) const
+ShadeRec Plane::hit(Ray &ray) const
 {
-	return true;
+	ShadeRec tmp;
+	return tmp;
 }

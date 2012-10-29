@@ -62,6 +62,21 @@ Vec3 Vec3::operator-(Vec3 &other)
 	return tmp;
 }
 
+Vec3& Vec3::operator*=(double &other)
+{
+	m_d[0] *= other;
+	m_d[1] *= other;
+	m_d[2] *= other;
+	return *this;
+}
+
+Vec3 Vec3::operator*(double &other)
+{
+	Vec3 tmp = *this;
+	tmp *= other;
+	return tmp;
+}
+
 std::ostream& operator<<(std::ostream &out, Vec3 &vec)
 {
 	out << "V [" << vec.x() << " , " << vec.y() << " , " << vec.z() << "]";

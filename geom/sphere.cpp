@@ -1,6 +1,6 @@
 #include "sphere.h"
 
-bool Sphere::hit(Ray &ray) const
+ShadeRec Sphere::hit(Ray &ray) const
 {
 	Point pnt = ray.m_origin;
 	Vec3 o = pnt.toVec3();
@@ -8,9 +8,11 @@ bool Sphere::hit(Ray &ray) const
 	double b = 2.0*(ray.m_dir.dot(o));
 	double c = o.dot(o) - m_radiusSquared;
 
+	ShadeRec sr;
+
 	double discriminant = b*b - 4*a*c;
 	if(discriminant < 0){
-		return false;
+		return sr;
 	}
 	double discSqrt = sqrt(discriminant);
 	double q;
@@ -28,14 +30,18 @@ bool Sphere::hit(Ray &ray) const
 		t1 = tmp;
 	}
 	if(t1<0.0){
-		return false;
+		return sr;
 	}
+	sr.setColor(m_color);
+	sr.setIncidentDirection(ray.m_dir);
+	sr.setHit(true);
 	if(t0<0.0){
 		//intersection at t1
-		return true;
+		sr.setHitPos(ray.getPointAtPos(t0));
 	}
 	else{
 		//intersection at t0
-		return true;
+		sr.setHitPos(ray.getPointAtPos(t0));
 	}
+	return sr;
 }

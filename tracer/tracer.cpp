@@ -7,13 +7,13 @@ void Tracer::render()
 		int numSamples = m_sampler->getNumSamples();
 		double invNumSamples = 1.0/(double)numSamples;
 		RGBA color;
-		color[3] = 1.0;
 		for(int j=0; j<numSamples; j++){
 			Point sample = m_sampler->getSquareSample();
 			Ray ray = m_viewPlane->getPixelRay(i,sample);
 			RGBA tmp = m_scene->trace(ray)*invNumSamples;
 			color += tmp;
 		}
+		color[3] = 1.0;
         m_viewPlane->setPixelValue(i,color);
     }
 }

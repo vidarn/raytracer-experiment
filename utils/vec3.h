@@ -24,6 +24,8 @@ class Vec3
 		Vec3 operator+(Vec3 &other);
 		Vec3& operator-=(Vec3 &other);
 		Vec3 operator-(Vec3 &other);
+		Vec3& operator*=(double &other);
+		Vec3 operator*(double &other);
 
 		friend std::ostream& operator<<(std::ostream &out, Vec3 &vec);
 	private:

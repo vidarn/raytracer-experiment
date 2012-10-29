@@ -2,11 +2,12 @@
 #define __GEOMETRIC_OBJECT_H__
 #include "../utils/ray.h"
 #include "../utils/rgba.h"
+#include "../shadeRec/shadeRec.h"
 
 class GeometricObject
 {
 	public:
-		virtual bool hit(Ray &ray) const = 0;
+		virtual ShadeRec hit(Ray &ray) const = 0;
 	protected:
 		RGBA m_color;
 };

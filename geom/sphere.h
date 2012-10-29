@@ -5,9 +5,9 @@
 class Sphere: public GeometricObject
 {
 	public:
-		Sphere(){};
-		Sphere(double radius):m_radius(radius),m_radiusSquared(radius*radius){};
-		virtual bool hit(Ray &ray) const;
+		Sphere(RGBA color){m_color = color;};
+		Sphere(double radius, RGBA color):m_radius(radius),m_radiusSquared(radius*radius){m_color = color;};
+		virtual ShadeRec hit(Ray &ray) const;
 	private:
 		double m_radius;
 		double m_radiusSquared;

@@ -11,6 +11,8 @@ class Ray
 		Ray(Vec3 dir, double tMin=0.0, int depth=0):m_origin(),m_dir(dir),m_tMin(tMin),m_depth(depth){};
 		Ray(Point origin, double tMin=0.0, int depth=0):m_origin(origin),m_dir(),m_tMin(tMin),m_depth(depth){};
 
+		Point getPointAtPos(double t);
+
 		friend std::ostream& operator<<(std::ostream &out, Ray &vec);
 
 		double m_tMin;

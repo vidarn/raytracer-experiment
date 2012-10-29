@@ -6,6 +6,7 @@ OBJ += scene/scene.o
 OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o
 OBJ += sampler/sampler.o
+OBJ += shadeRec/shadeRec.o
 FLG = -g
 LIB = -ltiff
 $(OUT):$(OBJ)
