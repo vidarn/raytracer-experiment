@@ -43,5 +43,18 @@ ShadeRec Sphere::hit(Ray &ray) const
 		//intersection at t0
 		sr.setHitPos(ray.getPointAtPos(t0));
 	}
+	/* temporary */
+	RGBA tmpColor;
+	Vec3 lightDir(1.0,0.5,-1.0);
+	lightDir.normalize();
+	Vec3 normal = sr.getHitPos().toVec3();
+	normal.normalize();
+	double lambert = lightDir.dot(normal);
+	if(lambert < 0.0){
+		lambert = 0.0;
+	}
+	tmpColor = m_color*lambert;
+	sr.setColor(tmpColor);
+	/*           */
 	return sr;
 }

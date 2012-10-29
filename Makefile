@@ -7,7 +7,8 @@ OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o
 OBJ += sampler/sampler.o
 OBJ += shadeRec/shadeRec.o
-FLG = -g
+OBJ += bucket/bucket.o
+FLG = -g -pthread
 LIB = -ltiff
 $(OUT):$(OBJ)
 	g++ -o $(OUT) $(OBJ) $(FLG) $(LIB)

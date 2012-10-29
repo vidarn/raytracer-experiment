@@ -41,7 +41,7 @@ RGBA& RGBA::operator*=(double &other)
 	return *this;
 }
 
-RGBA RGBA::operator*(double &other)
+RGBA RGBA::operator*(double &other) const
 {
 	RGBA tmp = *this;
 	tmp *= other;

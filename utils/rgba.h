@@ -19,7 +19,7 @@ class RGBA
 		RGBA& operator-=(RGBA &other);
 		RGBA operator-(RGBA &other);
 		RGBA& operator*=(double &other);
-		RGBA operator*(double &other);
+		RGBA operator*(double &other) const;
 
 		friend std::ostream& operator<<(std::ostream &out, RGBA &rgba);
 	private:

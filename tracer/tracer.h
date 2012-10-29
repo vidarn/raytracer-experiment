@@ -3,6 +3,8 @@
 #include "../scene/scene.h"
 #include "../viewPlane/viewPlane.h"
 #include "../sampler/sampler.h"
+#include "../bucket/bucket.h"
+#include <pthread.h>
 
 class Tracer
 {
