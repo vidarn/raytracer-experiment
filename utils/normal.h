@@ -9,6 +9,7 @@ class Normal
 		Normal(Vec3 &vec):m_vec(vec){};
 		Normal(double x, double y, double z):m_vec(x,y,z){};
 		Normal(double d[3]):m_vec(d){};
+		Vec3 toVec3(){return m_vec;};
 		~Normal(){};
 	private:
 		Vec3 m_vec;

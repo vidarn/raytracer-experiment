@@ -1,4 +1,5 @@
 #include "sphere.h"
+#include "../utils/matrix4x4.h"
 
 ShadeRec Sphere::hit(Ray &ray) const
 {
@@ -37,24 +38,28 @@ ShadeRec Sphere::hit(Ray &ray) const
 	sr.setHit(true);
 	if(t0<0.0){
 		//intersection at t1
-		sr.setHitPos(ray.getPointAtPos(t0));
+		sr.setHitT(t0);
 	}
 	else{
 		//intersection at t0
-		sr.setHitPos(ray.getPointAtPos(t0));
+		sr.setHitT(t0);
 	}
-	/* temporary */
+
+	Point hitPos = ray.getPointAtPos(sr.getHitT());
+	Vec3 tmpVec = hitPos.toVec3().getNormalized();
+	Normal normal(tmpVec);
+
+	/* temporary shading*/
 	RGBA tmpColor;
 	Vec3 lightDir(1.0,0.5,-1.0);
 	lightDir.normalize();
-	Vec3 normal = sr.getHitPos().toVec3();
-	normal.normalize();
-	double lambert = lightDir.dot(normal);
+	Vec3 normalVec = normal.toVec3();
+	double lambert = lightDir.dot(normalVec);
 	if(lambert < 0.0){
 		lambert = 0.0;
 	}
 	tmpColor = m_color*lambert;
 	sr.setColor(tmpColor);
-	/*           */
+	/* end temporary shading*/
 	return sr;
 }

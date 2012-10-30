@@ -3,15 +3,15 @@
 #include "scene/scene.h"
 #include "viewPlane/viewPlane.h"
 #include "tracer/tracer.h"
+#include "utils/matrix4x4.h"
 
 int main(int argc, char** argv)
 {
     Scene scene;
     scene.build();
-    ViewPlane viewPlane(512,512,1.0,1.0);
-	Sampler sampler(3);
+    ViewPlane viewPlane(1024,1024,1.0,1.0);
+	Sampler sampler(4);
     Tracer tracer(&scene, &viewPlane, &sampler);
     tracer.render();
-    //std::cout << viewPlane;
 	viewPlane.saveToTiff("out.tif");
 }
