@@ -10,7 +10,7 @@ int main(int argc, char** argv)
     Scene scene;
     scene.build();
     ViewPlane viewPlane(1024,1024,1.0,1.0);
-	Sampler sampler(4);
+	Sampler sampler(1);
     Tracer tracer(&scene, &viewPlane, &sampler);
     tracer.render();
 	viewPlane.saveToTiff("out.tif");

@@ -8,6 +8,8 @@ OBJ += tracer/tracer.o
 OBJ += sampler/sampler.o
 OBJ += shadeRec/shadeRec.o
 OBJ += bucket/bucket.o
+OBJ += material/material.o
+OBJ += brdf/brdf.o brdf/lambert.o brdf/phong.o
 FLG = -g -pthread
 LIB = -ltiff
 $(OUT):$(OBJ)

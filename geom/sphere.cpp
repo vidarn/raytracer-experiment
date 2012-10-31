@@ -33,7 +33,6 @@ ShadeRec Sphere::hit(Ray &ray) const
 	if(t1<0.0){
 		return sr;
 	}
-	sr.setColor(m_color);
 	sr.setIncidentDirection(ray.m_dir);
 	sr.setHit(true);
 	if(t0<0.0){
@@ -48,18 +47,6 @@ ShadeRec Sphere::hit(Ray &ray) const
 	Point hitPos = ray.getPointAtPos(sr.getHitT());
 	Vec3 tmpVec = hitPos.toVec3().getNormalized();
 	Normal normal(tmpVec);
-
-	/* temporary shading*/
-	RGBA tmpColor;
-	Vec3 lightDir(1.0,0.5,-1.0);
-	lightDir.normalize();
-	Vec3 normalVec = normal.toVec3();
-	double lambert = lightDir.dot(normalVec);
-	if(lambert < 0.0){
-		lambert = 0.0;
-	}
-	tmpColor = m_color*lambert;
-	sr.setColor(tmpColor);
-	/* end temporary shading*/
+	sr.setNormal(normal);
 	return sr;
 }

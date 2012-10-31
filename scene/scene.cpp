@@ -11,10 +11,11 @@ void Scene::build()
 {
 	Matrix4x4 transform;
 	transform.setTranslation(0.0,0.5,0.0);
-	transform.setScaling(1.0,0.4,1.0);
+	transform.setScaling(1.0,1.0,1.0);
 	transform = transform.invert();
     RGBA col = RGBA(1.0,0.0,0.0,1.0);
-	Sphere *obj = new Sphere(0.9,col,transform);
+	Material mat = Material(col);
+	Sphere *obj = new Sphere(0.9,mat,transform);
 	m_objects.push_back(obj);
 }
 
@@ -27,7 +28,7 @@ RGBA Scene::trace(Ray &ray)
 	Ray tmpRay(tmpPoint,tmpDir);
 	ShadeRec sr = m_objects[0]->hit(tmpRay);
 	if(sr.getHit()){
-		col = sr.getColor();
+		col = m_objects[0]->getMaterial().shade(sr);
     }
     return col;
 }

@@ -14,6 +14,14 @@ Vec3 Vec3::cross(Vec3 &rhs)
 	return Vec3(result);
 }
 
+Vec3 Vec3::reflect(Vec3 &other)
+{
+	double val = 2 * dot(other);
+	Vec3 result = operator*(val);
+	result -= other;
+	return result;
+}
+
 void Vec3::normalize()
 {
 	double mag = magnitude();

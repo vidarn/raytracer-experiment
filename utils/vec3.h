@@ -13,6 +13,7 @@ class Vec3
 		~Vec3() {};
 		double dot(Vec3 &other);
 		Vec3 cross(Vec3 &other);
+		Vec3 reflect(Vec3 &other);
 		double magnitude(){return sqrt(x()*x()+y()*y()+z()*z());};
 		void normalize();
 		Vec3 getNormalized();
