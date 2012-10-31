@@ -20,6 +20,7 @@ class RGBA
 		RGBA operator-(RGBA &other);
 		RGBA& operator*=(double &other);
 		RGBA operator*(double &other) const;
+		void clamp(double val=1.0);
 
 		friend std::ostream& operator<<(std::ostream &out, RGBA &rgba);
 	private:

@@ -47,6 +47,14 @@ RGBA RGBA::operator*(double &other) const
 	tmp *= other;
 	return tmp;
 }
+
+void RGBA::clamp(double val)
+{
+	for (int i = 0; i < 4; i++) {
+		m_col[i] = m_col[i] < val ? m_col[i] : val;
+	}
+}
+
 std::ostream& operator<<(std::ostream &out, RGBA &rgba)
 {
 	out << "RGBA [" << rgba.r() << " , " << rgba.g() << " , " << rgba.b() << " , " << rgba.a() << "]";

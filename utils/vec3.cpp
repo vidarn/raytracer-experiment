@@ -16,9 +16,10 @@ Vec3 Vec3::cross(Vec3 &rhs)
 
 Vec3 Vec3::reflect(Vec3 &other)
 {
-	double val = 2 * dot(other);
-	Vec3 result = operator*(val);
-	result -= other;
+	Vec3 thisVec = Vec3(m_d);
+	double val = thisVec.dot(other);
+	val *= 2.0;
+	Vec3 result = thisVec*val - other;
 	return result;
 }
 
@@ -38,6 +39,13 @@ Vec3 Vec3::getNormalized()
 	Vec3 tmp(m_d);
 	tmp.normalize();
 	return tmp;
+}
+
+void Vec3::invert()
+{
+	for (int i = 0; i < 3; i++) {
+		m_d[i] = - m_d[i];
+	}
 }
 
 Vec3& Vec3::operator+=(Vec3 &other)

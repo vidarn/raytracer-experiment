@@ -3,3 +3,4 @@ raytracer
 *.o
 out.tif
 old_out.tif
+.qiv-select*

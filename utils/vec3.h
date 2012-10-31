@@ -16,6 +16,7 @@ class Vec3
 		Vec3 reflect(Vec3 &other);
 		double magnitude(){return sqrt(x()*x()+y()*y()+z()*z());};
 		void normalize();
+		void invert();
 		Vec3 getNormalized();
 		double x() {return m_d[0];};
 		double y() {return m_d[1];};

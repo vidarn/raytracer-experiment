@@ -42,6 +42,7 @@ void ViewPlane::saveToTiff(const char *filename)
     char *image=new char [m_resolution[0]*m_resolution[1]*sampleperpixel];
     for(int i = 0;i<m_resolution[0]*m_resolution[1];i++){
         RGBA pixel = m_pixels[i];
+		pixel.clamp();
         image[i*sampleperpixel] = pixel.r()*255;
         image[i*sampleperpixel+1] = pixel.g()*255;
         image[i*sampleperpixel+2] = pixel.b()*255;
