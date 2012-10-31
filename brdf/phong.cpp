@@ -11,7 +11,7 @@ double Phong::shade(ShadeRec &shadeRec, Vec3 &lightDir) const
 		val = 0.0;
 	}
 	else{
-		val = pow(val,20);
+		val = pow(val,10);
 	}
 	return val;
 }
