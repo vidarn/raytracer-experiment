@@ -4,6 +4,7 @@
 #include "../utils/rgba.h"
 #include "../utils/ray.h"
 #include "../geom/geometricObject.h"
+#include "../lights/directional.h"
 
 class Scene
 {
@@ -14,6 +15,7 @@ class Scene
         RGBA trace(Ray &ray);
 	private:
 		std::vector<GeometricObject*> m_objects;
+		std::vector<Light*> m_lights;
 		RGBA m_bkgColor;
 };
 

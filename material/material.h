@@ -5,6 +5,7 @@
 #include "../brdf/brdf.h"
 #include "../brdf/lambert.h"
 #include "../brdf/phong.h"
+#include "../lights/light.h"
 
 class Material
 {
@@ -12,7 +13,7 @@ class Material
         Material(){};
         Material(RGBA color):m_color(color){};
 		void setColor(RGBA color);
-		RGBA shade(ShadeRec shadeRec);
+		RGBA shade(ShadeRec shadeRec, Light *light);
     private:
         BRDF *m_brdf;
         RGBA m_color;

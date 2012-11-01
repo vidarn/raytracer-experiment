@@ -5,13 +5,13 @@ void Material::setColor(RGBA color)
 	m_color = color;
 }
 
-RGBA Material::shade(ShadeRec shadeRec)
+RGBA Material::shade(ShadeRec shadeRec, Light *light)
 {
 	RGBA col;
 	Lambert lambert;
 
-	Vec3 lightDirection = Vec3(1.0,1.0,-1.0);
-	lightDirection.normalize();
+	Point hitPos;
+	Vec3 lightDirection = light->getLightDirection(hitPos);
 	double shade = lambert.shade(shadeRec, lightDirection);
 	shade *= 0.8;
 	col = m_color*shade;

@@ -29,6 +29,10 @@ void Scene::build()
 	mat = Material(col);
 	obj = new Sphere(0.9,mat,transform);
 	m_objects.push_back(obj);
+
+	transform.setIdentity();
+	Directional *directionalLight = new Directional(1.0,transform);
+	m_lights.push_back(directionalLight);
 }
 
 RGBA Scene::trace(Ray &ray)
@@ -44,7 +48,7 @@ RGBA Scene::trace(Ray &ray)
 		ShadeRec sr = m_objects[i]->hit(tmpRay);
 		if(sr.getHit()){
 			sr.setIncidentDirection(ray.m_dir.getNormalized());
-			col = m_objects[i]->getMaterial().shade(sr);
+			col = m_objects[i]->getMaterial().shade(sr, m_lights[0]);
 		}
 	}
     return col;

@@ -2,5 +2,5 @@
 raytracer
 *.o
 out.tif
-old_out.tif
+out_old.tif
 .qiv-select*

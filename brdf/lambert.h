@@ -2,7 +2,7 @@
 #define __LAMBERT_H__
 #include "brdf.h"
 
-class Lambert
+class Lambert: public BRDF
 {
 	public:
 		Lambert(){};
