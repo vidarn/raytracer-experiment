@@ -31,10 +31,9 @@ void Scene::build()
 	m_objects.push_back(obj);
 
 	transform.setIdentity();
-	transform.setRotation(1,-0.8);
-	tmpMat.setRotation(0,1.0);
+	tmpMat.setTranslation(0.6,2.0,-2.0);
     transform = transform*tmpMat;
-	Directional *directionalLight = new Directional(1.0,transform);
+	PointLight *directionalLight = new PointLight(1.0,transform);
 	m_lights.push_back(directionalLight);
 }
 
@@ -50,6 +49,8 @@ RGBA Scene::trace(Ray &ray)
 
 		ShadeRec sr = m_objects[i]->hit(tmpRay);
 		if(sr.getHit()){
+            Point hitPos = ray.getPointAtPos(sr.getHitT());
+            sr.setHitPos(hitPos);
 			sr.setIncidentDirection(ray.m_dir.getNormalized());
 			col = m_objects[i]->getMaterial().shade(sr, m_lights[0]);
 		}

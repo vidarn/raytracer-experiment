@@ -5,6 +5,7 @@
 #include "../utils/ray.h"
 #include "../geom/geometricObject.h"
 #include "../lights/directional.h"
+#include "../lights/point.h"
 
 class Scene
 {

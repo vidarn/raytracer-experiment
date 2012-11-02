@@ -10,7 +10,7 @@ OBJ += shadeRec/shadeRec.o
 OBJ += bucket/bucket.o
 OBJ += material/material.o
 OBJ += brdf/brdf.o brdf/lambert.o brdf/phong.o
-OBJ += lights/light.o lights/directional.o
+OBJ += lights/light.o lights/directional.o lights/point.o
 FLG = -g -pthread
 LIB = -ltiff
 $(OUT):$(OBJ)

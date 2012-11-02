@@ -12,8 +12,10 @@ class ShadeRec
         void setHit(bool hit){m_hit = hit;};
         void setIncidentDirection(Vec3 dir){m_iDir = dir;};
         void setHitT(double t){m_hitT = t;};
+        void setHitPos(Point pos){m_hitPos = pos;};
         void setNormal(Normal normal){m_normal = normal;};
         double getHitT(){return m_hitT;};
+        Point getHitPos(){return m_hitPos;};
         Vec3 getIncidentDirection(){return m_iDir;};
         bool getHit(){return m_hit;};
         Normal getNormal(){return m_normal;};
@@ -22,6 +24,7 @@ class ShadeRec
         double m_hitT;
         Vec3 m_iDir;
 		Normal m_normal;
+		Point m_hitPos;
 };
 
 #endif

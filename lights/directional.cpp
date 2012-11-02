@@ -1,6 +1,5 @@
 #include "directional.h"
 
-
 double Directional::computeStrength(Point pos)
 {
 	return 1.0;
