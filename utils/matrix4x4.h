@@ -15,6 +15,7 @@ class Matrix4x4
         void setIdentity();
         void setTranslation(double x, double y, double z);
         void setScaling(double x, double y, double z);
+        void setRotation(int axis, double angle);
         Matrix4x4 invert();
         Matrix4x4 operator*(Matrix4x4 &other);
         Vec3 operator*(Vec3 &vec);

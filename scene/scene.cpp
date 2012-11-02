@@ -31,6 +31,9 @@ void Scene::build()
 	m_objects.push_back(obj);
 
 	transform.setIdentity();
+	transform.setRotation(1,-0.8);
+	tmpMat.setRotation(0,1.0);
+    transform = transform*tmpMat;
 	Directional *directionalLight = new Directional(1.0,transform);
 	m_lights.push_back(directionalLight);
 }

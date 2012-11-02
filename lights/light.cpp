@@ -3,9 +3,10 @@
 
 Light::Light(double strength, Matrix4x4 transform)
 {
+    std::cout << transform;
     m_transform = transform;
-    m_invTransform = transform;
-    m_invTransform.invert();
+    m_invTransform = transform.invert();
+    std::cout << m_invTransform;
 }
 
 double Light::getLightStrength(Point pos)
@@ -19,7 +20,11 @@ Vec3 Light::getLightDirection(Point pos)
 {
     pos = m_invTransform*pos;
     Vec3 dir = computeDirection(pos);
+    //std::cout << dir << std::endl;
     dir = m_transform*dir;
+    //std::cout << dir << std::endl;
     dir.normalize();
+    //std::cout << dir << std::endl;
+    //std::cout << "-----\n";
     return dir;
 }

@@ -7,7 +7,7 @@ void Tracer::render()
 	std::vector<pthread_t> threads;
 	std::vector<Bucket> buckets;
     int numPixels = m_viewPlane->getNumPixels();
-	int numThreads = 8;
+	int numThreads = 1;
 	int pixelsPerThreads = numPixels/numThreads;
 	for(int i = 0;i < numThreads; i++){
 		int startPixel = i*pixelsPerThreads;

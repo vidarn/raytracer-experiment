@@ -37,6 +37,36 @@ void Matrix4x4::setScaling(double x, double y, double z)
 	m_entries[10] = z;
 }
 
+void Matrix4x4::setRotation(int axis, double angle)
+{
+	setIdentity();
+    double cosAngle = cos(angle);
+    double sinAngle = sin(angle);
+    switch(axis){
+        case 0:
+            m_entries[1+4] = cosAngle;
+            m_entries[2+4] = -sinAngle;
+            m_entries[1+8] = sinAngle;
+            m_entries[2+8] = cosAngle;
+            break;
+        case 1:
+            m_entries[0] = cosAngle;
+            m_entries[2] = sinAngle;
+            m_entries[8] = -sinAngle;
+            m_entries[2+8] = cosAngle;
+            break;
+        case 2:
+            m_entries[0] = cosAngle;
+            m_entries[1] = -sinAngle;
+            m_entries[4] = sinAngle;
+            m_entries[4+1] = cosAngle;
+            break;
+        default:
+            //raise error ;)
+            assert(false);
+    }
+}
+
 void Matrix4x4::setIdentity()
 {
 	for(int y=0;y<4;y++){
@@ -103,7 +133,7 @@ Vec3 Matrix4x4::operator*(Vec3 &vec)
 	for(int y=0;y<3;y++){
 		double val = 0;
 		for(int x=0;x<3;x++){
-			val += m_entries[x+y*4]*vec[y];
+			val += m_entries[x+y*4]*vec[x];
 		}
 		result[y] = val;
 	}
