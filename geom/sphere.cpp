@@ -36,7 +36,7 @@ ShadeRec Sphere::hit(Ray &ray) const
 	sr.setHit(true);
 	if(t0<0.0){
 		//intersection at t1
-		sr.setHitT(t0);
+		sr.setHitT(t1);
 	}
 	else{
 		//intersection at t0
@@ -44,7 +44,6 @@ ShadeRec Sphere::hit(Ray &ray) const
 	}
 
 	Point hitPos = ray.getPointAtPos(sr.getHitT());
-	//std::cout << hitPos <<std::endl;
 	Vec3 tmpVec = hitPos.toVec3().getNormalized();
 	Normal normal(tmpVec);
 	sr.setNormal(normal);
