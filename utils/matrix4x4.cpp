@@ -78,20 +78,29 @@ void Matrix4x4::setIdentity()
 
 Matrix4x4 Matrix4x4::invert()
 {
+	Matrix4x4 tmpMat;
+    for (int y = 0; y < 4; y++){
+        for (int x = 0; x < 4; x++){
+            tmpMat.m_entries[x+y*4] = m_entries[x+y*4];
+        }
+    }
 	Matrix4x4 invMat;
 	for (int y = 0; y < 4; y++) {
 		for (int x = 0; x < y; x++) {
-			double mult = m_entries[x+y*4];
+			double mult = tmpMat.m_entries[x+y*4];
 			invMat.subMultRow(x,y,mult);
+			tmpMat.subMultRow(x,y,mult);
 		}
-		double diagVal = m_entries[y+y*4];
+		double diagVal = tmpMat.m_entries[y+y*4];
 		invMat.multRow(y,1.0/diagVal);
+		tmpMat.multRow(y,1.0/diagVal);
 	}
 	// we should now have ones in the diagonal and zeroes int the lower left half
 	// let's fix the upper right half
 	for (int y = 2; y >= 0; y--) {
 		for (int x = 3; x > y; x--) {
-			double mult = m_entries[x+y*4];
+			double mult = tmpMat.m_entries[x+y*4];
+			tmpMat.subMultRow(x,y,mult);
 			invMat.subMultRow(x,y,mult);
 		}
 	}

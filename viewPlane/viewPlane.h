@@ -2,6 +2,7 @@
 #define __VIEW_PLANE_H__
 #include "../utils/rgba.h"
 #include "../utils/ray.h"
+#include "../utils/matrix4x4.h"
 #include <vector>
 #include <tiffio.h>
 #include <tiffio.hxx>

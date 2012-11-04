@@ -8,7 +8,7 @@ ShadeRec Plane::hit(Ray &ray) const
     if(direction_z == 0.0){
         return tmp;
     }
-    double t = origin_z/direction_z;
+    double t = -origin_z/direction_z;
     if(t>0.0){
         tmp.setHit(true);
         tmp.setHitT(t);

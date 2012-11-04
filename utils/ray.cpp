@@ -2,7 +2,7 @@
 
 Point Ray::getPointAtPos(double t)
 {
-	Vec3 tmp = m_dir.getNormalized();
+	Vec3 tmp = m_dir;
 	tmp *= t;
 	return m_origin + tmp;
 }
