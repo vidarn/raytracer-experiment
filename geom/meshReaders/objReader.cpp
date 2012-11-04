@@ -39,6 +39,8 @@ void ObjReader::readVertexLine(std::string &line, Mesh *mesh)
 	}
 	Point point = Point(pos);
 	mesh->addPoint(point);
+	Normal normal;
+	mesh->addNormal(normal);
 }
 
 void ObjReader::readFaceLine(std::string &line, Mesh *mesh)

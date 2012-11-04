@@ -12,6 +12,7 @@ class Normal
 		~Normal(){};
 		Vec3 toVec3(){return m_vec;};
 		void normalize(){m_vec.normalize();};
+		void operator+=(Normal &other);
 	private:
 		Vec3 m_vec;
 };
