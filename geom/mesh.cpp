@@ -3,13 +3,8 @@
 
 ShadeRec Mesh::hit(Ray &ray) const
 {
-    ShadeRec sr;
-    for (int i = 0; i < m_faces.size(); i++) {
-        m_faces[i].hit(ray, sr);
-    }
-    if(sr.getHit()){
-        sr.setMaterial(m_material);
-    }
+    ShadeRec sr = m_collection.hit(ray);
+    sr.setMaterial(m_material);
     return sr;
 }
 
@@ -49,6 +44,14 @@ void Mesh::calculateNormals()
     }
 }
 
+void Mesh::populateCollection()
+{
+    for (int i = 0; i < m_faces.size(); i++) {
+        AABoundingBox *bbox = new AABoundingBox(&m_faces[i]);
+        m_collection.addObject(bbox);
+    }
+}
+
 void Mesh::addToNormal(int id, Normal normal)
 {
     m_normals[id] += normal;
@@ -76,8 +79,26 @@ void Face::calculateNormal()
     }
 }
 
-void Face::hit(Ray &ray, ShadeRec &sr) const
+void Face::getBounds(double min[3], double max[3]) const
 {
+    for (int i = 0; i < 3; i++) {
+        min[i] = DBL_MAX;
+        max[i] = DBL_MIN;
+        for (int j = 0; j < 3; j++){
+            double val = getPoint(j)[i];
+            if(val < min[i]){
+                min[i] = val;
+            }
+            if(val > max[i]){
+                max[i] = val;
+            }
+        }
+    }
+}
+
+ShadeRec Face::hit(Ray &ray) const
+{
+    ShadeRec sr;
     Point &p1 = getPoint(0);
     Point &p2 = getPoint(1);
     Point &p3 = getPoint(2);
@@ -86,25 +107,25 @@ void Face::hit(Ray &ray, ShadeRec &sr) const
     Vec3 s1 = ray.m_dir.cross(e2);
     double divisor = s1.dot(e1);
     if(divisor == 0.0){
-        return;
+        return sr;
     }
     double invDivisor = 1.0/divisor;
 
     Vec3 d = ray.m_origin - p1;
     double b1 = d.dot(s1) * invDivisor;
     if(b1 < 0.0 || b1 > 1.0){
-        return;
+        return sr;
     }
 
     Vec3 s2 = d.cross(e1);
     double b2 = ray.m_dir.dot(s2) * invDivisor;
     if(b2 < 0.0 || b1 + b2 > 1.0){
-        return;
+        return sr;
     }
 
     double t = e2.dot(s2) * invDivisor;
     if(t < 0.0){
-        return;
+        return sr;
     }
     if(!sr.getHit() || t < sr.getHitT()){
         double b0 = (1.0 - b1 - b2);
@@ -124,4 +145,5 @@ void Face::hit(Ray &ray, ShadeRec &sr) const
         norVec.normalize();
         sr.setNormal(norVec);
     }
+    return sr;
 }

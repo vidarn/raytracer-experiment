@@ -5,6 +5,8 @@
 #include "../utils/point.h"
 #include "../utils/normal.h"
 #include "geometricObject.h"
+#include "../aggregates/aaBoundingBox.h"
+#include "../aggregates/collection.h"
 
 class Face;
 
@@ -21,6 +23,7 @@ class Mesh : public GeometricObject
         virtual void getBounds(double min[3], double max[3]) const;
         void calculateBounds();
         void calculateNormals();
+        void populateCollection();
         void addToNormal(int id, Normal normal);
     private:
         double m_min[3];
@@ -28,12 +31,13 @@ class Mesh : public GeometricObject
         std::vector<Point> m_points;
         std::vector<Normal> m_normals;
         std::vector<Face> m_faces;
+        Collection m_collection;
         Face* m_face;
 };
 
 
 
-class Face
+class Face : public GeometricObject
 {
     public:
         Face(Mesh *owner):m_owner(owner){};
@@ -41,7 +45,8 @@ class Face
         Point &getPoint(int id) const;
         Normal &getNormal(int id) const;
         void calculateNormal();
-        void hit(Ray &ray, ShadeRec &sr) const;
+		virtual ShadeRec hit(Ray &ray) const;
+        virtual void getBounds(double min[3], double max[3]) const;
     private:
         Normal m_normal;
         int m_pointIds[3];
