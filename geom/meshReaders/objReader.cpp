@@ -23,6 +23,7 @@ Mesh *ObjReader::read(const char *filename)
 	}
 	file.close();
 	mesh->calculateNormals();
+	mesh->calculateBounds();
 	std::cout << "obj file \"" << filename << "\" read\n";
 	return mesh;
 }

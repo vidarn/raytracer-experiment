@@ -3,6 +3,7 @@ OBJ = app.o
 OBJ += utils/vec3.o utils/point.o utils/ray.o utils/rgba.o utils/normal.o utils/matrix4x4.o
 OBJ += geom/geometricObject.o geom/plane.o geom/sphere.o geom/mesh.o
 OBJ += geom/meshReaders/objReader.o
+OBJ += aggregates/aaBoundingBox.o
 OBJ += scene/scene.o
 OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o

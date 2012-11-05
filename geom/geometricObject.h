@@ -9,6 +9,7 @@ class GeometricObject
 {
 	public:
 		virtual ShadeRec hit(Ray &ray) const = 0;
+		virtual void getBounds(double min[3], double max[3]) const = 0;
 		Material *getMaterial(){return m_material;};
 		Matrix4x4 getTransform(){return m_transform;};
 		void setMaterial(Material *material){m_material = material;};

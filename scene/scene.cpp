@@ -2,6 +2,7 @@
 #include "../geom/sphere.h"
 #include "../geom/plane.h"
 #include "../geom/meshReaders/objReader.h"
+#include "../aggregates/aaBoundingBox.h"
 #include "../utils/matrix4x4.h"
 #include <cfloat>
 
@@ -15,6 +16,8 @@ void Scene::build()
 	Matrix4x4 transform, tmpMat, worldTransform;
 	tmpMat.setTranslation(0.0,0.0,-50.0);
     worldTransform = worldTransform*tmpMat;
+	tmpMat.setRotation(1,-1.4);
+    //worldTransform = worldTransform*tmpMat;
 
 	tmpMat.setTranslation(-0.5,0.0,1.0);
     transform = transform*tmpMat;
@@ -60,7 +63,8 @@ void Scene::build()
 	Mesh *mesh = objReader.read("monkey.obj");
     mesh->setTransform(transform);
     mesh->setMaterial(mat);
-	m_objects.push_back(mesh);
+    AABoundingBox *bbox = new AABoundingBox(mesh);
+	m_objects.push_back(bbox);
 
 	transform.setIdentity();
 	tmpMat.setTranslation(0.6,2.0,-2.0);

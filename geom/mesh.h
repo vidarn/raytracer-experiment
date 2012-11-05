@@ -18,9 +18,13 @@ class Mesh : public GeometricObject
         Point &getPoint(int id){return m_points[id];};
         Normal &getNormal(int id){return m_normals[id];};
 		virtual ShadeRec hit(Ray &ray) const;
+        virtual void getBounds(double min[3], double max[3]) const;
+        void calculateBounds();
         void calculateNormals();
         void addToNormal(int id, Normal normal);
     private:
+        double m_min[3];
+        double m_max[3];
         std::vector<Point> m_points;
         std::vector<Normal> m_normals;
         std::vector<Face> m_faces;

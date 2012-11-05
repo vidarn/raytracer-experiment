@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include <cfloat>
 
 ShadeRec Mesh::hit(Ray &ray) const
 {
@@ -10,6 +11,32 @@ ShadeRec Mesh::hit(Ray &ray) const
         sr.setMaterial(m_material);
     }
     return sr;
+}
+
+void Mesh::getBounds(double min[3], double max[3]) const
+{
+    for (int i = 0; i < 3; i++) {
+        min[i] = m_min[i];
+        max[i] = m_max[i];
+    }
+}
+
+void Mesh::calculateBounds()
+{
+    for (int i = 0; i < 3; i++) {
+        m_min[i] = DBL_MAX;
+        m_max[i] = DBL_MIN;
+    }
+    for (int i = 0; i < m_points.size(); i++) {
+        for (int j = 0; j < 3; j++) {
+            if( m_points[i][j] < m_min[j]){
+                m_min[j] = m_points[i][j];
+            }
+            if( m_points[i][j] > m_max[j]){
+                m_max[j] = m_points[i][j];
+            }
+        }
+    }
 }
 
 void Mesh::calculateNormals()

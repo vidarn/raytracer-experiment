@@ -1,4 +1,15 @@
 #include "plane.h"
+#include <cfloat>
+
+void Plane::getBounds(double min[3], double max[3]) const
+{
+    min[0] = -0.1;
+    max[0] = 0.1;
+    min[1] = -0.1;
+    max[1] = 0.1;
+    min[2] = DBL_MIN;
+    max[2] = DBL_MAX;
+}
 
 ShadeRec Plane::hit(Ray &ray) const
 {

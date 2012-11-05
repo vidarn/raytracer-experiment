@@ -1,6 +1,14 @@
 #include "sphere.h"
 #include "../utils/matrix4x4.h"
 
+void Sphere::getBounds(double min[3], double max[3]) const
+{
+    for (int i = 0; i < 3; i++) {
+        min[i] = -m_radius;
+        max[i] = m_radius;
+    }
+}
+
 ShadeRec Sphere::hit(Ray &ray) const
 {
 	Point pnt = ray.m_origin;
