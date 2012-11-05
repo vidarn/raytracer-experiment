@@ -47,5 +47,6 @@ ShadeRec Sphere::hit(Ray &ray) const
 	Vec3 tmpVec = hitPos.toVec3().getNormalized();
 	Normal normal(tmpVec);
 	sr.setNormal(normal);
+    sr.setMaterial(m_material);
 	return sr;
 }

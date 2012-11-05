@@ -23,3 +23,4 @@ $(OUT):$(OBJ)
 clean:
 	rm *.o
 	rm */*.o
+	rm */*/*.o

@@ -7,7 +7,7 @@
 class Plane: public GeometricObject
 {
 	public:
-		Plane(Material material, Matrix4x4 transform){m_transform = transform; m_material = material;};
+		Plane(Material *material, Matrix4x4 transform){m_transform = transform; m_material = material;};
 		virtual ShadeRec hit(Ray &ray) const;
 	private:
 		Point m_point;

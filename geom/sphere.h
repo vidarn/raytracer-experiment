@@ -6,8 +6,8 @@
 class Sphere: public GeometricObject
 {
 	public:
-		Sphere(Material material, Matrix4x4 transform){m_transform = transform; m_material = material;};
-		Sphere(double radius, Material material, Matrix4x4 transform):m_radius(radius),m_radiusSquared(radius*radius){m_transform = transform; m_material = material;};
+		Sphere(Material *material, Matrix4x4 transform){m_transform = transform; m_material = material;};
+		Sphere(double radius, Material *material, Matrix4x4 transform):m_radius(radius),m_radiusSquared(radius*radius){m_transform = transform; m_material = material;};
 		virtual ShadeRec hit(Ray &ray) const;
 	private:
 		double m_radius;

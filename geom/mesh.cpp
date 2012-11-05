@@ -6,6 +6,9 @@ ShadeRec Mesh::hit(Ray &ray) const
     for (int i = 0; i < m_faces.size(); i++) {
         m_faces[i].hit(ray, sr);
     }
+    if(sr.getHit()){
+        sr.setMaterial(m_material);
+    }
     return sr;
 }
 

@@ -21,7 +21,7 @@ void Scene::build()
 	transform = transform.invert();
     transform = worldTransform*transform;
     RGBA col = RGBA(0.8,0.2,0.1,1.0);
-	Material mat = Material(col);
+	Material *mat = new Material(col);
 	Sphere *obj = new Sphere(0.9,mat,transform);
 	m_objects.push_back(obj);
 
@@ -33,7 +33,7 @@ void Scene::build()
 	transform = transform.invert();
     transform = worldTransform*transform;
     col = RGBA(0.1,0.2,0.8,1.0);
-	mat = Material(col);
+	mat = new Material(col);
 	obj = new Sphere(0.9,mat,transform);
 	m_objects.push_back(obj);
 
@@ -43,7 +43,7 @@ void Scene::build()
 	transform = transform.invert();
     transform = worldTransform*transform;
     col = RGBA(0.8,0.2,0.2,1.0);
-	mat = Material(col);
+	mat = new Material(col);
 	Plane *plan = new Plane(mat,transform);
 	m_objects.push_back(plan);
 
@@ -55,7 +55,7 @@ void Scene::build()
 	transform = transform.invert();
     transform = worldTransform*transform;
     col = RGBA(0.2,0.8,0.8,1.0);
-	mat = Material(col);
+	mat = new Material(col);
     ObjReader objReader;
 	Mesh *mesh = objReader.read("monkey.obj");
     mesh->setTransform(transform);
@@ -87,7 +87,9 @@ RGBA Scene::trace(Ray &ray)
                 Point hitPos = ray.getPointAtPos(sr.getHitT());
                 sr.setHitPos(hitPos);
                 sr.setIncidentDirection(ray.m_dir.getNormalized());
-                col = m_objects[i]->getMaterial().shade(sr, m_lights[0]);
+                if(sr.getMaterial() != 0){
+                    col = sr.getMaterial()->shade(sr, m_lights[0]);
+                }
             }
 		}
 	}
