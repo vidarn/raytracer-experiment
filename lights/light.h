@@ -6,15 +6,15 @@
 class Light
 {
     public:
-        Light(double strength, Matrix4x4 transform);
-        double getLightStrength(Point pos);
+        Light(float strength, Matrix4x4 transform);
+        float getLightStrength(Point pos);
         Vec3 getLightDirection(Point pos);
-        virtual double computeStrength(Point pos) = 0;
+        virtual float computeStrength(Point pos) = 0;
         virtual Vec3 computeDirection(Point pos) = 0;
     private:
         Matrix4x4 m_transform;
         Matrix4x4 m_invTransform;
-        double m_strength;
+        float m_strength;
 };
 
 #endif

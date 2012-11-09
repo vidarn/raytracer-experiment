@@ -1,7 +1,7 @@
 #include "viewPlane.h"
 #include <cstring>
 
-ViewPlane::ViewPlane(int resX, int resY, double sizeX, double sizeY)
+ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY)
 {
     m_resolution[0] = resX;
     m_resolution[1] = resY;
@@ -16,12 +16,12 @@ ViewPlane::ViewPlane(int resX, int resY, double sizeX, double sizeY)
 
 Ray ViewPlane::getPixelRay(int index, Point sample)
 {
-    double x = index % m_resolution[0];
-    double y = index / m_resolution[0];
+    float x = index % m_resolution[0];
+    float y = index / m_resolution[0];
     x += sample[0];
     y += sample[1];
-    double posX = -1.0 + 2.0*((double) x)/((double) m_resolution[0]);
-    double posY = -1.0 + 2.0*((double) y)/((double) m_resolution[1]);
+    float posX = -1.0 + 2.0*((float) x)/((float) m_resolution[0]);
+    float posY = -1.0 + 2.0*((float) y)/((float) m_resolution[1]);
     posX *= m_size[0];
     posY *= m_size[1];
     Point origin(posX,posY,0.0);

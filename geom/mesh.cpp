@@ -3,12 +3,12 @@
 
 ShadeRec Mesh::hit(Ray &ray) const
 {
-    ShadeRec sr = m_collection.hit(ray);
+    ShadeRec sr = m_kdTree.hit(ray);
     sr.setMaterial(m_material);
     return sr;
 }
 
-void Mesh::getBounds(double min[3], double max[3]) const
+void Mesh::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
         min[i] = m_min[i];
@@ -46,10 +46,11 @@ void Mesh::calculateNormals()
 
 void Mesh::populateCollection()
 {
-    for (int i = 0; i < m_faces.size(); i++) {
-        AABoundingBox *bbox = new AABoundingBox(&m_faces[i]);
-        m_collection.addObject(bbox);
-    }
+	std::vector<GeometricObject *> objects;
+	for (int i = 0; i < m_faces.size(); i++) {
+		objects.push_back(&(m_faces[i]));
+	}
+	m_kdTree.build(objects);
 }
 
 void Mesh::addToNormal(int id, Normal normal)
@@ -79,13 +80,13 @@ void Face::calculateNormal()
     }
 }
 
-void Face::getBounds(double min[3], double max[3]) const
+void Face::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
         min[i] = DBL_MAX;
         max[i] = DBL_MIN;
         for (int j = 0; j < 3; j++){
-            double val = getPoint(j)[i];
+            float val = getPoint(j)[i];
             if(val < min[i]){
                 min[i] = val;
             }
@@ -105,30 +106,30 @@ ShadeRec Face::hit(Ray &ray) const
     Vec3 e1 = p2 - p1;
     Vec3 e2 = p3 - p1;
     Vec3 s1 = ray.m_dir.cross(e2);
-    double divisor = s1.dot(e1);
+    float divisor = s1.dot(e1);
     if(divisor == 0.0){
         return sr;
     }
-    double invDivisor = 1.0/divisor;
+    float invDivisor = 1.0/divisor;
 
     Vec3 d = ray.m_origin - p1;
-    double b1 = d.dot(s1) * invDivisor;
+    float b1 = d.dot(s1) * invDivisor;
     if(b1 < 0.0 || b1 > 1.0){
         return sr;
     }
 
     Vec3 s2 = d.cross(e1);
-    double b2 = ray.m_dir.dot(s2) * invDivisor;
+    float b2 = ray.m_dir.dot(s2) * invDivisor;
     if(b2 < 0.0 || b1 + b2 > 1.0){
         return sr;
     }
 
-    double t = e2.dot(s2) * invDivisor;
+    float t = e2.dot(s2) * invDivisor;
     if(t < 0.0){
         return sr;
     }
     if(!sr.getHit() || t < sr.getHitT()){
-        double b0 = (1.0 - b1 - b2);
+        float b0 = (1.0 - b1 - b2);
         sr.setHit(true);
         sr.setHitT(t);
         Vec3 norVec;

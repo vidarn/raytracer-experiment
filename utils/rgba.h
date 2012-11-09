@@ -7,24 +7,24 @@ class RGBA
 {
 	public:
 		RGBA(){m_col[0] = m_col[1] = m_col[2] = m_col[3] = 0.0;};
-		RGBA(double d[4]){m_col[0] = d[0];m_col[1] = d[1];m_col[2] = d[2];m_col[3] = d[3];};
-		RGBA(double r, double g, double b, double a){m_col[0] = r;m_col[1] = g;m_col[2] = b;m_col[3] = a;};
-		double& operator[](int id){assert(id < 4 && id>=0);return m_col[id];};
-		double r(){return m_col[0];};
-		double g(){return m_col[1];};
-		double b(){return m_col[2];};
-		double a(){return m_col[3];};
+		RGBA(float d[4]){m_col[0] = d[0];m_col[1] = d[1];m_col[2] = d[2];m_col[3] = d[3];};
+		RGBA(float r, float g, float b, float a){m_col[0] = r;m_col[1] = g;m_col[2] = b;m_col[3] = a;};
+		float& operator[](int id){assert(id < 4 && id>=0);return m_col[id];};
+		float r(){return m_col[0];};
+		float g(){return m_col[1];};
+		float b(){return m_col[2];};
+		float a(){return m_col[3];};
 		RGBA& operator+=(RGBA &other);
 		RGBA operator+(RGBA &other);
 		RGBA& operator-=(RGBA &other);
 		RGBA operator-(RGBA &other);
-		RGBA& operator*=(double &other);
-		RGBA operator*(double &other) const;
-		void clamp(double val=1.0);
+		RGBA& operator*=(float &other);
+		RGBA operator*(float &other) const;
+		void clamp(float val=1.0);
 
 		friend std::ostream& operator<<(std::ostream &out, RGBA &rgba);
 	private:
-		double m_col[4];
+		float m_col[4];
 };
 
 #endif

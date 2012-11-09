@@ -10,7 +10,7 @@ AABoundingBox::AABoundingBox(GeometricObject *object)
 	m_object->getBounds(m_min, m_max);
 }
 
-void AABoundingBox::getBounds(double min[3], double max[3]) const
+void AABoundingBox::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
         min[i] = m_min[i];
@@ -20,10 +20,10 @@ void AABoundingBox::getBounds(double min[3], double max[3]) const
 
 bool AABoundingBox::testBBox(Ray &ray) const
 {
-	double tmin;
-	double tmax;
-	double minTmin = DBL_MAX;
-	double maxTmax = DBL_MIN;
+	float tmin;
+	float tmax;
+	float minTmin = DBL_MAX;
+	float maxTmax = DBL_MIN;
 	for (int i = 0; i < 3; i++) {
 		if(ray.m_dir[i] == 0.0){
 			if(ray.m_origin[i] < m_min[i] || ray.m_origin[i] > m_max[i]){
@@ -31,11 +31,11 @@ bool AABoundingBox::testBBox(Ray &ray) const
 			}
 			continue;
 		}
-		double invD = 1.0/ray.m_dir[i];
+		float invD = 1.0/ray.m_dir[i];
 		tmin = (m_min[i]-ray.m_origin[i])*invD;
 		tmax = (m_max[i]-ray.m_origin[i])*invD;
 		if(invD < 0.0){
-			double tmp = tmin;
+			float tmp = tmin;
 			tmin = tmax;
 			tmax = tmp;
 		}

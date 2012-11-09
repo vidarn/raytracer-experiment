@@ -5,7 +5,7 @@ Matrix4x4::Matrix4x4()
 	setIdentity();
 }
 
-Matrix4x4::Matrix4x4(double entries[4][4])
+Matrix4x4::Matrix4x4(float entries[4][4])
 {
 	for (int y = 0; y < 4; y++) {
 		for (int x = 0; x < 4; x++) {
@@ -14,14 +14,14 @@ Matrix4x4::Matrix4x4(double entries[4][4])
 	}
 }
 
-Matrix4x4::Matrix4x4(double entries[16])
+Matrix4x4::Matrix4x4(float entries[16])
 {
 	for (int i = 0; i < 16; i++) {
 		m_entries[i] = entries[i];
 	}
 }
 
-void Matrix4x4::setTranslation(double x, double y, double z)
+void Matrix4x4::setTranslation(float x, float y, float z)
 {
 	setIdentity();
 	m_entries[3] = x;
@@ -29,7 +29,7 @@ void Matrix4x4::setTranslation(double x, double y, double z)
 	m_entries[11] = z;
 }
 
-void Matrix4x4::setScaling(double x, double y, double z)
+void Matrix4x4::setScaling(float x, float y, float z)
 {
 	setIdentity();
 	m_entries[0] = x;
@@ -37,11 +37,11 @@ void Matrix4x4::setScaling(double x, double y, double z)
 	m_entries[10] = z;
 }
 
-void Matrix4x4::setRotation(int axis, double angle)
+void Matrix4x4::setRotation(int axis, float angle)
 {
 	setIdentity();
-    double cosAngle = cos(angle);
-    double sinAngle = sin(angle);
+    float cosAngle = cos(angle);
+    float sinAngle = sin(angle);
     switch(axis){
         case 0:
             m_entries[1+4] = cosAngle;
@@ -87,11 +87,11 @@ Matrix4x4 Matrix4x4::invert()
 	Matrix4x4 invMat;
 	for (int y = 0; y < 4; y++) {
 		for (int x = 0; x < y; x++) {
-			double mult = tmpMat.m_entries[x+y*4];
+			float mult = tmpMat.m_entries[x+y*4];
 			invMat.subMultRow(x,y,mult);
 			tmpMat.subMultRow(x,y,mult);
 		}
-		double diagVal = tmpMat.m_entries[y+y*4];
+		float diagVal = tmpMat.m_entries[y+y*4];
 		invMat.multRow(y,1.0/diagVal);
 		tmpMat.multRow(y,1.0/diagVal);
 	}
@@ -99,7 +99,7 @@ Matrix4x4 Matrix4x4::invert()
 	// let's fix the upper right half
 	for (int y = 2; y >= 0; y--) {
 		for (int x = 3; x > y; x--) {
-			double mult = tmpMat.m_entries[x+y*4];
+			float mult = tmpMat.m_entries[x+y*4];
 			tmpMat.subMultRow(x,y,mult);
 			invMat.subMultRow(x,y,mult);
 		}
@@ -107,14 +107,14 @@ Matrix4x4 Matrix4x4::invert()
 	return invMat;
 }
 
-void Matrix4x4::multRow(int row, double mult)
+void Matrix4x4::multRow(int row, float mult)
 {
 	for(int x = 0; x < 4; x++){
 		m_entries[x+row*4] *= mult;
 	}
 }
 
-void Matrix4x4::subMultRow(int srcRow,int destRow, double mult)
+void Matrix4x4::subMultRow(int srcRow,int destRow, float mult)
 {
 	for(int x = 0; x < 4; x++){
 		m_entries[x+destRow*4] -= mult*m_entries[x+srcRow*4];
@@ -126,7 +126,7 @@ Matrix4x4 Matrix4x4::operator*(Matrix4x4 &other)
 	Matrix4x4 result;
 	for(int y=0;y<4;y++){
 		for(int x=0;x<4;x++){
-			double val = 0;
+			float val = 0;
 			for (int i = 0; i < 4; i++) {
 				val += m_entries[x+i*4]*other.m_entries[i+y*4];
 			}
@@ -140,7 +140,7 @@ Vec3 Matrix4x4::operator*(Vec3 &vec)
 {
 	Vec3 result;
 	for(int y=0;y<3;y++){
-		double val = 0;
+		float val = 0;
 		for(int x=0;x<3;x++){
 			val += m_entries[x+y*4]*vec[x];
 		}

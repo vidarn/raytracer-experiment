@@ -32,7 +32,7 @@ RGBA RGBA::operator-(RGBA &other)
 	return tmp;
 }
 
-RGBA& RGBA::operator*=(double &other)
+RGBA& RGBA::operator*=(float &other)
 {
 	m_col[0] *= other;
 	m_col[1] *= other;
@@ -41,14 +41,14 @@ RGBA& RGBA::operator*=(double &other)
 	return *this;
 }
 
-RGBA RGBA::operator*(double &other) const
+RGBA RGBA::operator*(float &other) const
 {
 	RGBA tmp = *this;
 	tmp *= other;
 	return tmp;
 }
 
-void RGBA::clamp(double val)
+void RGBA::clamp(float val)
 {
 	for (int i = 0; i < 4; i++) {
 		m_col[i] = m_col[i] < val ? m_col[i] : val;

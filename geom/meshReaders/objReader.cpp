@@ -31,7 +31,7 @@ Mesh *ObjReader::read(const char *filename)
 
 void ObjReader::readVertexLine(std::string &line, Mesh *mesh)
 {
-	double pos[3];
+	float pos[3];
 	int b = 0;
 	for(int i=0;i<3;i++){
 		int a = line.find(' ',b);

@@ -5,8 +5,8 @@
 class Directional: public Light
 {
 	public:
-		Directional(double strength, Matrix4x4 transform):Light(strength,transform){};
-        virtual double computeStrength(Point pos);
+		Directional(float strength, Matrix4x4 transform):Light(strength,transform){};
+        virtual float computeStrength(Point pos);
         virtual Vec3 computeDirection(Point pos);
 	private:
 };

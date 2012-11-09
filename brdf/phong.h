@@ -6,7 +6,7 @@ class Phong
 {
 	public:
 		Phong(){};
-		virtual double shade(ShadeRec &shadeRec, Vec3 &lightDir) const;
+		virtual float shade(ShadeRec &shadeRec, Vec3 &lightDir) const;
 	private:
 };
 

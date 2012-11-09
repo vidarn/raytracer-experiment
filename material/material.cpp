@@ -12,7 +12,7 @@ RGBA Material::shade(ShadeRec shadeRec, Light *light)
 
 	Point hitPos = shadeRec.getHitPos();
 	Vec3 lightDirection = light->getLightDirection(hitPos);
-	double shade = lambert.shade(shadeRec, lightDirection);
+	float shade = lambert.shade(shadeRec, lightDirection);
 	shade *= 0.8;
 	col = m_color*shade;
 

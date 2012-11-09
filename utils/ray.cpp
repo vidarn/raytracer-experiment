@@ -1,6 +1,6 @@
 #include "ray.h"
 
-Point Ray::getPointAtPos(double t)
+Point Ray::getPointAtPos(float t)
 {
 	Vec3 tmp = m_dir;
 	tmp *= t;

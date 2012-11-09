@@ -10,23 +10,23 @@ class Matrix4x4
 {
     public:
         Matrix4x4();
-        Matrix4x4(double entries[4][4]);
-        Matrix4x4(double entries[16]);
+        Matrix4x4(float entries[4][4]);
+        Matrix4x4(float entries[16]);
         void setIdentity();
-        void setTranslation(double x, double y, double z);
-        void setScaling(double x, double y, double z);
-        void setRotation(int axis, double angle);
+        void setTranslation(float x, float y, float z);
+        void setScaling(float x, float y, float z);
+        void setRotation(int axis, float angle);
         Matrix4x4 invert();
         Matrix4x4 operator*(Matrix4x4 &other);
         Vec3 operator*(Vec3 &vec);
         Point operator*(Point &point);
-		double& operator[](int id){assert(id < 16 && id>=0);return m_entries[id];};
+		float& operator[](int id){assert(id < 16 && id>=0);return m_entries[id];};
 
 		friend std::ostream& operator<<(std::ostream &out, Matrix4x4 &mat);
     private:
-        void multRow(int row, double mult);
-        void subMultRow(int srcRow,int destRow, double mult);
-        double m_entries[16];
+        void multRow(int row, float mult);
+        void subMultRow(int srcRow,int destRow, float mult);
+        float m_entries[16];
 };
 
 #endif

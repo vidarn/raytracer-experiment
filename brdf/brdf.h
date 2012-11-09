@@ -6,7 +6,7 @@
 class BRDF
 {
 	public:
-		virtual double shade(ShadeRec &shadeRec, Vec3 &lightDir) const = 0;
+		virtual float shade(ShadeRec &shadeRec, Vec3 &lightDir) const = 0;
 };
 
 #endif /* end of include guard: __BRDF_H__ */

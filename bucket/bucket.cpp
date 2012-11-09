@@ -4,7 +4,7 @@ void Bucket::render()
 {
     for(int i=m_startPixel; i<m_endPixel; i++){
 		int numSamples = m_sampler->getNumSamples();
-		double invNumSamples = 1.0/(double)numSamples;
+		float invNumSamples = 1.0/(float)numSamples;
 		RGBA color;
 		for(int j=0; j<numSamples; j++){
 			Point sample = m_sampler->getSquareSample();

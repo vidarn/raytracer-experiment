@@ -8,7 +8,7 @@ class Plane: public GeometricObject
 {
 	public:
 		Plane(Material *material, Matrix4x4 transform){m_transform = transform; m_material = material;};
-        virtual void getBounds(double min[3], double max[3]) const;
+        virtual void getBounds(float min[3], float max[3]) const;
 		virtual ShadeRec hit(Ray &ray) const;
 	private:
 		Point m_point;

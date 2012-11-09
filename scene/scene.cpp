@@ -80,7 +80,7 @@ RGBA Scene::trace(Ray &ray)
 {
 	RGBA col;
     int numObjects = m_objects.size();
-    double minT = DBL_MAX;
+    float minT = DBL_MAX;
     ShadeRec shadeRec;
 	for (int i = 0; i < numObjects; i++) {
 		Point tmpPoint = m_objects[i]->getTransform()*ray.m_origin;

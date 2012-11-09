@@ -1,15 +1,15 @@
 #include "light.h"
 
 
-Light::Light(double strength, Matrix4x4 transform)
+Light::Light(float strength, Matrix4x4 transform)
 {
     m_transform = transform;
     m_invTransform = transform.invert();
 }
 
-double Light::getLightStrength(Point pos)
+float Light::getLightStrength(Point pos)
 {
-    double result;
+    float result;
     result = m_strength*computeStrength(pos);
     return result;
 }

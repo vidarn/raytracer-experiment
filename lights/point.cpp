@@ -1,6 +1,6 @@
 #include "point.h"
 
-double PointLight::computeStrength(Point pos)
+float PointLight::computeStrength(Point pos)
 {
 	return 1.0;
 }

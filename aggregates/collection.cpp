@@ -12,8 +12,8 @@ Collection::Collection()
 void Collection::addObject(GeometricObject *object)
 {
 	m_objects.push_back(object);
-	double min[3];
-	double max[3];
+	float min[3];
+	float max[3];
 	object->getBounds(min,max);
 	for (int i = 0; i < 3; i++) {
 		if(min[i] < m_min[i]){
@@ -25,7 +25,7 @@ void Collection::addObject(GeometricObject *object)
 	}
 }
 
-void Collection::getBounds(double min[3], double max[3]) const
+void Collection::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
         min[i] = m_min[i];
@@ -36,7 +36,7 @@ void Collection::getBounds(double min[3], double max[3]) const
 ShadeRec Collection::hit(Ray &ray) const
 {
 	ShadeRec ret;
-	double t = DBL_MAX;
+	float t = DBL_MAX;
 	for (int i = 0; i < m_objects.size(); i++) {
 		Point tmpPoint = m_objects[i]->getTransform()*ray.m_origin;
 		Vec3 tmpDir = m_objects[i]->getTransform()*ray.m_dir;

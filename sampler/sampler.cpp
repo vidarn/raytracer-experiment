@@ -4,8 +4,8 @@ void Sampler::generateSamples()
 {
 	int n = m_numSamples;
 	m_numSamples *= m_numSamples;
-	double xd, yd;
-	double invN = 1.0/((double)(n+1));
+	float xd, yd;
+	float invN = 1.0/((float)(n+1));
 	yd = invN;
 	for(int y = 0; y<n; y++){
 		xd = invN;
