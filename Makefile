@@ -22,6 +22,4 @@ $(OUT):$(OBJ)
 	g++ $(FLG) $(INC) -c $< -o $@
 
 clean:
-	rm *.o
-	rm */*.o
-	rm */*/*.o
+	rm `find . -name '*.o'`
