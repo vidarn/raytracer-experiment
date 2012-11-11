@@ -6,6 +6,7 @@
 #include "../utils/normal.h"
 #include "geometricObject.h"
 #include "../aggregates/aaBoundingBox.h"
+#include "../aggregates/collection.h"
 #include "../aggregates/kdTree.h"
 
 class Face;
@@ -19,7 +20,7 @@ class Mesh : public GeometricObject
         void addNormal(Normal &normal){m_normals.push_back(normal);};
         Point &getPoint(int id){return m_points[id];};
         Normal &getNormal(int id){return m_normals[id];};
-		virtual ShadeRec hit(Ray &ray) const;
+		virtual void hit(Ray &ray, ShadeRec &sr) const;
         virtual void getBounds(float min[3], float max[3]) const;
         void calculateBounds();
         void calculateNormals();
@@ -32,6 +33,7 @@ class Mesh : public GeometricObject
         std::vector<Normal> m_normals;
         std::vector<Face> m_faces;
         KDTree m_kdTree;
+        Collection m_collection;
         Face* m_face;
 };
 
@@ -45,7 +47,7 @@ class Face : public GeometricObject
         Point &getPoint(int id) const;
         Normal &getNormal(int id) const;
         void calculateNormal();
-		virtual ShadeRec hit(Ray &ray) const;
+		virtual void hit(Ray &ray, ShadeRec &sr) const;
         virtual void getBounds(float min[3], float max[3]) const;
     private:
         Normal m_normal;

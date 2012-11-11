@@ -9,7 +9,7 @@ class Collection : public GeometricObject
 		Collection();
 		void addObject(GeometricObject *object);
         virtual void getBounds(float min[3], float max[3]) const;
-		virtual ShadeRec hit(Ray &ray) const;
+		virtual void hit(Ray &ray, ShadeRec &sr) const;
 	private:
 		std::vector<GeometricObject*> m_objects;
 		float m_min[3];

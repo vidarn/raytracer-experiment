@@ -9,7 +9,7 @@ class Sphere: public GeometricObject
 		Sphere(Material *material, Matrix4x4 transform){m_transform = transform; m_material = material;};
 		Sphere(float radius, Material *material, Matrix4x4 transform):m_radius(radius),m_radiusSquared(radius*radius){m_transform = transform; m_material = material;};
         virtual void getBounds(float min[3], float max[3]) const;
-		virtual ShadeRec hit(Ray &ray) const;
+		virtual void hit(Ray &ray, ShadeRec &sr) const;
 	private:
 		float m_radius;
 		float m_radiusSquared;

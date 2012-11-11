@@ -4,8 +4,8 @@
 Collection::Collection()
 {
     for (int i = 0; i < 3; i++) {
-        m_min[i] = DBL_MAX;
-        m_max[i] = DBL_MIN;
+        m_min[i] = FLT_MAX;
+        m_max[i] = -FLT_MAX;
     }
 }
 
@@ -33,22 +33,21 @@ void Collection::getBounds(float min[3], float max[3]) const
     }
 }
 
-ShadeRec Collection::hit(Ray &ray) const
+void Collection::hit(Ray &ray, ShadeRec &sr) const
 {
-	ShadeRec ret;
-	float t = DBL_MAX;
+	float t = FLT_MAX;
 	for (int i = 0; i < m_objects.size(); i++) {
+        ShadeRec tmp;
 		Point tmpPoint = m_objects[i]->getTransform()*ray.m_origin;
 		Vec3 tmpDir = m_objects[i]->getTransform()*ray.m_dir;
 		Ray tmpRay(tmpPoint,tmpDir);
 
-		ShadeRec sr = m_objects[i]->hit(tmpRay);
-		if(sr.getHit()){
-			if(sr.getHitT() < t){
-				t = sr.getHitT();
-				ret = sr;
+        m_objects[i]->hit(tmpRay, tmp);
+		if(tmp.getHit()){
+			if(tmp.getHitT() < t){
+				t = tmp.getHitT();
+				sr = tmp;
 			}
 		}
 	}
-	return ret;
 }

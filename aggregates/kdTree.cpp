@@ -1,25 +1,37 @@
 #include "kdTree.h"
+#include <cfloat>
 
 void KDTree::build(std::vector<GeometricObject *> objects)
 {
-    m_maxDepth = 4;
+    for (int a = 0; a < 3; a++) {
+        m_min[a] = FLT_MAX;
+        m_max[a] = -FLT_MAX;
+    }
+    m_maxDepth = int(8+1.3f*log(objects.size()));
     m_maxPrims = 15;
     for(int i=0;i<objects.size();i++){
         m_objects.push_back(objects[i]);
     }
+    float min[3], max[3];
     std::vector<AABoundingBox> bounds;
     for(int i =0; i<m_objects.size();i++){
         AABoundingBox b = AABoundingBox(m_objects[i]);
+        b.getBounds(min,max);
         bounds.push_back(b);
+        for (int a = 0; a < 3; a++) {
+            m_min[a] = min[a] < m_min[a] ? min[a] : m_min[a];
+            m_max[a] = max[a] > m_max[a] ? max[a] : m_max[a];
+        }
     }
+    m_bounds = new AABoundingBox(this);
     std::vector<int> overlappingObjects;
     for(int i=0; i<m_objects.size();i++){
         overlappingObjects.push_back(i);
     }
-    buildNode(overlappingObjects,bounds,m_maxDepth,1);
+    buildNode(overlappingObjects,bounds,m_maxDepth,0);
 }
 
-void KDTree::buildNode(std::vector<int> objects, std::vector<AABoundingBox> bounds, int depth, char axis)
+void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, int depth, char axis)
 {
     if(objects.size() <= m_maxPrims || depth == 0){
         KDTreeLeafNode *leafNode = new KDTreeLeafNode(objects,this);
@@ -29,21 +41,19 @@ void KDTree::buildNode(std::vector<int> objects, std::vector<AABoundingBox> boun
         // TODO: better calculation of split position
         float splitPosition;
         float min[3], max[3];
-        for(int i=0;i<objects.size();i++){
-            bounds[objects[i]].getBounds(min,max);
-            splitPosition += (min[axis] + max[axis])*0.5;
-        }
-        splitPosition /= float(objects.size());
+        bounds[objects[objects.size()/2]].getBounds(min,max);
+        splitPosition = (min[axis] + max[axis])*0.5;
         KDTreeInteriorNode *interiorNode = new KDTreeInteriorNode(axis,splitPosition,this);
+        interiorNode->setDepth(depth);
         m_nodes.push_back(interiorNode);
         std::vector<int> lowerObjects;
         std::vector<int> upperObjects;
         for (int i = 0; i < objects.size(); i++) {
             bounds[objects[i]].getBounds(min,max);
-            if(min[axis] < splitPosition){
+            if(min[axis] <= splitPosition){
                 lowerObjects.push_back(objects[i]);
             }
-            if(max[axis] > splitPosition){
+            if(max[axis] >= splitPosition){
                 upperObjects.push_back(objects[i]);
             }
         }
@@ -56,32 +66,67 @@ void KDTree::buildNode(std::vector<int> objects, std::vector<AABoundingBox> boun
     }
 }
 
-ShadeRec KDTree::hit(Ray &ray) const
+void KDTree::hit(Ray &ray, ShadeRec &sr) const
 {
-	ShadeRec sr;
-    sr = m_nodes[0]->hit(ray);
-	return sr;
+    float tmin, tmax;
+    if(m_bounds->testBBox(ray,tmin,tmax)){
+        m_nodes[0]->hit(ray,sr,tmin,tmax);
+    }
 }
 
 void KDTree::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
-        min[i] = -1;
-        max[i] = 1;
+        min[i] = m_min[i];
+        max[i] = m_max[i];
     }
 }
 
-ShadeRec KDTreeInteriorNode::hit(Ray &ray)
+void KDTreeInteriorNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 {
-    ShadeRec low, high;
-    low = getNodeBelow()->hit(ray);
-    high = getNodeAbove()->hit(ray);
-    if(high.getHit()){
-        if(!low.getHit() || low.getHitT() > high.getHitT()){
-            low = high;
+    if(ray.m_dir[m_axis] != 0.0f){
+        KDTreeNode* nearNode = ray.m_origin[m_axis] < m_position ? getNodeBelow():getNodeAbove();
+        KDTreeNode* farNode  = ray.m_origin[m_axis] < m_position ? getNodeAbove():getNodeBelow();
+        float tHit = (m_position - ray.m_origin[m_axis])/ray.m_dir[m_axis];
+        if(tHit > tMax){
+            nearNode->hit(ray,sr,tMin,tMax);
+        }
+        else if(tHit < tMin){
+            if(tHit > 0.0f){
+                farNode->hit(ray,sr,tMin,tMax);
+            }
+            else if(tHit < 0.0f){
+                nearNode->hit(ray,sr,tMin,tMax);
+            }
+            else{
+                if(ray.m_dir[m_axis] < 0.0f){
+                    farNode->hit(ray,sr,tMin,tMax);
+                }
+                else{
+                    nearNode->hit(ray,sr,tMin,tMax);
+                }
+            }
+        }
+        else{
+            if(tHit > 0.0f){
+                nearNode->hit(ray,sr,tMin,tHit);
+                if(!sr.getHit()){
+                    farNode->hit(ray,sr,tHit,tMax);
+                }
+            }
+            else{
+                nearNode->hit(ray,sr,tHit,tHit);
+            }
         }
     }
-	return low;
+    else{
+        if(ray.m_origin[m_axis] < m_position){
+            getNodeBelow()->hit(ray,sr,tMin,tMax);
+        }
+        if(ray.m_origin[m_axis] > m_position){
+            getNodeAbove()->hit(ray,sr,tMin,tMax);
+        }
+    }
 }
 
 KDTreeNode *KDTreeInteriorNode::getNodeBelow()
@@ -98,7 +143,7 @@ KDTreeNode *KDTreeInteriorNode::getNodeAbove()
     return ret;
 }
 
-KDTreeLeafNode::KDTreeLeafNode(std::vector<int> objects, KDTree* owner)
+KDTreeLeafNode::KDTreeLeafNode(std::vector<int> &objects, KDTree* owner)
 {
     for(int i=0;i<objects.size();i++){
         m_objects.push_back(objects[i]);
@@ -106,17 +151,16 @@ KDTreeLeafNode::KDTreeLeafNode(std::vector<int> objects, KDTree* owner)
     m_owner = owner;
 }
 
-ShadeRec KDTreeLeafNode::hit(Ray &ray)
+void KDTreeLeafNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 {
-    ShadeRec sr;
     for(int i=0; i<m_objects.size();i++){
         ShadeRec tmp;
-        tmp = m_owner->getObject(m_objects[i])->hit(ray);
+        m_owner->getObject(m_objects[i])->hit(ray, tmp);
         if(tmp.getHit()){
-            if(!(sr.getHit()) || tmp.getHitT() < sr.getHitT()){
+            if(tmp.getHitT() <= tMax && tmp.getHitT() >= tMin){
+                tMax = tmp.getHitT();
                 sr = tmp;
             }
         }
     }
-	return sr;
 }

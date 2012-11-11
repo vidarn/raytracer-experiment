@@ -17,8 +17,8 @@ void Scene::build()
 	Matrix4x4 transform, tmpMat, worldTransform;
 	tmpMat.setTranslation(0.0,0.0,-50.0);
     worldTransform = worldTransform*tmpMat;
-	tmpMat.setRotation(1,-1.4);
-    //worldTransform = worldTransform*tmpMat;
+	tmpMat.setRotation(1,-0.4);
+    worldTransform = worldTransform*tmpMat;
 
     Collection *collection = new Collection();
     collection->setTransform(worldTransform);
@@ -45,7 +45,7 @@ void Scene::build()
     collection->addObject(obj);
 
     transform.setIdentity();
-	tmpMat.setTranslation(0.0,0.0,10.0);
+	tmpMat.setTranslation(0.0,0.0,50.0);
     transform = transform*tmpMat;
 	transform = transform.invert();
     col = RGBA(0.8,0.2,0.2,1.0);
@@ -65,8 +65,7 @@ void Scene::build()
 	Mesh *mesh = objReader.read("monkey.obj");
     mesh->setTransform(transform);
     mesh->setMaterial(mat);
-    AABoundingBox *bbox = new AABoundingBox(mesh);
-    collection->addObject(bbox);
+    collection->addObject(mesh);
 
 	transform.setIdentity();
 	tmpMat.setTranslation(0.6,2.0,-2.0);
@@ -80,14 +79,15 @@ RGBA Scene::trace(Ray &ray)
 {
 	RGBA col;
     int numObjects = m_objects.size();
-    float minT = DBL_MAX;
+    float minT = FLT_MAX;
     ShadeRec shadeRec;
 	for (int i = 0; i < numObjects; i++) {
 		Point tmpPoint = m_objects[i]->getTransform()*ray.m_origin;
 		Vec3 tmpDir = m_objects[i]->getTransform()*ray.m_dir;
 		Ray tmpRay(tmpPoint,tmpDir);
 
-		ShadeRec sr = m_objects[i]->hit(tmpRay);
+		ShadeRec sr;
+        m_objects[i]->hit(tmpRay,sr);
 		if(sr.getHit()){
             if(sr.getHitT() < minT){
                 minT = sr.getHitT();

@@ -4,6 +4,7 @@
 
 Mesh *ObjReader::read(const char *filename)
 {
+	std::cout << "reading file \"" << filename << "\"\n";
 	Mesh *mesh = new Mesh;
 	std::string line;
 	std::ifstream file;

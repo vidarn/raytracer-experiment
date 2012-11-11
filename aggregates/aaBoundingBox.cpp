@@ -18,12 +18,12 @@ void AABoundingBox::getBounds(float min[3], float max[3]) const
     }
 }
 
-bool AABoundingBox::testBBox(Ray &ray) const
+bool AABoundingBox::testBBox(Ray &ray, float &retTmin, float &retTmax) const
 {
 	float tmin;
 	float tmax;
-	float minTmin = DBL_MAX;
-	float maxTmax = DBL_MIN;
+    retTmin = FLT_MAX;
+	retTmax = -FLT_MAX;
 	for (int i = 0; i < 3; i++) {
 		if(ray.m_dir[i] == 0.0){
 			if(ray.m_origin[i] < m_min[i] || ray.m_origin[i] > m_max[i]){
@@ -39,21 +39,20 @@ bool AABoundingBox::testBBox(Ray &ray) const
 			tmin = tmax;
 			tmax = tmp;
 		}
-		if(tmin < minTmin){
-			minTmin = tmin;
+		if(tmin < retTmin){
+			retTmin = tmin;
 		}
-		if(tmax > maxTmax){
-			maxTmax = tmax;
+		if(tmax > retTmax){
+			retTmax = tmax;
 		}
 	}
-	return (minTmin < maxTmax && maxTmax > 0.0);
+	return (retTmin < retTmax && retTmax > 0.0);
 }
 
-ShadeRec AABoundingBox::hit(Ray &ray) const
+void AABoundingBox::hit(Ray &ray, ShadeRec &sr) const
 {
-	ShadeRec sr;
-	if(testBBox(ray)){
-		sr = m_object->hit(ray);
+    float tmin, tmax;
+	if(testBBox(ray, tmin, tmax)){
+		m_object->hit(ray,sr);
 	}
-	return sr;
 }

@@ -7,8 +7,8 @@ class AABoundingBox : public GeometricObject
 	public:
 		AABoundingBox(GeometricObject *object);
         virtual void getBounds(float min[3], float max[3]) const;
-		virtual ShadeRec hit(Ray &ray) const;
-		bool testBBox(Ray &ray) const;
+		virtual void hit(Ray &ray, ShadeRec &sr) const;
+		bool testBBox(Ray &ray, float &retTmin, float &retTmax) const;
 	private:
 		GeometricObject *m_object;
 		float m_min[3];

@@ -14,5 +14,6 @@ void Bucket::render()
 		}
 		color[3] = 1.0;
         m_viewPlane->setPixelValue(i,color);
+        //std::cout << i <<"/" << m_endPixel << std::endl;
     }
 }

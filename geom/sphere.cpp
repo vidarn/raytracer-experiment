@@ -9,7 +9,7 @@ void Sphere::getBounds(float min[3], float max[3]) const
     }
 }
 
-ShadeRec Sphere::hit(Ray &ray) const
+void Sphere::hit(Ray &ray, ShadeRec &sr) const
 {
 	Point pnt = ray.m_origin;
 	Vec3 o = pnt.toVec3();
@@ -17,11 +17,9 @@ ShadeRec Sphere::hit(Ray &ray) const
 	float b = 2.0*(ray.m_dir.dot(o));
 	float c = o.dot(o) - m_radiusSquared;
 
-	ShadeRec sr;
-
 	float discriminant = b*b - 4*a*c;
 	if(discriminant < 0){
-		return sr;
+		return;
 	}
 	float discSqrt = sqrt(discriminant);
 	float q;
@@ -39,7 +37,7 @@ ShadeRec Sphere::hit(Ray &ray) const
 		t1 = tmp;
 	}
 	if(t1<0.0){
-		return sr;
+		return;
 	}
 	sr.setHit(true);
 	if(t0<0.0){
@@ -56,5 +54,4 @@ ShadeRec Sphere::hit(Ray &ray) const
 	Normal normal(tmpVec);
 	sr.setNormal(normal);
     sr.setMaterial(m_material);
-	return sr;
 }

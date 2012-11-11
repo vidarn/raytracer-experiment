@@ -7,17 +7,16 @@ void Plane::getBounds(float min[3], float max[3]) const
     max[0] = 0.1;
     min[1] = -0.1;
     max[1] = 0.1;
-    min[2] = DBL_MIN;
-    max[2] = DBL_MAX;
+    min[2] = -FLT_MAX;
+    max[2] = FLT_MAX;
 }
 
-ShadeRec Plane::hit(Ray &ray) const
+void Plane::hit(Ray &ray, ShadeRec &sr) const
 {
-	ShadeRec sr;
     float origin_z = ray.m_origin[2];
     float direction_z = ray.m_dir[2];
     if(direction_z == 0.0){
-        return sr;
+        return;
     }
     float t = -origin_z/direction_z;
     if(t>0.0){
@@ -27,5 +26,4 @@ ShadeRec Plane::hit(Ray &ray) const
         sr.setNormal(normal);
         sr.setMaterial(m_material);
     }
-    return sr;
 }

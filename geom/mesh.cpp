@@ -1,26 +1,24 @@
 #include "mesh.h"
 #include <cfloat>
 
-ShadeRec Mesh::hit(Ray &ray) const
+void Mesh::hit(Ray &ray, ShadeRec &sr) const
 {
-    ShadeRec sr = m_kdTree.hit(ray);
+    m_kdTree.hit(ray, sr);
+    //m_collection.hit(ray,sr);
     sr.setMaterial(m_material);
-    return sr;
 }
 
 void Mesh::getBounds(float min[3], float max[3]) const
 {
-    for (int i = 0; i < 3; i++) {
-        min[i] = m_min[i];
-        max[i] = m_max[i];
-    }
+    m_kdTree.getBounds(min,max);
+    //m_collection.getBounds(min,max);
 }
 
 void Mesh::calculateBounds()
 {
     for (int i = 0; i < 3; i++) {
-        m_min[i] = DBL_MAX;
-        m_max[i] = DBL_MIN;
+        m_min[i] = FLT_MAX;
+        m_max[i] = -FLT_MAX;
     }
     for (int i = 0; i < m_points.size(); i++) {
         for (int j = 0; j < 3; j++) {
@@ -49,6 +47,7 @@ void Mesh::populateCollection()
 	std::vector<GeometricObject *> objects;
 	for (int i = 0; i < m_faces.size(); i++) {
 		objects.push_back(&(m_faces[i]));
+        //m_collection.addObject(&(m_faces[i]));
 	}
 	m_kdTree.build(objects);
 }
@@ -83,8 +82,8 @@ void Face::calculateNormal()
 void Face::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
-        min[i] = DBL_MAX;
-        max[i] = DBL_MIN;
+        min[i] = FLT_MAX;
+        max[i] = -FLT_MAX;
         for (int j = 0; j < 3; j++){
             float val = getPoint(j)[i];
             if(val < min[i]){
@@ -97,9 +96,8 @@ void Face::getBounds(float min[3], float max[3]) const
     }
 }
 
-ShadeRec Face::hit(Ray &ray) const
+void Face::hit(Ray &ray, ShadeRec &sr) const
 {
-    ShadeRec sr;
     Point &p1 = getPoint(0);
     Point &p2 = getPoint(1);
     Point &p3 = getPoint(2);
@@ -108,43 +106,40 @@ ShadeRec Face::hit(Ray &ray) const
     Vec3 s1 = ray.m_dir.cross(e2);
     float divisor = s1.dot(e1);
     if(divisor == 0.0){
-        return sr;
+        return;
     }
     float invDivisor = 1.0/divisor;
 
     Vec3 d = ray.m_origin - p1;
     float b1 = d.dot(s1) * invDivisor;
     if(b1 < 0.0 || b1 > 1.0){
-        return sr;
+        return;
     }
 
     Vec3 s2 = d.cross(e1);
     float b2 = ray.m_dir.dot(s2) * invDivisor;
     if(b2 < 0.0 || b1 + b2 > 1.0){
-        return sr;
+        return;
     }
 
     float t = e2.dot(s2) * invDivisor;
     if(t < 0.0){
-        return sr;
+        return;
     }
-    if(!sr.getHit() || t < sr.getHitT()){
-        float b0 = (1.0 - b1 - b2);
-        sr.setHit(true);
-        sr.setHitT(t);
-        Vec3 norVec;
-        Vec3 tmpVec;
-        tmpVec = getNormal(0).toVec3();
-        tmpVec *= b0;
-        norVec += tmpVec;
-        tmpVec = getNormal(1).toVec3();
-        tmpVec *= b1;
-        norVec += tmpVec;
-        tmpVec = getNormal(2).toVec3();
-        tmpVec *= b2;
-        norVec += tmpVec;
-        norVec.normalize();
-        sr.setNormal(norVec);
-    }
-    return sr;
+    float b0 = (1.0 - b1 - b2);
+    sr.setHit(true);
+    sr.setHitT(t);
+    Vec3 norVec;
+    Vec3 tmpVec;
+    tmpVec = getNormal(0).toVec3();
+    tmpVec *= b0;
+    norVec += tmpVec;
+    tmpVec = getNormal(1).toVec3();
+    tmpVec *= b1;
+    norVec += tmpVec;
+    tmpVec = getNormal(2).toVec3();
+    tmpVec *= b2;
+    norVec += tmpVec;
+    norVec.normalize();
+    sr.setNormal(norVec);
 }

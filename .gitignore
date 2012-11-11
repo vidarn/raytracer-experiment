@@ -4,3 +4,4 @@ raytracer
 out.tif
 out_old.tif
 .qiv-select*
+callgrind*
