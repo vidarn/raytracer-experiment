@@ -62,7 +62,7 @@ void Scene::build()
     col = RGBA(0.2,0.8,0.8,1.0);
 	mat = new Material(col);
     ObjReader objReader;
-	Mesh *mesh = objReader.read("/tmp/untitled.obj");
+	Mesh *mesh = objReader.read("monkey.obj");
     mesh->setTransform(transform);
     mesh->setMaterial(mat);
     collection->addObject(mesh);
