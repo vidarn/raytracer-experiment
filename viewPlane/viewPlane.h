@@ -16,6 +16,8 @@ class ViewPlane
         ViewPlane(int res[2], float sizeX, float sizeY){ ViewPlane(res[0],res[1], sizeX, sizeY);};
         ~ViewPlane(){};
         int getNumPixels(){return m_pixels.size();};
+        int getWidth(){return m_resolution[0];};
+        int getHeight(){return m_resolution[1];};
         Ray getPixelRay(int index, Point sample);
         void setPixelValue(int index, RGBA color);
         void saveToTiff(const char *filename);

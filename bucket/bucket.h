@@ -7,14 +7,17 @@
 class Bucket
 {
 	public:
-		Bucket(ViewPlane *viewPlane, Scene *scene, Sampler *sampler, int startPixel, int endPixel):m_viewPlane(viewPlane), m_scene(scene), m_sampler(sampler), m_startPixel(startPixel), m_endPixel(endPixel){};
+		Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPixel[2], int width);
+        bool isDone(){return m_done;};
 		void render();
 	private:
 		ViewPlane *m_viewPlane;
 		Scene *m_scene;
 		Sampler *m_sampler;
-		int m_startPixel;
-		int m_endPixel;
+		int m_startPixel[2];
+		int m_endPixel[2];
+        int m_width;
+        bool m_done;
 };
 
 #endif

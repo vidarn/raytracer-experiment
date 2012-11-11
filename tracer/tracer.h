@@ -9,14 +9,13 @@
 class Tracer
 {
 	public:
-        Tracer(Scene *scene, ViewPlane *viewPlane, Sampler *sampler):m_scene(scene),m_viewPlane(viewPlane),m_sampler(sampler){};
+        Tracer(Scene *scene, ViewPlane *viewPlane):m_scene(scene),m_viewPlane(viewPlane){};
         ~Tracer(){};
         void render();
 
 	private:
 		Scene *m_scene;
 		ViewPlane *m_viewPlane;
-		Sampler *m_sampler;
 };
 
 #endif
