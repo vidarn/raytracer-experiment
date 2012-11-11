@@ -8,6 +8,7 @@ class Bucket
 {
 	public:
 		Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPixel[2], int width);
+        ~Bucket();
         bool isDone(){return m_done;};
 		void render();
 	private:
