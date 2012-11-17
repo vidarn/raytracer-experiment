@@ -3,6 +3,7 @@
 #define __MATRIX4X4_H__
 #include <cassert>
 #include <iostream>
+#include <fstream>
 #include "vec3.h"
 #include "point.h"
 
@@ -10,6 +11,7 @@ class Matrix4x4
 {
     public:
         Matrix4x4();
+        Matrix4x4(std::ifstream &stream);
         Matrix4x4(float entries[4][4]);
         Matrix4x4(float entries[16]);
         void setIdentity();

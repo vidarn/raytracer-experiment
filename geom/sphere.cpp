@@ -1,6 +1,15 @@
 #include "sphere.h"
 #include "../utils/matrix4x4.h"
 
+Sphere::Sphere(std::istream &stream, Matrix4x4 transform, Material *material)
+{
+    stream.read( reinterpret_cast<char*>( &m_radius ), sizeof m_radius );
+    std::cout << "radius: " << m_radius << std::endl;
+    m_radiusSquared = m_radius*m_radius;
+    m_transform = transform;
+    m_material = material;
+}
+
 void Sphere::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {

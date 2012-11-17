@@ -14,6 +14,7 @@ class Scene
 		~Scene();
 		void build();
         RGBA trace(Ray &ray);
+        std::vector<GeometricObject *> getObjects();
 	private:
 		std::vector<GeometricObject*> m_objects;
 		std::vector<Light*> m_lights;

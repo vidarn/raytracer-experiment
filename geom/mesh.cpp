@@ -1,17 +1,52 @@
 #include "mesh.h"
 #include <cfloat>
 
+
+Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
+{
+    m_transform = transform;
+    m_material = mat;
+    int num_verts;
+    stream.read( reinterpret_cast<char*>( &num_verts ), sizeof num_verts );
+    std::cout << "numVerts: " << num_verts << std::endl;
+    float pos[3];
+    for(int i=0; i<num_verts; i++){
+        for(int j=0; j<3; j++){
+            stream.read( reinterpret_cast<char*>( &pos[j] ), sizeof pos[j] );
+        }
+        Point point(pos);
+        addPoint(point);
+        Normal normal;
+        addNormal(normal);
+    }
+    int num_triangles;
+    stream.read( reinterpret_cast<char*>( &num_triangles ), sizeof num_triangles );
+    std::cout << "numTriangles: " << num_triangles << std::endl;
+    for(int i=0; i<num_triangles; i++){
+        int pointIds[3];
+        for(int j=0; j<3; j++){
+            stream.read( reinterpret_cast<char*>( &(pointIds[j]) ), sizeof pointIds[j] );
+        }
+        Face face(this);
+        face[0] = pointIds[0];
+        face[1] = pointIds[1];
+        face[2] = pointIds[2];
+        addFace(face);
+    }
+    calculateNormals();
+    calculateBounds();
+    populateCollection();
+}
+
 void Mesh::hit(Ray &ray, ShadeRec &sr) const
 {
     m_kdTree.hit(ray, sr);
-    //m_collection.hit(ray,sr);
     sr.setMaterial(m_material);
 }
 
 void Mesh::getBounds(float min[3], float max[3]) const
 {
     m_kdTree.getBounds(min,max);
-    //m_collection.getBounds(min,max);
 }
 
 void Mesh::calculateBounds()
@@ -47,7 +82,6 @@ void Mesh::populateCollection()
 	std::vector<GeometricObject *> objects;
 	for (int i = 0; i < m_faces.size(); i++) {
 		objects.push_back(&(m_faces[i]));
-        //m_collection.addObject(&(m_faces[i]));
 	}
 	m_kdTree.build(objects);
 }

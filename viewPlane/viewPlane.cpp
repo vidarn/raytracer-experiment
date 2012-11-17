@@ -25,7 +25,7 @@ Ray ViewPlane::getPixelRay(int index, Point sample)
     posX *= m_size[0];
     posY *= m_size[1];
     Point origin(posX,posY,0.0);
-    Vec3 direction(0.0,0.0,1.0);
+    Vec3 direction(0.0,0.0,-1.0);
     direction = direction;
     origin = origin;
     Ray ray(origin,direction);

@@ -15,6 +15,7 @@ class Mesh : public GeometricObject
 {
     public:
 		Mesh(){};
+		Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat);
         void addPoint(Point &point){m_points.push_back(point);};
         void addFace(Face &face){m_faces.push_back(face);};
         void addNormal(Normal &normal){m_normals.push_back(normal);};
@@ -33,7 +34,6 @@ class Mesh : public GeometricObject
         std::vector<Normal> m_normals;
         std::vector<Face> m_faces;
         KDTree m_kdTree;
-        Collection m_collection;
         Face* m_face;
 };
 

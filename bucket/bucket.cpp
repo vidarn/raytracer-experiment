@@ -29,7 +29,6 @@ void Bucket::render()
                 RGBA tmp = m_scene->trace(ray)*invNumSamples;
                 color += tmp;
             }
-            color[3] = 1.0;
             m_viewPlane->setPixelValue(i,color);
         }
     }

@@ -4,6 +4,7 @@
 #include "../utils/matrix4x4.h"
 #include "../material/material.h"
 #include "../shadeRec/shadeRec.h"
+#include <ostream>
 
 class GeometricObject
 {

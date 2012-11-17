@@ -16,7 +16,7 @@ float Light::getLightStrength(Point pos)
 
 Vec3 Light::getLightDirection(Point pos)
 {
-    pos = m_invTransform*pos;
+    //pos = m_invTransform*pos;
     Vec3 dir = computeDirection(pos);
     dir = m_transform*dir;
     dir.normalize();

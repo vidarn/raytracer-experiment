@@ -48,6 +48,7 @@ void Tracer::render()
                     pthread_join(threads[i],NULL);
                     numDoneBuckets++;
                     std::cout << "bucket " << bucketMap[i] << " done!\n";
+                    m_viewPlane->saveToTiff("/tmp/out.tif");
                     bucketMap[i] = -1;
                     if(currentBucket < numTotalBuckets){
                         pthread_create(&(threads[i]), NULL, renderBucketProcess, (void*)(buckets[currentBucket]));

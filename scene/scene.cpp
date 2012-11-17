@@ -5,6 +5,7 @@
 #include "../aggregates/aaBoundingBox.h"
 #include "../aggregates/collection.h"
 #include "../utils/matrix4x4.h"
+#include "../file/file.h"
 #include <cfloat>
 
 Scene::~Scene()
@@ -20,52 +21,8 @@ void Scene::build()
 	tmpMat.setRotation(1,-0.4);
     worldTransform = worldTransform*tmpMat;
 
-    Collection *collection = new Collection();
-    collection->setTransform(worldTransform);
-	m_objects.push_back(collection);
-
-
-	tmpMat.setTranslation(-0.5,0.0,1.0);
-    transform = transform*tmpMat;
-	transform = transform.invert();
-    RGBA col = RGBA(0.8,0.2,0.1,1.0);
-	Material *mat = new Material(col);
-	Sphere *obj = new Sphere(0.9,mat,transform);
-    collection->addObject(obj);
-
-    transform.setIdentity();
-	tmpMat.setScaling(0.5,0.5,0.5);
-    transform = transform*tmpMat;
-	tmpMat.setTranslation(0.5,0.0,0.0);
-    transform = transform*tmpMat;
-	transform = transform.invert();
-    col = RGBA(0.1,0.2,0.8,1.0);
-	mat = new Material(col);
-	obj = new Sphere(0.9,mat,transform);
-    collection->addObject(obj);
-
-    transform.setIdentity();
-	tmpMat.setTranslation(0.0,0.0,50.0);
-    transform = transform*tmpMat;
-	transform = transform.invert();
-    col = RGBA(0.8,0.2,0.2,1.0);
-	mat = new Material(col);
-	Plane *plan = new Plane(mat,transform);
-    collection->addObject(plan);
-
-    transform.setIdentity();
-	tmpMat.setScaling(0.4,0.4,0.4);
-    transform = transform*tmpMat;
-	tmpMat.setTranslation(0.0,0.0,-1.0);
-    transform = transform*tmpMat;
-	transform = transform.invert();
-    col = RGBA(0.2,0.8,0.8,1.0);
-	mat = new Material(col);
-    ObjReader objReader;
-	Mesh *mesh = objReader.read("monkey.obj");
-    mesh->setTransform(transform);
-    mesh->setMaterial(mat);
-    collection->addObject(mesh);
+    File file("/tmp/test.scn");
+    file.read(m_objects);
 
 	transform.setIdentity();
 	tmpMat.setTranslation(0.6,2.0,-2.0);
@@ -103,6 +60,16 @@ RGBA Scene::trace(Ray &ray)
         if(shadeRec.getMaterial() != 0){
             col = shadeRec.getMaterial()->shade(shadeRec, m_lights[0]);
         }
+        col[3] = 1.0f;
     }
     return col;
+}
+
+std::vector<GeometricObject *> Scene::getObjects()
+{
+    std::vector<GeometricObject *> objects;
+    for(int i=0;i<m_objects.size();i++){
+        objects.push_back(m_objects[i]);
+    }
+    return objects;
 }

@@ -5,6 +5,13 @@ Matrix4x4::Matrix4x4()
 	setIdentity();
 }
 
+Matrix4x4::Matrix4x4(std::ifstream &stream)
+{
+    for(int i=0; i<16; i++){
+        stream.read( reinterpret_cast<char*>( &(m_entries[i]) ), sizeof m_entries[i] );
+    }
+}
+
 Matrix4x4::Matrix4x4(float entries[4][4])
 {
 	for (int y = 0; y < 4; y++) {
