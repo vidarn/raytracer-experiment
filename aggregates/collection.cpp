@@ -38,8 +38,8 @@ void Collection::hit(Ray &ray, ShadeRec &sr) const
 	float t = FLT_MAX;
 	for (int i = 0; i < m_objects.size(); i++) {
         ShadeRec tmp;
-		Point tmpPoint = m_objects[i]->getTransform()*ray.m_origin;
-		Vec3 tmpDir = m_objects[i]->getTransform()*ray.m_dir;
+		Vec3 tmpPoint = m_objects[i]->getTransform().multPoint(ray.m_origin);
+		Vec3 tmpDir   = m_objects[i]->getTransform().multVec3(ray.m_dir);
 		Ray tmpRay(tmpPoint,tmpDir);
 
         m_objects[i]->hit(tmpRay, tmp);

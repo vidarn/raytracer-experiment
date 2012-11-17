@@ -40,9 +40,9 @@ void ObjReader::readVertexLine(std::string &line, Mesh *mesh)
 		std::string tmpStr = line.substr(a,b);
 		pos[i] = atof(tmpStr.c_str());
 	}
-	Point point = Point(pos);
+	Vec3 point(pos);
 	mesh->addPoint(point);
-	Normal normal;
+	Vec3 normal;
 	mesh->addNormal(normal);
 }
 

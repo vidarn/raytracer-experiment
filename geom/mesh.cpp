@@ -14,9 +14,9 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
         for(int j=0; j<3; j++){
             stream.read( reinterpret_cast<char*>( &pos[j] ), sizeof pos[j] );
         }
-        Point point(pos);
+        Vec3 point(pos);
         addPoint(point);
-        Normal normal;
+        Vec3 normal;
         addNormal(normal);
     }
     int num_triangles;
@@ -86,17 +86,17 @@ void Mesh::populateCollection()
 	m_kdTree.build(objects);
 }
 
-void Mesh::addToNormal(int id, Normal normal)
+void Mesh::addToNormal(int id, Vec3 normal)
 {
     m_normals[id] += normal;
 }
 
-Point &Face::getPoint(int id) const
+Vec3 &Face::getPoint(int id) const
 {
     return m_owner->getPoint(m_pointIds[id]);
 }
 
-Normal &Face::getNormal(int id) const
+Vec3 &Face::getNormal(int id) const
 {
     return m_owner->getNormal(m_pointIds[id]);
 }
@@ -105,9 +105,8 @@ void Face::calculateNormal()
 {
     Vec3 v1 = getPoint(0) - getPoint(1);
     Vec3 v2 = getPoint(1) - getPoint(2);
-    Vec3 v3 = v1.cross(v2);
-    v3.normalize();
-    m_normal = Normal(v3);
+    m_normal = v1.cross(v2);
+    m_normal.normalize();
     for (int i = 0; i < 3; i++) {
         m_owner->addToNormal(m_pointIds[i],m_normal);
     }
@@ -132,9 +131,9 @@ void Face::getBounds(float min[3], float max[3]) const
 
 void Face::hit(Ray &ray, ShadeRec &sr) const
 {
-    Point &p1 = getPoint(0);
-    Point &p2 = getPoint(1);
-    Point &p3 = getPoint(2);
+    Vec3 &p1 = getPoint(0);
+    Vec3 &p2 = getPoint(1);
+    Vec3 &p3 = getPoint(2);
     Vec3 e1 = p2 - p1;
     Vec3 e2 = p3 - p1;
     Vec3 s1 = ray.m_dir.cross(e2);
@@ -165,13 +164,13 @@ void Face::hit(Ray &ray, ShadeRec &sr) const
     sr.setHitT(t);
     Vec3 norVec;
     Vec3 tmpVec;
-    tmpVec = getNormal(0).toVec3();
+    tmpVec = getNormal(0);
     tmpVec *= b0;
     norVec += tmpVec;
-    tmpVec = getNormal(1).toVec3();
+    tmpVec = getNormal(1);
     tmpVec *= b1;
     norVec += tmpVec;
-    tmpVec = getNormal(2).toVec3();
+    tmpVec = getNormal(2);
     tmpVec *= b2;
     norVec += tmpVec;
     norVec.normalize();

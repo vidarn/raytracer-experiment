@@ -143,7 +143,7 @@ Matrix4x4 Matrix4x4::operator*(Matrix4x4 &other)
 	return result;
 }
 
-Vec3 Matrix4x4::operator*(Vec3 &vec)
+Vec3 Matrix4x4::multVec3(Vec3 &vec)
 {
 	Vec3 result;
 	for(int y=0;y<3;y++){
@@ -156,14 +156,12 @@ Vec3 Matrix4x4::operator*(Vec3 &vec)
 	return result;
 }
 
-Point Matrix4x4::operator*(Point &point)
+Vec3 Matrix4x4::multPoint(Vec3 &point)
 {
-	Vec3 vec = point.toVec3();
-	vec = operator*(vec);
+	Vec3 result = multVec3(point);
 	for(int y=0;y<3;y++){
-		vec[y] += m_entries[3+y*4];
+		result[y] += m_entries[3+y*4];
 	}
-	Point result(vec);
 	return result;
 }
 

@@ -1,13 +1,13 @@
 #include "point.h"
 
-float PointLight::computeStrength(Point pos)
+float PointLight::computeStrength(Vec3 pos)
 {
 	return 1.0;
 }
 
-Vec3 PointLight::computeDirection(Point pos)
+Vec3 PointLight::computeDirection(Vec3 pos)
 {
-	Vec3 dir = pos.toVec3();
+	Vec3 dir = pos;
     dir.invert();
 	return dir;
 }

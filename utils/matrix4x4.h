@@ -5,7 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include "vec3.h"
-#include "point.h"
 
 class Matrix4x4
 {
@@ -20,8 +19,8 @@ class Matrix4x4
         void setRotation(int axis, float angle);
         Matrix4x4 invert();
         Matrix4x4 operator*(Matrix4x4 &other);
-        Vec3 operator*(Vec3 &vec);
-        Point operator*(Point &point);
+        Vec3 multPoint(Vec3 &vec);
+        Vec3 multVec3(Vec3 &vec);
 		float& operator[](int id){assert(id < 16 && id>=0);return m_entries[id];};
 
 		friend std::ostream& operator<<(std::ostream &out, Matrix4x4 &mat);

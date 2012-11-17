@@ -39,8 +39,8 @@ RGBA Scene::trace(Ray &ray)
     float minT = FLT_MAX;
     ShadeRec shadeRec;
 	for (int i = 0; i < numObjects; i++) {
-		Point tmpPoint = m_objects[i]->getTransform()*ray.m_origin;
-		Vec3 tmpDir = m_objects[i]->getTransform()*ray.m_dir;
+		Vec3 tmpPoint = m_objects[i]->getTransform().multPoint(ray.m_origin);
+		Vec3 tmpDir = m_objects[i]->getTransform().multVec3(ray.m_dir);
 		Ray tmpRay(tmpPoint,tmpDir);
 
 		ShadeRec sr;
@@ -54,7 +54,7 @@ RGBA Scene::trace(Ray &ray)
 	}
     if(shadeRec.getHit())
     {
-        Point hitPos = ray.getPointAtPos(shadeRec.getHitT());
+        Vec3 hitPos = ray.getPointAtPos(shadeRec.getHitT());
         shadeRec.setHitPos(hitPos);
         shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
         if(shadeRec.getMaterial() != 0){

@@ -20,8 +20,8 @@ void Sphere::getBounds(float min[3], float max[3]) const
 
 void Sphere::hit(Ray &ray, ShadeRec &sr) const
 {
-	Point pnt = ray.m_origin;
-	Vec3 o = pnt.toVec3();
+	Vec3 pnt = ray.m_origin;
+	Vec3 o = pnt;
 	float a = ray.m_dir.dot(ray.m_dir);
 	float b = 2.0*(ray.m_dir.dot(o));
 	float c = o.dot(o) - m_radiusSquared;
@@ -58,9 +58,9 @@ void Sphere::hit(Ray &ray, ShadeRec &sr) const
 		sr.setHitT(t0);
 	}
 
-	Point hitPos = ray.getPointAtPos(sr.getHitT());
-	Vec3 tmpVec = hitPos.toVec3().getNormalized();
-	Normal normal(tmpVec);
+	Vec3 hitPos = ray.getPointAtPos(sr.getHitT());
+	Vec3 tmpVec = hitPos.getNormalized();
+	Vec3 normal(tmpVec);
 	sr.setNormal(normal);
     sr.setMaterial(m_material);
 }

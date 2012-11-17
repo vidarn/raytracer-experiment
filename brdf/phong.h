@@ -10,4 +10,4 @@ class Phong
 	private:
 };
 
-#endif /* end of include guard: __PHONG_H__ */
+#endif

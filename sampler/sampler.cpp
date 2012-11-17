@@ -10,7 +10,7 @@ void Sampler::generateSamples()
 	for(int y = 0; y<n; y++){
 		xd = invN;
 		for(int x = 0; x<n; x++){
-			Point tmpPoint(xd,yd,0.0);
+			Vec3 tmpPoint(xd,yd,0.0);
 			m_samples.push_back(tmpPoint);
 			xd += invN;
 		}
@@ -18,7 +18,7 @@ void Sampler::generateSamples()
 	}
 }
 
-Point Sampler::getSquareSample()
+Vec3 Sampler::getSquareSample()
 {
 	int tmp = m_currentSample;
 	m_currentSample = (m_currentSample + 1) % m_numSamples;

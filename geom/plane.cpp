@@ -22,7 +22,7 @@ void Plane::hit(Ray &ray, ShadeRec &sr) const
     if(t>0.0){
         sr.setHit(true);
         sr.setHitT(t);
-        Normal normal(0.0,0.0,-1.0);
+        Vec3 normal(0.0,0.0,-1.0);
         sr.setNormal(normal);
         sr.setMaterial(m_material);
     }
