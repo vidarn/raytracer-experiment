@@ -25,6 +25,7 @@ class Mesh : public GeometricObject
         void calculateNormals();
         void populateCollection();
         void addToNormal(int id, Vec3 normal);
+		void applyTransformation();
     private:
         float m_min[3];
         float m_max[3];

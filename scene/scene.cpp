@@ -39,9 +39,7 @@ RGBA Scene::trace(Ray &ray)
     float minT = FLT_MAX;
     ShadeRec shadeRec;
 	for (int i = 0; i < numObjects; i++) {
-		Vec3 tmpPoint = m_objects[i]->getTransform().multPoint(ray.m_origin);
-		Vec3 tmpDir = m_objects[i]->getTransform().multVec3(ray.m_dir);
-		Ray tmpRay(tmpPoint,tmpDir);
+		Ray tmpRay(ray.m_origin,ray.m_dir);
 
 		ShadeRec sr;
         m_objects[i]->hit(tmpRay,sr);

@@ -23,6 +23,7 @@ Mesh *ObjReader::read(const char *filename)
 		}
 	}
 	file.close();
+	mesh->applyTransformation();
 	mesh->calculateNormals();
 	mesh->calculateBounds();
 	mesh->populateCollection();

@@ -20,7 +20,6 @@ void File::read(std::vector<GeometricObject *> &objects)
         stream.read( reinterpret_cast<char*>( &type ), sizeof type );
         if(stream.good()){
             Matrix4x4 transform(stream);
-            transform = transform.invert();
             std::cout << transform << std::endl;
             RGBA col = RGBA(0.8,0.2,0.1,1.0);
             Material *mat = new Material(col);

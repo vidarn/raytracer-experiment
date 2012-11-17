@@ -33,6 +33,7 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
         face[2] = pointIds[2];
         addFace(face);
     }
+	applyTransformation();
     calculateNormals();
     calculateBounds();
     populateCollection();
@@ -89,6 +90,14 @@ void Mesh::populateCollection()
 void Mesh::addToNormal(int id, Vec3 normal)
 {
     m_normals[id] += normal;
+}
+
+void Mesh::applyTransformation()
+{
+	std::cout << m_transform << std::endl;
+	for (int i = 0; i < m_points.size(); i++) {
+		m_points[i] = m_transform.multPoint(m_points[i]);
+	}
 }
 
 Vec3 &Face::getPoint(int id) const
