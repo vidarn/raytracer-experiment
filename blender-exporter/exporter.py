@@ -2,6 +2,7 @@ import bpy
 import ctypes
 import os
 import subprocess
+import fcntl
 
 class Matrix:
     def __init__(self,matrix):
@@ -88,11 +89,23 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                 obj.to_stream(stream)
             stream.close()
             process = subprocess.Popen(self.path_to_executable, stdout = subprocess.PIPE)
+            last_image_update = os.stat(self.image_path).st_mtime_ns
+            while process.poll() == None:
+                image_update = os.stat(self.image_path).st_mtime_ns
+                if image_update != last_image_update:
+                    self.update_image()
+                    last_image_update = image_update
+            self.update_image()
+            
+        def update_image(self):
             result =self.begin_result(0,0,512,512)
             lay = result.layers[0]
+            f = open(self.image_path)
+            fcntl.lockf(f,fcntl.LOCK_SH)
             lay.load_from_file(self.image_path)
+            fcntl.lockf(f,fcntl.LOCK_UN)
+            f.close()
             self.end_result(result)
-            print("done!")
                 
         def __del__(self):
             pass

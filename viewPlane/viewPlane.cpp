@@ -1,5 +1,10 @@
 #include "viewPlane.h"
 #include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY)
 {
@@ -12,6 +17,10 @@ ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY)
     m_size[1] = sizeY;
     m_pixels.reserve(m_resolution[0]*m_resolution[1]);
     m_pixels.resize(m_resolution[0]*m_resolution[1]);
+    RGBA defaultPixel(0.0f,0.0f,0.0f,1.0f);
+    for(int i=0;i<m_resolution[0]*m_resolution[1];i++){
+        m_pixels[i] = defaultPixel;
+    }
 }
 
 Ray ViewPlane::getPixelRay(int index, Point sample)
@@ -39,6 +48,14 @@ void ViewPlane::setPixelValue(int index, RGBA color)
 
 void ViewPlane::saveToTiff(const char *filename)
 {
+    struct flock fl;
+    fl.l_type   = F_WRLCK;
+    fl.l_whence = SEEK_SET;
+    fl.l_start  = 0;
+    fl.l_len    = 0;
+    fl.l_pid    = getpid();
+    int fd = open(filename,O_WRONLY);
+    fcntl(fd, F_SETLKW, &fl);
     TIFF* out = TIFFOpen(filename, "w");
     int sampleperpixel = 4;
     char *image=new char [m_resolution[0]*m_resolution[1]*sampleperpixel];
@@ -74,6 +91,9 @@ void ViewPlane::saveToTiff(const char *filename)
     }
 
     TIFFClose(out);
+    fl.l_type   = F_UNLCK;
+    fcntl(fd, F_SETLK, &fl);
+    close(fd);
 }
 
 std::ostream& operator<<(std::ostream &out, ViewPlane &vp)

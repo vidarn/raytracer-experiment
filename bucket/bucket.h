@@ -3,6 +3,7 @@
 #include "../viewPlane/viewPlane.h"
 #include "../scene/scene.h"
 #include "../sampler/sampler.h"
+#include <vector>
 
 class Bucket
 {
@@ -19,6 +20,8 @@ class Bucket
 		int m_endPixel[2];
         int m_width;
         bool m_done;
+        int m_outlineSize;
+        std::vector<RGBA> m_pixels;
 };
 
 #endif
