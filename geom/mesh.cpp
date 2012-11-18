@@ -8,7 +8,6 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
     m_material = mat;
     int num_verts;
     stream.read( reinterpret_cast<char*>( &num_verts ), sizeof num_verts );
-    std::cout << "numVerts: " << num_verts << std::endl;
     float pos[3];
     for(int i=0; i<num_verts; i++){
         for(int j=0; j<3; j++){
@@ -21,7 +20,6 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
     }
     int num_triangles;
     stream.read( reinterpret_cast<char*>( &num_triangles ), sizeof num_triangles );
-    std::cout << "numTriangles: " << num_triangles << std::endl;
     for(int i=0; i<num_triangles; i++){
         int pointIds[3];
         for(int j=0; j<3; j++){
@@ -94,7 +92,6 @@ void Mesh::addToNormal(int id, Vec3 normal)
 
 void Mesh::applyTransformation()
 {
-	std::cout << m_transform << std::endl;
 	for (int i = 0; i < m_points.size(); i++) {
 		m_points[i] = m_transform.multPoint(m_points[i]);
 	}

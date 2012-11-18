@@ -5,10 +5,12 @@
 class PointLight: public Light
 {
 	public:
-		PointLight(float strength, Matrix4x4 transform):Light(strength,transform){};
-        virtual float computeStrength(Vec3 pos);
-        virtual Vec3 computeDirection(Vec3 pos);
+		PointLight(std::ifstream &stream, Matrix4x4 transform);
+		PointLight(float strength, Matrix4x4 transform);
+        virtual float computeStrength(Vec3 &pos);
+        virtual Vec3 computeDirection(Vec3 &pos);
 	private:
+        Vec3 m_point;
 };
 
 #endif

@@ -66,6 +66,18 @@ class Mesh(GeometricObject):
             for i in triangle:
                 a = ctypes.c_int(i)
                 stream.write(bytes(a))
+                
+class PointLight(GeometricObject):
+    def __init__(self,light,matrix):
+        self.set_matrix(matrix)
+        self.strength = light.energy
+        
+    def to_stream(self,stream):
+        type = ctypes.c_int(3)
+        stream.write(bytes(type))
+        self.matrix.to_stream(stream)
+        strength = ctypes.c_float(self.strength)
+        stream.write(bytes(strength))
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
         bl_idname = 'TEST'
@@ -78,10 +90,14 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             self.camera_matrix.invert()
             self.objects = []
             for obj in bpy.data.objects:
+                m = Matrix(self.camera_matrix * obj.matrix_world)
                 if obj.type == 'MESH':
-                    m = Matrix(self.camera_matrix * obj.matrix_world)
                     s = Mesh(obj.data,m)
                     self.objects.append(s)
+                if obj.type == 'LAMP':
+                    print("light!")
+                    l = PointLight(obj.data,m)
+                    self.objects.append(l)
         def render(self,scene):
             self.image_path = "/tmp/out.tif"
             stream = open("/tmp/test.scn","wb")

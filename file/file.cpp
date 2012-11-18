@@ -11,7 +11,7 @@ File::File(const char *filename)
     m_filename[strlen(filename)] = '\0';
 }
 
-void File::read(std::vector<GeometricObject *> &objects)
+void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights)
 {
     std::ifstream stream;
     stream.open(m_filename);
@@ -20,11 +20,11 @@ void File::read(std::vector<GeometricObject *> &objects)
         stream.read( reinterpret_cast<char*>( &type ), sizeof type );
         if(stream.good()){
             Matrix4x4 transform(stream);
-            std::cout << transform << std::endl;
             RGBA col = RGBA(0.8,0.2,0.1,1.0);
             Material *mat = new Material(col);
             Sphere *sphere;
             Mesh *mesh;
+            PointLight *pointLight;
             switch(type){
                 case 1:
                     std::cout << "Sphere!\n";
@@ -36,6 +36,10 @@ void File::read(std::vector<GeometricObject *> &objects)
                     mesh = new Mesh(stream, transform, mat);
                     objects.push_back(mesh);
                     break;
+                case 3:
+                    std::cout << "PointLight\n";
+                    pointLight = new PointLight(stream,transform);
+                    lights.push_back(pointLight);
             }
         }
     }

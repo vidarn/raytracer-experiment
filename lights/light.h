@@ -5,14 +5,13 @@
 class Light
 {
     public:
-        Light(float strength, Matrix4x4 transform);
+        Light(){};
+        Light(float strength);
         float getLightStrength(Vec3 pos);
         Vec3 getLightDirection(Vec3 pos);
-        virtual float computeStrength(Vec3 pos) = 0;
-        virtual Vec3 computeDirection(Vec3 pos) = 0;
-    private:
-        Matrix4x4 m_transform;
-        Matrix4x4 m_invTransform;
+        virtual float computeStrength(Vec3 &pos) = 0;
+        virtual Vec3 computeDirection(Vec3 &pos) = 0;
+    protected:
         float m_strength;
 };
 

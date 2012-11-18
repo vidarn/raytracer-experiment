@@ -1,13 +1,27 @@
 #include "point.h"
 
-float PointLight::computeStrength(Vec3 pos)
+PointLight::PointLight(std::ifstream &stream, Matrix4x4 transform)
 {
-	return 1.0;
+    m_point = Vec3(0.0f,0.0f,0.0f);
+    m_point = transform.multPoint(m_point);
+    stream.read( reinterpret_cast<char *>( &m_strength), sizeof m_strength);
 }
 
-Vec3 PointLight::computeDirection(Vec3 pos)
+PointLight::PointLight(float strength, Matrix4x4 transform)
+:Light(strength)
 {
-	Vec3 dir = pos;
-    dir.invert();
-	return dir;
+    m_point = Vec3(0.0f,0.0f,0.0f);
+    m_point = transform.multPoint(m_point);
+}
+
+float PointLight::computeStrength(Vec3 &pos)
+{
+	return m_strength;
+}
+
+Vec3 PointLight::computeDirection(Vec3 &pos)
+{
+    Vec3 ret = (m_point - pos);
+    ret.normalize();
+	return ret;
 }
