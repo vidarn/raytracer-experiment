@@ -6,7 +6,7 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
         m_startPixel[i] = startPixel[i];
         m_endPixel[i] = endPixel[i];
     }
-    m_sampler = new Sampler(2);
+    m_sampler = new Sampler(1);
     m_done = false;
     m_outlineSize = 5;
 }

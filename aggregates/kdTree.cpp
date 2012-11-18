@@ -115,7 +115,7 @@ void KDTreeInteriorNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
                 }
             }
             else{
-                nearNode->hit(ray,sr,tHit,tHit);
+                nearNode->hit(ray,sr,tMin,tMax);
             }
         }
     }

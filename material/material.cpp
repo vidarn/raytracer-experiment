@@ -1,11 +1,12 @@
 #include "material.h"
+#include "../scene/scene.h"
 
 void Material::setColor(RGBA color)
 {
 	m_color = color;
 }
 
-RGBA Material::shade(ShadeRec shadeRec, Light *light)
+RGBA Material::shade(ShadeRec shadeRec, Light *light, Scene *scene)
 {
 	RGBA col;
 	Lambert lambert;
@@ -25,5 +26,14 @@ RGBA Material::shade(ShadeRec shadeRec, Light *light)
     shade *= lightStrength;
 	specular_col *= shade;
 	col = col + specular_col;
+
+    float delta = 0.0001f;
+    Vec3 tmp = lightDirection * delta;
+    hitPos += tmp;
+    Ray ray(hitPos,lightDirection);
+    ray.m_depth = 5;
+    float shadow = scene->traceShadow(ray);
+    col *= shadow;
+
 	return col;
 }

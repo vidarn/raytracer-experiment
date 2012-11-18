@@ -8,7 +8,7 @@ void Tracer::render()
 {
 	std::vector<Bucket *> buckets;
     int numPixels = m_viewPlane->getNumPixels();
-    int numBuckets[2] = {5,5};
+    int numBuckets[2] = {8,8};
     int numTotalBuckets = numBuckets[0] * numBuckets[1];
 	int pixelsPerBucket[2];
     pixelsPerBucket[0] = ceil(float(m_viewPlane->getWidth())/float(numBuckets[0]));
