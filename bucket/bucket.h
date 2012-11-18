@@ -2,7 +2,8 @@
 #define __BUCKET_H__
 #include "../viewPlane/viewPlane.h"
 #include "../scene/scene.h"
-#include "../sampler/sampler.h"
+#include "../sampler/randomSampler.h"
+#include "../sampler/uniformSampler.h"
 #include <vector>
 
 class Bucket
@@ -19,6 +20,8 @@ class Bucket
 		int m_startPixel[2];
 		int m_endPixel[2];
         int m_width;
+		int m_numMinSamples;
+		int m_numMaxSamples;
         bool m_done;
         int m_outlineSize;
         std::vector<RGBA> m_pixels;

@@ -6,9 +6,11 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
         m_startPixel[i] = startPixel[i];
         m_endPixel[i] = endPixel[i];
     }
-    m_sampler = new Sampler(1);
     m_done = false;
     m_outlineSize = 5;
+    m_numMinSamples = 4;
+    m_numMaxSamples = 8;
+    m_sampler = new RandomSampler();
 }
 
 Bucket::~Bucket()
@@ -45,7 +47,7 @@ void Bucket::render()
     for(int y=m_startPixel[1]; y<m_endPixel[1]; y++){
         for(int x=m_startPixel[0]; x<m_endPixel[0]; x++){
             int i = x+y*m_width;
-            int numSamples = m_sampler->getNumSamples();
+            int numSamples = m_numMinSamples;
             float invNumSamples = 1.0/(float)numSamples;
             RGBA color;
             for(int j=0; j<numSamples; j++){
