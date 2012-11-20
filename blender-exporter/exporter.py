@@ -104,7 +104,7 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             for obj in self.objects:
                 obj.to_stream(stream)
             stream.close()
-            process = subprocess.Popen(self.path_to_executable, stdout = subprocess.PIPE)
+            process = subprocess.Popen(self.path_to_executable, stdout = None)
             last_image_update = os.stat(self.image_path).st_mtime_ns
             while process.poll() == None:
                 image_update = os.stat(self.image_path).st_mtime_ns

@@ -10,6 +10,22 @@ AABoundingBox::AABoundingBox(GeometricObject *object)
 	m_object->getBounds(m_min, m_max);
 }
 
+AABoundingBox::AABoundingBox()
+{
+    clear();
+}
+
+void AABoundingBox::extend(GeometricObject *object)
+{
+	float min[3];
+	float max[3];
+	object->getBounds(min,max);
+	for(int i = 0; i < 3; i++){
+		m_min[i] = min[i]<m_min[i]?min[i]:m_min[i];
+		m_max[i] = max[i]>m_max[i]?max[i]:m_max[i];
+	}
+}
+
 void AABoundingBox::getBounds(float min[3], float max[3]) const
 {
     for (int i = 0; i < 3; i++) {
@@ -55,4 +71,34 @@ void AABoundingBox::hit(Ray &ray, ShadeRec &sr) const
 	if(testBBox(ray, tmin, tmax)){
 		m_object->hit(ray,sr);
 	}
+}
+
+int AABoundingBox::getMaximumExtent()
+{
+	int maxAxis = 0;
+	for(int i=1; i<3;i ++){
+		maxAxis = (m_max[i] - m_min[i]) > (m_max[maxAxis] - m_min[maxAxis]) ? i : maxAxis;
+	}
+	return maxAxis;
+}
+
+void AABoundingBox::clear()
+{
+	m_object = NULL;
+	for(int i = 0; i < 3; i++){
+		m_min[i] =  FLT_MAX;
+		m_max[i] = -FLT_MAX;
+	}
+}
+
+float AABoundingBox::surfaceArea()
+{
+    Vec3 d(m_max[0]-m_min[0],m_max[1]-m_min[1],m_max[2]-m_min[2]);
+    return 2.0f * (d[0] * d[1] + d[0] * d[2] + d[1] * d[2]);
+}
+
+Vec3 AABoundingBox::diagonalVec()
+{
+    Vec3 d(m_max[0]-m_min[0],m_max[1]-m_min[1],m_max[2]-m_min[2]);
+    return d;
 }

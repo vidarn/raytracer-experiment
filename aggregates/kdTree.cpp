@@ -1,5 +1,7 @@
 #include "kdTree.h"
 #include <cfloat>
+#include <algorithm>
+#include <cstdlib>
 
 void KDTree::build(std::vector<GeometricObject *> objects)
 {
@@ -28,42 +30,125 @@ void KDTree::build(std::vector<GeometricObject *> objects)
     for(int i=0; i<m_objects.size();i++){
         overlappingObjects.push_back(i);
     }
-    buildNode(overlappingObjects,bounds,m_maxDepth,0);
+    for(int i=0; i<3; i++){
+        m_boundEdges[i] = new BoundEdge[2*m_objects.size()];
+    }
+    std::cout << "started building tree!\n";
+    buildNode(overlappingObjects,bounds,m_maxDepth,0,m_bounds);
+    std::cout << "tree built!\n";
 }
 
-void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, int depth, char axis)
+void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, int depth, char axis, AABoundingBox totalBounds)
 {
     if(objects.size() <= m_maxPrims || depth == 0){
         KDTreeLeafNode *leafNode = new KDTreeLeafNode(objects,this);
         m_nodes.push_back(leafNode);
     }
     else{
-        // TODO: better calculation of split position
-        float splitPosition;
-        float min[3], max[3];
-        bounds[objects[objects.size()/2]].getBounds(min,max);
-        splitPosition = (min[axis] + max[axis])*0.5;
-        KDTreeInteriorNode *interiorNode = new KDTreeInteriorNode(axis,splitPosition,this);
+        int splitPosition;
+        axis = findSplitAxis(objects,bounds,totalBounds);
+        KDTreeInteriorNode *interiorNode = new KDTreeInteriorNode(this);
+        int numRetries = 0;
+        while(numRetries < 3){
+            splitPosition = findSplitPos(objects,bounds,totalBounds,axis);
+            if(splitPosition == -1){
+                std::cout << " retry\n";
+                numRetries++;
+                axis = (axis+1)%3;
+            }
+            else{
+                numRetries = 10;
+            }
+        }
+        if(splitPosition == -1){
+            std::cout << "Could not find good split!\n";
+            splitPosition = objects.size();
+        }
         interiorNode->setDepth(depth);
         m_nodes.push_back(interiorNode);
         std::vector<int> lowerObjects;
         std::vector<int> upperObjects;
-        for (int i = 0; i < objects.size(); i++) {
-            bounds[objects[i]].getBounds(min,max);
-            if(min[axis] <= splitPosition){
-                lowerObjects.push_back(objects[i]);
-            }
-            if(max[axis] >= splitPosition){
-                upperObjects.push_back(objects[i]);
+        AABoundingBox lowerBounds;
+        AABoundingBox upperBounds;
+        for (int i = 0; i < splitPosition; i++) {
+            if(m_boundEdges[axis][i].m_start){
+                lowerObjects.push_back(m_boundEdges[axis][i].m_primNum);
+                lowerBounds.extend(&bounds[m_boundEdges[axis][i].m_primNum]);
             }
         }
-        char nextAxis = (axis+1)%3;
+        for (int i = splitPosition+1; i < objects.size() * 2; i++){
+            if(!m_boundEdges[axis][i].m_start){
+                upperObjects.push_back(m_boundEdges[axis][i].m_primNum);
+                upperBounds.extend(&bounds[m_boundEdges[axis][i].m_primNum]);
+            }
+        }
         int nextDepth = depth-1;
+        interiorNode->setAxis(axis);
+        interiorNode->setPosition(m_boundEdges[axis][splitPosition].m_pos);
         interiorNode->setLowerChildIndex(m_nodes.size());
-        buildNode(lowerObjects,bounds,nextDepth,nextAxis);
+        buildNode(lowerObjects,bounds,nextDepth,0,lowerBounds);
         interiorNode->setUpperChildIndex(m_nodes.size());
-        buildNode(upperObjects,bounds,nextDepth,nextAxis);
+        buildNode(upperObjects,bounds,nextDepth,0,upperBounds);
     }
+}
+
+char KDTree::findSplitAxis(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, AABoundingBox &totalBounds)
+{
+    return totalBounds.getMaximumExtent();
+}
+
+int KDTree::findSplitPos(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, AABoundingBox &totalBounds, char axis)
+{
+    float min[3], max[3];
+    for(int i = 0; i < objects.size(); i++){
+        bounds[objects[i]].getBounds(min,max);
+        m_boundEdges[axis][i*2].m_primNum = objects[i];
+        m_boundEdges[axis][i*2].m_start = true;
+        m_boundEdges[axis][i*2].m_pos = min[axis];
+        m_boundEdges[axis][i*2+1].m_primNum = objects[i];
+        m_boundEdges[axis][i*2+1].m_start = false;
+        m_boundEdges[axis][i*2+1].m_pos = max[axis];
+    }
+    std::sort(&m_boundEdges[axis][0], &m_boundEdges[axis][objects.size()*2]);
+
+    int bestOffset = -1;
+    float bestCost = INFINITY;
+    float totalSA = totalBounds.surfaceArea();
+    float invTotalSA = 1.0f / totalSA;
+    Vec3 d = totalBounds.diagonalVec();
+
+    int nBelow = 0;
+    int nAbove = objects.size();
+    for( int i=0; i < 2*objects.size(); i++){
+        BoundEdge *edge = &m_boundEdges[axis][i];
+        if(!edge->m_start){
+            nAbove--;
+        }
+        float pos = edge->m_pos;
+        if(pos > totalBounds.min(axis) && pos < totalBounds.max(axis)){
+            int otherAxis0 = (axis + 1)%3;
+            int otherAxis1 = (axis + 2)%3;
+            float belowSA = 2.0f * (d[otherAxis0] * d[otherAxis1] + 
+                            (pos - totalBounds.min(axis)) *
+                            (d[otherAxis0] + d[otherAxis1]));
+            float aboveSA = 2.0f * (d[otherAxis0] * d[otherAxis1] + 
+                            (totalBounds.max(axis) - pos) *
+                            (d[otherAxis0] + d[otherAxis1]));
+            float probBelow = belowSA * invTotalSA;
+            float probAbove = aboveSA * invTotalSA;
+            float emptyBonus = (nAbove == 0 || nBelow == 0) ? m_emptyBonus : 0.0f;
+            float cost = m_traversalCost + m_intersectCost * (1.0f - emptyBonus) *
+                            (probBelow * nBelow + probAbove * nAbove);
+            if(cost < bestCost){
+                bestCost = cost;
+                bestOffset = i;
+            }
+        }
+        if(edge->m_start){
+            nBelow++;
+        }
+    }
+    return bestOffset;
 }
 
 void KDTree::hit(Ray &ray, ShadeRec &sr) const
@@ -163,4 +248,15 @@ void KDTreeLeafNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
             }
         }
     }
+}
+
+BoundEdge::BoundEdge()
+{}
+
+bool BoundEdge::operator<(const BoundEdge &other) const
+{
+    if(m_pos == other.m_pos){
+        return(m_start && !other.m_start);
+    }
+    return m_pos < other.m_pos;
 }
