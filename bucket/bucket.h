@@ -14,6 +14,8 @@ class Bucket
         bool isDone(){return m_done;};
 		void render();
 	private:
+		void sample(int numSamples, int pixelId, std::vector<RGBA> &samples);
+		float getVariance(std::vector<RGBA> &samples);
 		ViewPlane *m_viewPlane;
 		Scene *m_scene;
 		Sampler *m_sampler;

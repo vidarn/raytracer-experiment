@@ -14,13 +14,14 @@ class RGBA
 		float g(){return m_col[1];};
 		float b(){return m_col[2];};
 		float a(){return m_col[3];};
-		RGBA& operator+=(RGBA &other);
+		RGBA& operator+=(const RGBA &other);
 		RGBA operator+(RGBA &other);
 		RGBA& operator-=(RGBA &other);
 		RGBA operator-(RGBA &other);
 		RGBA& operator*=(float &other);
 		RGBA operator*(float &other) const;
 		void clamp(float val=1.0);
+		float value();
 
 		friend std::ostream& operator<<(std::ostream &out, RGBA &rgba);
 	private:

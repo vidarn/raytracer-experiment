@@ -8,8 +8,8 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
     }
     m_done = false;
     m_outlineSize = 5;
-    m_numMinSamples = 4;
-    m_numMaxSamples = 8;
+    m_numMinSamples = 3;
+    m_numMaxSamples = 16;
     m_sampler = new RandomSampler();
 }
 
@@ -46,16 +46,22 @@ void Bucket::render()
     }
     for(int y=m_startPixel[1]; y<m_endPixel[1]; y++){
         for(int x=m_startPixel[0]; x<m_endPixel[0]; x++){
-            int i = x+y*m_width;
+            int pixelId = x+y*m_width;
             int numSamples = m_numMinSamples;
-            float invNumSamples = 1.0/(float)numSamples;
+			std::vector<RGBA> samples;
+			sample(numSamples, pixelId, samples);
+			if(getVariance(samples) > 0.002f){
+				numSamples = m_numMaxSamples - m_numMinSamples;
+				sample(numSamples, pixelId, samples);
+			}
             RGBA color;
-            for(int j=0; j<numSamples; j++){
-                Vec3 sample = m_sampler->getSquareSample();
-                Ray ray = m_viewPlane->getPixelRay(i,sample);
-                RGBA tmp = m_scene->trace(ray)*invNumSamples;
-                color += tmp;
-            }
+            float invNumSamples = 1.0/(float)samples.size();
+			for(int i=0; i<samples.size(); i++){
+				color += samples[i]*invNumSamples;
+			}
+			if(getVariance(samples) > 0.002f){
+				//color = RGBA(1.0f,1.0f,1.0f,1.0f);
+			}
             m_pixels.push_back(color);
         }
     }
@@ -68,4 +74,31 @@ void Bucket::render()
         }
     }
     m_done = true;
+}
+
+void Bucket::sample(int numSamples, int pixelId, std::vector<RGBA> &samples)
+{
+	for(int i=0; i<numSamples; i++){
+		Vec3 tmp_sample = m_sampler->getSquareSample();
+		Ray ray = m_viewPlane->getPixelRay(pixelId,tmp_sample);
+		samples.push_back(m_scene->trace(ray));
+	}
+}
+
+float Bucket::getVariance(std::vector<RGBA> &samples)
+{
+	float mean = 0;
+	for( int i = 0; i < samples.size(); i++){
+		mean += samples[i].value();
+	}
+	mean = mean/samples.size();
+	float accum = 0;
+	for( int i = 0; i < samples.size(); i++){
+		float tmp = samples[i].value() - mean;
+		accum += tmp*tmp;
+	}
+	accum = accum/(samples.size()-1);
+	accum = sqrtf(accum);
+	//std::cout << "accum: " << accum << std::endl;
+	return accum;
 }

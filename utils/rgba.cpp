@@ -1,6 +1,6 @@
 #include "rgba.h"
 
-RGBA& RGBA::operator+=(RGBA &other)
+RGBA& RGBA::operator+=(const RGBA &other)
 {
 	m_col[0] += other.m_col[0];
 	m_col[1] += other.m_col[1];
@@ -53,6 +53,11 @@ void RGBA::clamp(float val)
 	for (int i = 0; i < 4; i++) {
 		m_col[i] = m_col[i] < val ? m_col[i] : val;
 	}
+}
+
+float RGBA::value()
+{
+	return (m_col[0] + m_col[1] + m_col[2] ) / 3.0f;
 }
 
 std::ostream& operator<<(std::ostream &out, RGBA &rgba)
