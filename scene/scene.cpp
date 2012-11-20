@@ -1,9 +1,7 @@
 #include "scene.h"
 #include "../geom/sphere.h"
 #include "../geom/plane.h"
-#include "../geom/meshReaders/objReader.h"
 #include "../aggregates/aaBoundingBox.h"
-#include "../aggregates/collection.h"
 #include "../utils/matrix4x4.h"
 #include "../file/file.h"
 #include <cfloat>
@@ -15,26 +13,23 @@ Scene::~Scene()
 
 void Scene::build()
 {
+	std::vector<GeometricObject *> objects;
     File file("/tmp/test.scn");
-    file.read(m_objects, m_lights);
+    file.read(objects, m_lights);
+	std::vector<Triangle *> triangles;
+	for(int i=0; i<objects.size();i++){
+		objects[i]->refine(triangles);
+	}
+	std::cout << "num triangles: " << triangles.size() << std::endl;
+	m_tree.build(triangles);
 }
 
 RGBA Scene::trace(Ray &ray)
 {
 	RGBA col;
-    int numObjects = m_objects.size();
     float minT = FLT_MAX;
     ShadeRec shadeRec;
-	for (int i = 0; i < numObjects; i++) {
-		ShadeRec sr;
-        m_objects[i]->hit(ray,sr);
-		if(sr.getHit()){
-            if(sr.getHitT() < minT){
-                minT = sr.getHitT();
-                shadeRec = sr;
-            }
-		}
-	}
+	m_tree.hit(ray,shadeRec);
     if(shadeRec.getHit())
     {
         Vec3 hitPos = ray.getPointAtPos(shadeRec.getHitT());
@@ -52,19 +47,9 @@ RGBA Scene::trace(Ray &ray)
 
 float Scene::traceShadow(Ray &ray)
 {
-    int numObjects = m_objects.size();
     float minT = FLT_MAX;
     ShadeRec shadeRec;
-	for (int i = 0; i < numObjects; i++) {
-		ShadeRec sr;
-        m_objects[i]->hit(ray,sr);
-		if(sr.getHit()){
-            if(sr.getHitT() < minT){
-                minT = sr.getHitT();
-                shadeRec = sr;
-            }
-		}
-	}
+	m_tree.hit(ray,shadeRec);
     if(shadeRec.getHit()){
         return 0.0f;
     }
@@ -75,9 +60,5 @@ float Scene::traceShadow(Ray &ray)
 
 std::vector<GeometricObject *> Scene::getObjects()
 {
-    std::vector<GeometricObject *> objects;
-    for(int i=0;i<m_objects.size();i++){
-        objects.push_back(m_objects[i]);
-    }
-    return objects;
+    return m_objects;
 }

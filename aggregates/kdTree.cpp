@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cstdlib>
 
-void KDTree::build(std::vector<GeometricObject *> objects)
+void KDTree::build(std::vector<Triangle *> objects)
 {
     for (int a = 0; a < 3; a++) {
         m_min[a] = FLT_MAX;
@@ -17,7 +17,8 @@ void KDTree::build(std::vector<GeometricObject *> objects)
     float min[3], max[3];
     std::vector<AABoundingBox> bounds;
     for(int i =0; i<m_objects.size();i++){
-        AABoundingBox b = AABoundingBox(m_objects[i]);
+        AABoundingBox b;
+        b.extend(m_objects[i]);
         b.getBounds(min,max);
         bounds.push_back(b);
         for (int a = 0; a < 3; a++) {
@@ -25,7 +26,9 @@ void KDTree::build(std::vector<GeometricObject *> objects)
             m_max[a] = max[a] > m_max[a] ? max[a] : m_max[a];
         }
     }
-    m_bounds = new AABoundingBox(this);
+    m_bounds = new AABoundingBox();
+    m_bounds->setMin(m_min);
+    m_bounds->setMax(m_max);
     std::vector<int> overlappingObjects;
     for(int i=0; i<m_objects.size();i++){
         overlappingObjects.push_back(i);
@@ -34,11 +37,11 @@ void KDTree::build(std::vector<GeometricObject *> objects)
         m_boundEdges[i] = new BoundEdge[2*m_objects.size()];
     }
     std::cout << "started building tree!\n";
-    buildNode(overlappingObjects,bounds,m_maxDepth,0,m_bounds);
+    buildNode(overlappingObjects,bounds,m_maxDepth,*m_bounds);
     std::cout << "tree built!\n";
 }
 
-void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, int depth, char axis, AABoundingBox totalBounds)
+void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, int depth,  AABoundingBox totalBounds)
 {
     if(objects.size() <= m_maxPrims || depth == 0){
         KDTreeLeafNode *leafNode = new KDTreeLeafNode(objects,this);
@@ -46,7 +49,7 @@ void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bo
     }
     else{
         int splitPosition;
-        axis = findSplitAxis(objects,bounds,totalBounds);
+        char axis = findSplitAxis(objects,bounds,totalBounds);
         KDTreeInteriorNode *interiorNode = new KDTreeInteriorNode(this);
         int numRetries = 0;
         while(numRetries < 3){
@@ -73,22 +76,22 @@ void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bo
         for (int i = 0; i < splitPosition; i++) {
             if(m_boundEdges[axis][i].m_start){
                 lowerObjects.push_back(m_boundEdges[axis][i].m_primNum);
-                lowerBounds.extend(&bounds[m_boundEdges[axis][i].m_primNum]);
+                lowerBounds.extend(m_objects[m_boundEdges[axis][i].m_primNum]);
             }
         }
         for (int i = splitPosition+1; i < objects.size() * 2; i++){
             if(!m_boundEdges[axis][i].m_start){
                 upperObjects.push_back(m_boundEdges[axis][i].m_primNum);
-                upperBounds.extend(&bounds[m_boundEdges[axis][i].m_primNum]);
+                upperBounds.extend(m_objects[m_boundEdges[axis][i].m_primNum]);
             }
         }
         int nextDepth = depth-1;
         interiorNode->setAxis(axis);
         interiorNode->setPosition(m_boundEdges[axis][splitPosition].m_pos);
         interiorNode->setLowerChildIndex(m_nodes.size());
-        buildNode(lowerObjects,bounds,nextDepth,0,lowerBounds);
+        buildNode(lowerObjects,bounds,nextDepth,lowerBounds);
         interiorNode->setUpperChildIndex(m_nodes.size());
-        buildNode(upperObjects,bounds,nextDepth,0,upperBounds);
+        buildNode(upperObjects,bounds,nextDepth,upperBounds);
     }
 }
 

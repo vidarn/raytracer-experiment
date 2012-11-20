@@ -14,31 +14,13 @@ class Matrix:
         for val in self.values:
             tmp = ctypes.c_float(val)
             stream.write(bytes(tmp))
-
-class GeometricObject:
-    def __init__(self):
-        pass
-    def set_matrix(self,matrix):
-        self.matrix = matrix
         
-class Sphere(GeometricObject):
-    def __init__(self,radius,matrix):
-        self.radius = radius
-        self.set_matrix(matrix)
-        
-    def to_stream(self,stream):
-        type = ctypes.c_int(1)
-        stream.write(bytes(type))
-        self.matrix.to_stream(stream)
-        radius = ctypes.c_float(self.radius)
-        stream.write(bytes(radius))
-        
-class Mesh(GeometricObject):
+class Mesh:
     def __init__(self,mesh,matrix):
-        self.set_matrix(matrix)
         self.points = []
         self.triangles = []
         self.add_mesh_data(mesh)
+        self.matrix = matrix
         
     def add_mesh_data(self,mesh):
         for vert in mesh.vertices:
@@ -51,7 +33,7 @@ class Mesh(GeometricObject):
                 self.triangles.append(a)
             
     def to_stream(self,stream):
-        type = ctypes.c_int(2)
+        type = ctypes.c_int(1)
         stream.write(bytes(type))
         self.matrix.to_stream(stream)
         num_points = ctypes.c_int(len(self.points))
@@ -67,13 +49,13 @@ class Mesh(GeometricObject):
                 a = ctypes.c_int(i)
                 stream.write(bytes(a))
                 
-class PointLight(GeometricObject):
+class PointLight():
     def __init__(self,light,matrix):
-        self.set_matrix(matrix)
+        self.matrix = matrix
         self.strength = light.energy
         
     def to_stream(self,stream):
-        type = ctypes.c_int(3)
+        type = ctypes.c_int(2)
         stream.write(bytes(type))
         self.matrix.to_stream(stream)
         strength = ctypes.c_float(self.strength)

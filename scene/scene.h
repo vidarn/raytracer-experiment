@@ -6,6 +6,7 @@
 #include "../geom/geometricObject.h"
 #include "../lights/directional.h"
 #include "../lights/point.h"
+#include "../aggregates/kdTree.h"
 
 class Scene
 {
@@ -17,7 +18,8 @@ class Scene
         float traceShadow(Ray &ray);
         std::vector<GeometricObject *> getObjects();
 	private:
-		std::vector<GeometricObject*> m_objects;
+		std::vector<GeometricObject *> m_objects;
+		KDTree m_tree;
 		std::vector<Light*> m_lights;
 		RGBA m_bkgColor;
 };

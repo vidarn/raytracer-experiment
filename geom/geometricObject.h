@@ -4,17 +4,18 @@
 #include "../utils/matrix4x4.h"
 #include "../material/material.h"
 #include "../shadeRec/shadeRec.h"
+#include "triangle.h"
 #include <ostream>
+#include <vector>
 
 class GeometricObject
 {
 	public:
-		virtual void hit(Ray &ray, ShadeRec &sr) const = 0;
-		virtual void getBounds(float min[3], float max[3]) const = 0;
 		Material *getMaterial(){return m_material;};
 		Matrix4x4 getTransform(){return m_transform;};
 		void setMaterial(Material *material){m_material = material;};
 		void setTransform(Matrix4x4 transform){m_transform = transform;};
+		virtual void refine(std::vector<Triangle *> &triangles) = 0;
 	protected:
 		Material *m_material;
 		Matrix4x4 m_transform;

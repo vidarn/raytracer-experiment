@@ -1,9 +1,8 @@
 OUT = raytracer
 OBJ = app.o
 OBJ += utils/vec3.o utils/ray.o utils/rgba.o utils/matrix4x4.o
-OBJ += geom/geometricObject.o geom/plane.o geom/sphere.o geom/mesh.o
-OBJ += geom/meshReaders/objReader.o
-OBJ += aggregates/aaBoundingBox.o aggregates/collection.o aggregates/kdTree.o
+OBJ += geom/geometricObject.o geom/mesh.o geom/triangle.o
+OBJ += aggregates/aaBoundingBox.o aggregates/kdTree.o
 OBJ += scene/scene.o
 OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o
@@ -19,7 +18,7 @@ LIB = -ltiff
 $(OUT):$(OBJ)
 	g++ -o $(OUT) $(OBJ) $(FLG) $(LIB)
 
-%.o : %.cpp %.h
+%.o : %.cpp %.h Makefile
 	g++ $(FLG) $(INC) -c $< -o $@
 
 clean:

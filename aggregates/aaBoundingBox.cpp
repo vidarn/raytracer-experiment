@@ -1,25 +1,16 @@
 #include "aaBoundingBox.h"
 #include <cfloat>
 
-AABoundingBox::AABoundingBox(GeometricObject *object)
-	:m_object(object)
-{
-	m_transform = m_object->getTransform();
-	Matrix4x4 tmpTransform;
-	m_object->setTransform(tmpTransform);
-	m_object->getBounds(m_min, m_max);
-}
-
 AABoundingBox::AABoundingBox()
 {
     clear();
 }
 
-void AABoundingBox::extend(GeometricObject *object)
+void AABoundingBox::extend(Triangle *triangle)
 {
 	float min[3];
 	float max[3];
-	object->getBounds(min,max);
+	triangle->getBounds(min,max);
 	for(int i = 0; i < 3; i++){
 		m_min[i] = min[i]<m_min[i]?min[i]:m_min[i];
 		m_max[i] = max[i]>m_max[i]?max[i]:m_max[i];
@@ -65,13 +56,6 @@ bool AABoundingBox::testBBox(Ray &ray, float &retTmin, float &retTmax) const
 	return (retTmin < retTmax && retTmax > 0.0);
 }
 
-void AABoundingBox::hit(Ray &ray, ShadeRec &sr) const
-{
-    float tmin, tmax;
-	if(testBBox(ray, tmin, tmax)){
-		m_object->hit(ray,sr);
-	}
-}
 
 int AABoundingBox::getMaximumExtent()
 {
@@ -84,7 +68,6 @@ int AABoundingBox::getMaximumExtent()
 
 void AABoundingBox::clear()
 {
-	m_object = NULL;
 	for(int i = 0; i < 3; i++){
 		m_min[i] =  FLT_MAX;
 		m_max[i] = -FLT_MAX;
@@ -101,4 +84,18 @@ Vec3 AABoundingBox::diagonalVec()
 {
     Vec3 d(m_max[0]-m_min[0],m_max[1]-m_min[1],m_max[2]-m_min[2]);
     return d;
+}
+
+void AABoundingBox::setMin(float min[3])
+{
+	for(int i = 0; i < 3; i++){
+		m_min[i] = min[i];
+	}
+}
+
+void AABoundingBox::setMax(float max[3])
+{
+	for(int i = 0; i < 3; i++){
+		m_max[i] = max[i];
+	}
 }
