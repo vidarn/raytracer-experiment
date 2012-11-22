@@ -2,24 +2,14 @@
 #include "mesh.h"
 #include <cfloat>
 
-Vec3 &Triangle::getPoint(int id) const
-{
-    return m_owner->getPoint(m_pointIds[id]);
-}
-
-Vec3 &Triangle::getNormal(int id) const
-{
-    return m_owner->getNormal(m_pointIds[id]);
-}
-
 void Triangle::calculateNormal()
 {
-    Vec3 v1 = getPoint(0) - getPoint(1);
-    Vec3 v2 = getPoint(1) - getPoint(2);
-    m_normal = v1.cross(v2);
-    m_normal.normalize();
+    Vec3 v1 = *m_points[0] - *m_points[1];
+    Vec3 v2 = *m_points[1] - *m_points[2];
+    Vec3 tmpNormal = v1.cross(v2);
+    tmpNormal.normalize();
     for (int i = 0; i < 3; i++) {
-        m_owner->addToNormal(m_pointIds[i],m_normal);
+        *(m_normals[i]) += tmpNormal;
     }
 }
 
@@ -29,7 +19,8 @@ void Triangle::getBounds(float min[3], float max[3]) const
         min[i] = FLT_MAX;
         max[i] = -FLT_MAX;
         for (int j = 0; j < 3; j++){
-            float val = getPoint(j)[i];
+            Vec3 * tmpPoint = m_points[j];
+            float val = (*tmpPoint)[i];
             if(val < min[i]){
                 min[i] = val;
             }
@@ -42,9 +33,9 @@ void Triangle::getBounds(float min[3], float max[3]) const
 
 void Triangle::hit(Ray &ray, ShadeRec &sr) const
 {
-    Vec3 &p1 = getPoint(0);
-    Vec3 &p2 = getPoint(1);
-    Vec3 &p3 = getPoint(2);
+    Vec3 &p1 = *m_points[0];
+    Vec3 &p2 = *m_points[1];
+    Vec3 &p3 = *m_points[2];
     Vec3 e1 = p2 - p1;
     Vec3 e2 = p3 - p1;
     Vec3 s1 = ray.m_dir.cross(e2);
@@ -75,13 +66,13 @@ void Triangle::hit(Ray &ray, ShadeRec &sr) const
     sr.setHitT(t);
     Vec3 norVec;
     Vec3 tmpVec;
-    tmpVec = getNormal(0);
+    tmpVec = *m_normals[0];
     tmpVec *= b0;
     norVec += tmpVec;
-    tmpVec = getNormal(1);
+    tmpVec = *m_normals[1];
     tmpVec *= b1;
     norVec += tmpVec;
-    tmpVec = getNormal(2);
+    tmpVec = *m_normals[2];
     tmpVec *= b2;
     norVec += tmpVec;
     norVec.normalize();

@@ -173,8 +173,8 @@ void KDTree::getBounds(float min[3], float max[3]) const
 void KDTreeInteriorNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 {
     if(ray.m_dir[m_axis] != 0.0f){
-        KDTreeNode* nearNode = ray.m_origin[m_axis] < m_position ? getNodeBelow():getNodeAbove();
-        KDTreeNode* farNode  = ray.m_origin[m_axis] < m_position ? getNodeAbove():getNodeBelow();
+        KDTreeNode* nearNode = ray.m_origin[m_axis] < m_position ? m_owner->m_nodes[m_nodeBelowIndex]:m_owner->m_nodes[m_nodeAboveIndex];
+        KDTreeNode* farNode  = ray.m_origin[m_axis] < m_position ? m_owner->m_nodes[m_nodeAboveIndex]:m_owner->m_nodes[m_nodeBelowIndex];
         float tHit = (m_position - ray.m_origin[m_axis])/ray.m_dir[m_axis];
         if(tHit > tMax){
             nearNode->hit(ray,sr,tMin,tMax);
@@ -209,26 +209,12 @@ void KDTreeInteriorNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
     }
     else{
         if(ray.m_origin[m_axis] < m_position){
-            getNodeBelow()->hit(ray,sr,tMin,tMax);
+            m_owner->m_nodes[m_nodeBelowIndex]->hit(ray,sr,tMin,tMax);
         }
         if(ray.m_origin[m_axis] > m_position){
-            getNodeAbove()->hit(ray,sr,tMin,tMax);
+            m_owner->m_nodes[m_nodeAboveIndex]->hit(ray,sr,tMin,tMax);
         }
     }
-}
-
-KDTreeNode *KDTreeInteriorNode::getNodeBelow()
-{
-    KDTreeNode *ret;
-    ret = m_owner->getNode(m_nodeBelowIndex);
-    return ret;
-}
-
-KDTreeNode *KDTreeInteriorNode::getNodeAbove()
-{
-    KDTreeNode *ret;
-    ret = m_owner->getNode(m_nodeAboveIndex);
-    return ret;
 }
 
 KDTreeLeafNode::KDTreeLeafNode(std::vector<int> &objects, KDTree* owner)
@@ -241,9 +227,10 @@ KDTreeLeafNode::KDTreeLeafNode(std::vector<int> &objects, KDTree* owner)
 
 void KDTreeLeafNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 {
+	ShadeRec tmp;
     for(int i=0; i<m_objects.size();i++){
-        ShadeRec tmp;
-        m_owner->getObject(m_objects[i])->hit(ray, tmp);
+		tmp.setHit(false);
+        m_owner->m_objects[m_objects[i]]->hit(ray, tmp);
         if(tmp.getHit()){
             if(tmp.getHitT() <= tMax && tmp.getHitT() >= tMin){
                 tMax = tmp.getHitT();

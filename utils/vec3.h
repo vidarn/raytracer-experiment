@@ -18,9 +18,9 @@ class Vec3
 		void normalize();
 		Vec3 getNormalized();
 		void invert();
-		float x() {return m_d[0];};
-		float y() {return m_d[1];};
-		float z() {return m_d[2];};
+		float& x() {return m_d[0];};
+		float& y() {return m_d[1];};
+		float& z() {return m_d[2];};
 		float distance(Vec3 &other){return (operator-(other)).magnitude();};
 		float& operator[](int id){assert(id < 3 && id>=0);return m_d[id];};
 		Vec3& operator+=(Vec3 &other);

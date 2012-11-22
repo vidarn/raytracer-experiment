@@ -8,9 +8,9 @@ float Vec3::dot(Vec3 &other)
 Vec3 Vec3::cross(Vec3 &rhs)
 {
 	float result[3];
-	result[0] = y()*rhs.z() - z()*rhs.y();
-	result[1] = z()*rhs.x() - x()*rhs.z();
-	result[2] = x()*rhs.y() - y()*rhs.x();
+	result[0] = m_d[1]*rhs.m_d[2] - m_d[2]*rhs.m_d[1];
+	result[1] = m_d[2]*rhs.m_d[0] - m_d[0]*rhs.m_d[2];
+	result[2] = m_d[0]*rhs.m_d[1] - m_d[1]*rhs.m_d[0];
 	return Vec3(result);
 }
 

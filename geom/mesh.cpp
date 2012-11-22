@@ -26,9 +26,12 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
             stream.read( reinterpret_cast<char*>( &(pointIds[j]) ), sizeof pointIds[j] );
         }
         Triangle triangle(this);
-        triangle[0] = pointIds[0];
-        triangle[1] = pointIds[1];
-        triangle[2] = pointIds[2];
+        triangle[0] = &m_points[pointIds[0]];
+        triangle[1] = &m_points[pointIds[1]];
+        triangle[2] = &m_points[pointIds[2]];
+        triangle.setNormal(&m_normals[pointIds[0]],0);
+        triangle.setNormal(&m_normals[pointIds[1]],1);
+        triangle.setNormal(&m_normals[pointIds[2]],2);
 		triangle.setMaterial(m_material);
         addTriangle(triangle);
     }

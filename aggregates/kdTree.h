@@ -14,8 +14,8 @@ class KDTree
         void getBounds(float min[3], float max[3]) const;
 		void hit(Ray &ray, ShadeRec &sr) const;
         void build(std::vector<Triangle *> objects);
-        Triangle* getObject(int i){return m_objects[i];};
-        KDTreeNode* getNode(int i){return m_nodes[i];};
+        std::vector<KDTreeNode *> m_nodes;
+        std::vector<Triangle *> m_objects;
     private:
         void buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, int depth, AABoundingBox totalBounds);
         int findSplitPos(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, AABoundingBox &totalBounds, char axis);
@@ -24,8 +24,6 @@ class KDTree
         BoundEdge *m_boundEdges[3];
         AABoundingBox *m_bounds;
         float m_min[3], m_max[3];
-        std::vector<KDTreeNode *> m_nodes;
-        std::vector<Triangle *> m_objects;
         int m_maxDepth;
         int m_maxPrims;
         static const float m_emptyBonus = 0.0f;
@@ -49,8 +47,6 @@ class KDTreeInteriorNode: public KDTreeNode
         KDTreeInteriorNode(KDTree* owner){m_owner = owner;};
         virtual bool isInterior() const { return true;};
 		virtual void hit(Ray &ray, ShadeRec &sr, float tMin, float tMax);
-        KDTreeNode *getNodeBelow();
-        KDTreeNode *getNodeAbove();
         void setLowerChildIndex(int i){m_nodeBelowIndex = i;};
         void setUpperChildIndex(int i){m_nodeAboveIndex = i;};
         void setDepth(int depth){m_depth = depth;};
