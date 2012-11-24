@@ -13,7 +13,7 @@ OBJ += material/material.o
 OBJ += brdf/brdf.o brdf/lambert.o brdf/phong.o
 OBJ += lights/light.o lights/directional.o lights/point.o
 OBJ += file/file.o
-FLG = -g -pthread
+FLG = -O3 -pthread
 LIB = -ltiff
 $(OUT):$(OBJ)
 	g++ -o $(OUT) $(OBJ) $(FLG) $(LIB)

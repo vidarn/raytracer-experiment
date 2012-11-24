@@ -18,7 +18,6 @@ class Mesh:public GeometricObject
         Vec3 &getNormal(int id){return m_normals[id];};
         void calculateNormals();
         void addToNormal(int id, Vec3 normal);
-		void applyTransformation();
 		virtual void refine(std::vector<Triangle *> &triangles);
     private:
         std::vector<Vec3> m_points;

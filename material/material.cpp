@@ -11,7 +11,7 @@ RGBA Material::shade(ShadeRec shadeRec, Light *light, Scene *scene)
 	RGBA col;
 	Lambert lambert;
 
-	Vec3 hitPos = shadeRec.getHitPos();
+	Vec3 hitPos = shadeRec.m_hitPos;
 	Vec3 lightDirection = light->getLightDirection(hitPos);
     float lightStrength = light->getLightStrength(hitPos);
 	float shade = lambert.shade(shadeRec, lightDirection);
@@ -30,7 +30,8 @@ RGBA Material::shade(ShadeRec shadeRec, Light *light, Scene *scene)
     float delta = 0.0001f;
     Vec3 tmp = lightDirection * delta;
     hitPos += tmp;
-    Ray ray(hitPos,lightDirection);
+    Ray ray(hitPos,lightDirection,true);
+	ray.computePlucker();
     ray.m_depth = 5;
     float shadow = scene->traceShadow(ray);
     col *= shadow;

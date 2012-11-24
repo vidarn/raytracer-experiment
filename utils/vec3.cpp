@@ -1,11 +1,11 @@
 #include "vec3.h"
 
-float Vec3::dot(Vec3 &other)
+float Vec3::dot(const Vec3 &other) const
 {
 	return m_d[0]*other.m_d[0] + m_d[1]*other.m_d[1] + m_d[2]*other.m_d[2];
 }
 
-Vec3 Vec3::cross(Vec3 &rhs)
+Vec3 Vec3::cross(const Vec3 &rhs) const
 {
 	float result[3];
 	result[0] = m_d[1]*rhs.m_d[2] - m_d[2]*rhs.m_d[1];
@@ -48,7 +48,7 @@ void Vec3::invert()
 	}
 }
 
-Vec3& Vec3::operator+=(Vec3 &other)
+Vec3& Vec3::operator+=(const Vec3 &other)
 {
 	m_d[0] += other.m_d[0];
 	m_d[1] += other.m_d[1];
@@ -63,7 +63,7 @@ Vec3 Vec3::operator+(Vec3 &other)
 	return tmp;
 }
 
-Vec3& Vec3::operator-=(Vec3 &other)
+Vec3& Vec3::operator-=(const Vec3 &other)
 {
 	m_d[0] -= other.m_d[0];
 	m_d[1] -= other.m_d[1];
@@ -71,14 +71,14 @@ Vec3& Vec3::operator-=(Vec3 &other)
 	return *this;
 }
 
-Vec3 Vec3::operator-(Vec3 &other)
+Vec3 Vec3::operator-(const Vec3 &other) const
 {
 	Vec3 tmp = *this;
 	tmp -= other;
 	return tmp;
 }
 
-Vec3& Vec3::operator*=(float &other)
+Vec3& Vec3::operator*=(const float &other)
 {
 	m_d[0] *= other;
 	m_d[1] *= other;
@@ -86,7 +86,7 @@ Vec3& Vec3::operator*=(float &other)
 	return *this;
 }
 
-Vec3 Vec3::operator*(float &other)
+Vec3 Vec3::operator*(const float &other) const
 {
 	Vec3 tmp = *this;
 	tmp *= other;

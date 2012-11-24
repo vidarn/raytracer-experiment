@@ -30,10 +30,10 @@ RGBA Scene::trace(Ray &ray)
     float minT = FLT_MAX;
     ShadeRec shadeRec;
 	m_tree.hit(ray,shadeRec);
-    if(shadeRec.getHit())
+    if(shadeRec.m_hit)
     {
-        Vec3 hitPos = ray.getPointAtPos(shadeRec.getHitT());
-        shadeRec.setHitPos(hitPos);
+        shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
+		shadeRec.m_triangle->shadeInfo(ray,shadeRec);
         shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
         for(int i = 0; i < m_lights.size(); i++){
             if(shadeRec.getMaterial() != 0){
@@ -50,12 +50,7 @@ float Scene::traceShadow(Ray &ray)
     float minT = FLT_MAX;
     ShadeRec shadeRec;
 	m_tree.hit(ray,shadeRec);
-    if(shadeRec.getHit()){
-        return 0.0f;
-    }
-    else{
-        return 1.0f;
-    }
+	return !shadeRec.m_hit;
 }
 
 std::vector<GeometricObject *> Scene::getObjects()

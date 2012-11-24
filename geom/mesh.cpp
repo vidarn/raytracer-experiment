@@ -14,6 +14,7 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
             stream.read( reinterpret_cast<char*>( &pos[j] ), sizeof pos[j] );
         }
         Vec3 point(pos);
+        point = m_transform.multPoint(point);
         addPoint(point);
         Vec3 normal;
         addNormal(normal);
@@ -26,16 +27,16 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
             stream.read( reinterpret_cast<char*>( &(pointIds[j]) ), sizeof pointIds[j] );
         }
         Triangle triangle(this);
-        triangle[0] = &m_points[pointIds[0]];
-        triangle[1] = &m_points[pointIds[1]];
-        triangle[2] = &m_points[pointIds[2]];
+        triangle.setPoint(&m_points[pointIds[0]],0);
+        triangle.setPoint(&m_points[pointIds[1]],1);
+        triangle.setPoint(&m_points[pointIds[2]],2);
         triangle.setNormal(&m_normals[pointIds[0]],0);
         triangle.setNormal(&m_normals[pointIds[1]],1);
         triangle.setNormal(&m_normals[pointIds[2]],2);
 		triangle.setMaterial(m_material);
+        triangle.computePlucker();
         addTriangle(triangle);
     }
-	applyTransformation();
     calculateNormals();
 }
 
@@ -52,13 +53,6 @@ void Mesh::calculateNormals()
 void Mesh::addToNormal(int id, Vec3 normal)
 {
     m_normals[id] += normal;
-}
-
-void Mesh::applyTransformation()
-{
-	for (int i = 0; i < m_points.size(); i++) {
-		m_points[i] = m_transform.multPoint(m_points[i]);
-	}
 }
 
 void Mesh::refine(std::vector<Triangle *> &triangles)

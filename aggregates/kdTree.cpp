@@ -198,7 +198,7 @@ void KDTreeInteriorNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
         else{
             if(tHit > 0.0f){
                 nearNode->hit(ray,sr,tMin,tHit);
-                if(!sr.getHit()){
+                if(!sr.m_hit){
                     farNode->hit(ray,sr,tHit,tMax);
                 }
             }
@@ -219,24 +219,20 @@ void KDTreeInteriorNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 
 KDTreeLeafNode::KDTreeLeafNode(std::vector<int> &objects, KDTree* owner)
 {
-    for(int i=0;i<objects.size();i++){
-        m_objects.push_back(objects[i]);
-    }
     m_owner = owner;
+    for(int i=0;i<objects.size();i++){
+        m_objects.push_back(m_owner->m_objects[objects[i]]);
+    }
+	m_numObjects = m_objects.size();
+	if(m_numObjects > 100){
+		std::cout << "num objects:" << m_numObjects << std::endl;
+	}
 }
 
 void KDTreeLeafNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 {
-	ShadeRec tmp;
-    for(int i=0; i<m_objects.size();i++){
-		tmp.setHit(false);
-        m_owner->m_objects[m_objects[i]]->hit(ray, tmp);
-        if(tmp.getHit()){
-            if(tmp.getHitT() <= tMax && tmp.getHitT() >= tMin){
-                tMax = tmp.getHitT();
-                sr = tmp;
-            }
-        }
+    for(int i=0; i<m_numObjects;i++){
+        m_objects[i]->hit(ray, sr);
     }
 }
 

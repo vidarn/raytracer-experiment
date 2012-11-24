@@ -67,7 +67,8 @@ class KDTreeLeafNode: public KDTreeNode
         virtual bool isInterior() const { return false;};
 		virtual void hit(Ray &ray, ShadeRec &sr, float tMin, float tMax);
     private:
-        std::vector<int> m_objects;
+        std::vector<Triangle *> m_objects;
+		int m_numObjects;
 };
 
 class BoundEdge

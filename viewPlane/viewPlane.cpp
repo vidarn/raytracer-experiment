@@ -37,7 +37,8 @@ Ray ViewPlane::getPixelRay(int index, Vec3 sample)
     Vec3 direction(0.0,0.0,-1.0);
     direction = direction;
     origin = origin;
-    Ray ray(origin,direction);
+    Ray ray(origin,direction,false);
+	ray.computePlucker();
     return ray;
 }
 
