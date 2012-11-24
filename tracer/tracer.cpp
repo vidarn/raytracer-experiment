@@ -34,31 +34,47 @@ void Tracer::render()
 		threads.push_back(thread);
     }
     int bucketMap[numThreads];
+    bool borderDrawn[numThreads];
     int currentBucket = 0;
 	for(int i = 0;i < numThreads; i++){
 		pthread_create(&(threads[i]), NULL, renderBucketProcess, (void*)(buckets[currentBucket]));
         bucketMap[i] = currentBucket;
         currentBucket++;
+		borderDrawn[i] = false;
 	}
     int numDoneBuckets = 0;
+	bool updateImage;
     while(numDoneBuckets < numTotalBuckets){
+		updateImage = false;
         for(int i = 0;i < numThreads; i++){
             if(bucketMap[i] != -1){
                 if(buckets[bucketMap[i]]->isDone()){
+					updateImage = true;
                     pthread_join(threads[i],NULL);
                     numDoneBuckets++;
                     std::cout << "bucket " << bucketMap[i] << " done!\n";
-                    m_viewPlane->saveToTiff("/tmp/out.tif");
                     bucketMap[i] = -1;
                     if(currentBucket < numTotalBuckets){
                         pthread_create(&(threads[i]), NULL, renderBucketProcess, (void*)(buckets[currentBucket]));
                         bucketMap[i] = currentBucket;
                         currentBucket++;
+						borderDrawn[i] = false;
                     }
                 }
+				else{
+					if(!borderDrawn[i] && buckets[bucketMap[i]]->borderDrawn()){
+						borderDrawn[i] = true;
+						updateImage = true;
+					}
+				}
             }
         }
-        usleep(10);
+		if(updateImage){
+			m_viewPlane->saveToTiff("/tmp/out.tif");
+		}
+		else{
+			usleep(4);
+		}
     }
     for(int i=0; i<numTotalBuckets; i++){
         delete buckets[i];
