@@ -25,6 +25,7 @@ class Triangle
         int m_maxNormalDir;
         float m_distOrigin;
         float m_plucker[3][6];
+        float m_barry[4];
         Vec3 *m_normals[3];
         Vec3 *m_points[3];
         Mesh* m_owner;

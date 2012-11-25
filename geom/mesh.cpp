@@ -34,10 +34,12 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
         triangle.setNormal(&m_normals[pointIds[1]],1);
         triangle.setNormal(&m_normals[pointIds[2]],2);
 		triangle.setMaterial(m_material);
-        triangle.computePlucker();
         addTriangle(triangle);
     }
     calculateNormals();
+    for(int i=0; i<num_triangles; i++){
+        m_triangles[i].computePlucker();
+    }
 }
 
 void Mesh::calculateNormals()

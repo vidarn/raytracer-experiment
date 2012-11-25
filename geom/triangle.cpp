@@ -53,6 +53,20 @@ void Triangle::computePlucker()
         m_plucker[i][4] = p[2] - q[2];
         m_plucker[i][5] = q[1] - p[1];
     }
+    int x = (m_maxNormalDir+1)%3;
+    int y = (m_maxNormalDir+2)%3;
+    float mat[4];
+    mat[0] = (*m_points[0])[x] - (*m_points[2])[x];
+    mat[1] = (*m_points[1])[x] - (*m_points[2])[x];
+    mat[2] = (*m_points[0])[y] - (*m_points[2])[y];
+    mat[3] = (*m_points[1])[y] - (*m_points[2])[y];
+
+    mat[1] /= mat[0];
+
+    m_barry[0] = 1.0f / mat[0];
+    m_barry[1] = mat[2];
+    m_barry[2] = 1.0f / (mat[3] - (mat[1] * mat[2]));
+    m_barry[3] = mat[1];
 }
 
 void Triangle::hit(Ray &ray, ShadeRec &sr) const
@@ -82,21 +96,11 @@ void Triangle::shadeInfo(Ray &ray, ShadeRec &sr) const
     int y = (m_maxNormalDir+2)%3;
     float b0 = sr.m_hitPos[x] - (*m_points[2])[x];
     float b1 = sr.m_hitPos[y] - (*m_points[2])[y];
-    float mat[4];
-    mat[0] = (*m_points[0])[x] - (*m_points[2])[x];
-    mat[1] = (*m_points[1])[x] - (*m_points[2])[x];
-    mat[2] = (*m_points[0])[y] - (*m_points[2])[y];
-    mat[3] = (*m_points[1])[y] - (*m_points[2])[y];
+    b0 *= m_barry[0];
+    b1 -= b0 * m_barry[1];
+    b1 *= m_barry[2];
+    b0 -= b1*m_barry[3];
 
-    b0 /= mat[0];
-    mat[1] /= mat[0];
-
-    b1 -= b0 * mat[2];
-    mat[3] -= mat[1] * mat[2];
-
-    b1 /= mat[3];
-
-    b0 -= b1*mat[1];
     sr.setMaterial(m_material);
     Vec3 normal = *(m_normals[0]) * b0;
     normal +=*(m_normals[1]) * b1;
