@@ -10,23 +10,23 @@
 class ViewPlane
 {
     public:
-        ViewPlane(int resX, int resY, float sizeX, float sizeY);
-        ViewPlane(int resX, int resY, float size[2]){ ViewPlane(resX,resY, size[0], size[1]);};
-        ViewPlane(int res[2], float size[2]){ ViewPlane(res[0],res[1], size[0], size[1]);};
-        ViewPlane(int res[2], float sizeX, float sizeY){ ViewPlane(res[0],res[1], sizeX, sizeY);};
+        ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *filename);
         ~ViewPlane(){};
         int getNumPixels(){return m_pixels.size();};
         int getWidth(){return m_resolution[0];};
         int getHeight(){return m_resolution[1];};
         Ray getPixelRay(int index, Vec3 sample);
         void setPixelValue(int index, RGBA color);
-        void saveToTiff(const char *filename);
+        void saveToTiff();
+		void setFov(float fov);
 
 		friend std::ostream& operator<<(std::ostream &out, ViewPlane &vp);
     private:
         int m_resolution[2];
         std::vector<RGBA> m_pixels;
         float m_size[2];
+		Vec3 m_origin;
+		const char *m_filename;
 };
 
 #endif

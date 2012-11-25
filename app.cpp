@@ -8,9 +8,14 @@
 
 int main(int argc, char** argv)
 {
+	const char * filename = "/tmp/out.tif";
+	if(argc == 2){
+		filename = argv[1];
+	}
+    ViewPlane viewPlane(512,512,1.0f,1.0f,filename);
+	viewPlane.saveToTiff();
     Scene scene;
-    scene.build();
-    ViewPlane viewPlane(512,512,1.0,1.0);
+    scene.build(viewPlane);
     Tracer tracer(&scene, &viewPlane);
     tracer.render();
 }

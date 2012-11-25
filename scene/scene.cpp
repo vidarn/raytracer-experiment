@@ -11,11 +11,11 @@ Scene::~Scene()
 	// TODO: Free objects
 }
 
-void Scene::build()
+void Scene::build(ViewPlane &viewPlane)
 {
 	std::vector<GeometricObject *> objects;
     File file("/tmp/test.scn");
-    file.read(objects, m_lights);
+    file.read(objects, m_lights,viewPlane);
 	std::vector<Triangle *> triangles;
 	for(int i=0; i<objects.size();i++){
 		objects[i]->refine(triangles);

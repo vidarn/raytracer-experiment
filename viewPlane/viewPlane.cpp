@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY)
+ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *filename)
 {
     m_resolution[0] = resX;
     m_resolution[1] = resY;
@@ -21,6 +21,7 @@ ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY)
     for(int i=0;i<m_resolution[0]*m_resolution[1];i++){
         m_pixels[i] = defaultPixel;
     }
+	m_filename = filename;
 }
 
 Ray ViewPlane::getPixelRay(int index, Vec3 sample)
@@ -34,9 +35,11 @@ Ray ViewPlane::getPixelRay(int index, Vec3 sample)
     posX *= m_size[0];
     posY *= m_size[1];
     Vec3 origin(posX,posY,0.0);
-    Vec3 direction(0.0,0.0,-1.0);
-    direction = direction;
-    origin = origin;
+    Vec3 direction;
+	direction = origin - m_origin;
+	direction.normalize();
+	origin[0] = 0.0f;
+	origin[1] = 0.0f;
     Ray ray(origin,direction,false);
 	ray.computePlucker();
     return ray;
@@ -47,7 +50,7 @@ void ViewPlane::setPixelValue(int index, RGBA color)
     m_pixels[index] = color;
 }
 
-void ViewPlane::saveToTiff(const char *filename)
+void ViewPlane::saveToTiff()
 {
     struct flock fl;
     fl.l_type   = F_WRLCK;
@@ -55,9 +58,9 @@ void ViewPlane::saveToTiff(const char *filename)
     fl.l_start  = 0;
     fl.l_len    = 0;
     fl.l_pid    = getpid();
-    int fd = open(filename,O_WRONLY);
+    int fd = open(m_filename,O_WRONLY);
     fcntl(fd, F_SETLKW, &fl);
-    TIFF* out = TIFFOpen(filename, "w");
+    TIFF* out = TIFFOpen(m_filename, "w");
     int sampleperpixel = 4;
     char *image=new char [m_resolution[0]*m_resolution[1]*sampleperpixel];
     for(int i = 0;i<m_resolution[0]*m_resolution[1];i++){
@@ -95,6 +98,13 @@ void ViewPlane::saveToTiff(const char *filename)
     fl.l_type   = F_UNLCK;
     fcntl(fd, F_SETLK, &fl);
     close(fd);
+}
+
+void ViewPlane::setFov(float fov)
+{
+	m_origin[0] = 0.0f;
+	m_origin[1] = 0.0f;
+	m_origin[2] = m_size[0]/tan(fov*0.5f);
 }
 
 std::ostream& operator<<(std::ostream &out, ViewPlane &vp)

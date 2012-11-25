@@ -70,7 +70,7 @@ void Tracer::render()
             }
         }
 		if(updateImage){
-			m_viewPlane->saveToTiff("/tmp/out.tif");
+			m_viewPlane->saveToTiff();
 		}
 		else{
 			usleep(4);

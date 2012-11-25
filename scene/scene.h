@@ -7,13 +7,14 @@
 #include "../lights/directional.h"
 #include "../lights/point.h"
 #include "../aggregates/kdTree.h"
+#include "../viewPlane/viewPlane.h"
 
 class Scene
 {
 	public:
 		Scene(){};
 		~Scene();
-		void build();
+		void build(ViewPlane &viewPlane);
         RGBA trace(Ray &ray);
         float traceShadow(Ray &ray);
         std::vector<GeometricObject *> getObjects();

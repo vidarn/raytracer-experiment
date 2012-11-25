@@ -80,13 +80,23 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                     print("light!")
                     l = PointLight(obj.data,m)
                     self.objects.append(l)
+                    
+        def export_camera(self,scene,stream):
+            camera = scene.camera.data
+            fov = ctypes.c_float(camera.angle)
+            stream.write(bytes(fov))
+                    
         def render(self,scene):
-            self.image_path = "/tmp/out.tif"
+            self.image_path = "/tmp/frame" + str(scene.frame_current).zfill(4) + ".tif"
             stream = open("/tmp/test.scn","wb")
+            self.export_camera(scene,stream)
             for obj in self.objects:
                 obj.to_stream(stream)
             stream.close()
-            process = subprocess.Popen(self.path_to_executable, stdout = None)
+            args = (self.path_to_executable,self.image_path)
+            process = subprocess.Popen(args, stdout = None)
+            while not os.path.isfile(self.image_path):
+                pass
             last_image_update = os.stat(self.image_path).st_mtime_ns
             while process.poll() == None:
                 image_update = os.stat(self.image_path).st_mtime_ns

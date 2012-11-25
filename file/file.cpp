@@ -10,10 +10,15 @@ File::File(const char *filename)
     m_filename[strlen(filename)] = '\0';
 }
 
-void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights)
+void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane)
 {
     std::ifstream stream;
     stream.open(m_filename);
+	if(stream.good()){
+		float fov;
+        stream.read( reinterpret_cast<char*>( &fov ), sizeof fov );
+		viewPlane.setFov(fov);
+	}
     int type;
     while(stream.good()){
         stream.read( reinterpret_cast<char*>( &type ), sizeof type );
