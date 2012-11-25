@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "../sampler/randomSampler.h"
 
 ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *filename)
 {
@@ -22,6 +23,7 @@ ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *f
         m_pixels[i] = defaultPixel;
     }
 	m_filename = filename;
+	m_sampler = new RandomSampler();
 }
 
 Ray ViewPlane::getPixelRay(int index, Vec3 sample)
@@ -38,11 +40,21 @@ Ray ViewPlane::getPixelRay(int index, Vec3 sample)
     Vec3 direction;
 	direction = origin - m_origin;
 	direction.normalize();
-	origin[0] = 0.0f;
-	origin[1] = 0.0f;
     Ray ray(origin,direction,false);
+	ray.m_origin[0] = 0.0f;
+	ray.m_origin[1] = 0.0f;
+	getDofRay(ray);
 	ray.computePlucker();
     return ray;
+}
+
+void ViewPlane::getDofRay(Ray &ray)
+{
+	if(m_focusDist > 0.0f){
+		Vec3 p = ray.getPointAtPos(m_focusDist);
+		ray.m_origin += m_sampler->getDiskSample()*0.5f;
+		ray.m_dir = p - ray.m_origin;
+	}
 }
 
 void ViewPlane::setPixelValue(int index, RGBA color)

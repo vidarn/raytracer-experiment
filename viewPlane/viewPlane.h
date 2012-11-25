@@ -3,6 +3,7 @@
 #include "../utils/rgba.h"
 #include "../utils/ray.h"
 #include "../utils/matrix4x4.h"
+#include "../sampler/sampler.h"
 #include <vector>
 #include <tiffio.h>
 #include <tiffio.hxx>
@@ -19,14 +20,19 @@ class ViewPlane
         void setPixelValue(int index, RGBA color);
         void saveToTiff();
 		void setFov(float fov);
+		void setFocusDistance(float focusDist){m_focusDist = focusDist;};
 
 		friend std::ostream& operator<<(std::ostream &out, ViewPlane &vp);
     private:
+		void getDofRay(Ray &ray);
+
         int m_resolution[2];
         std::vector<RGBA> m_pixels;
         float m_size[2];
+		float m_focusDist;
 		Vec3 m_origin;
 		const char *m_filename;
+		Sampler *m_sampler;
 };
 
 #endif

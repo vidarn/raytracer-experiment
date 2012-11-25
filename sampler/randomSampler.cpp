@@ -13,3 +13,18 @@ Vec3 RandomSampler::getSquareSample()
     }
     return sample;
 }
+
+Vec3 RandomSampler::getDiskSample()
+{
+	bool found = false;
+	Vec3 sample;
+	while(!found){
+		sample = getSquareSample();
+		sample[0] = 1.0f - 2.0f*sample[0];
+		sample[1] = 1.0f - 2.0f*sample[1];
+		if(sqrtf(sample[0]*sample[0] + sample[1]*sample[1]) <= 1.0f){
+			found = true;
+		}
+	}
+	return sample;
+}

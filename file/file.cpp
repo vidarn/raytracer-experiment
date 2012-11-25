@@ -18,6 +18,9 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
 		float fov;
         stream.read( reinterpret_cast<char*>( &fov ), sizeof fov );
 		viewPlane.setFov(fov);
+		float focusDist;
+        stream.read( reinterpret_cast<char*>( &focusDist ), sizeof focusDist );
+		viewPlane.setFocusDistance(focusDist);
 	}
     int type;
     while(stream.good()){

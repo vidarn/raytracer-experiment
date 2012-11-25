@@ -7,6 +7,7 @@ class Sampler
 {
 	public:
 		virtual Vec3 getSquareSample() = 0;
+		virtual Vec3 getDiskSample() = 0;
 };
 
 #endif

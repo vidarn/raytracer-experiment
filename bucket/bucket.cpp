@@ -72,12 +72,13 @@ void Bucket::render()
         int height= (m_endPixel[1] - m_startPixel[1]);
         for(int y=m_startPixel[1]; y<m_endPixel[1]; y++){
             for(int x=m_startPixel[0]; x<m_endPixel[0]; x++){
+				bool refine = false;
                 std::vector<RGBA*> checkSamples;
                 if(checkSamples.size() < 4){
                     for(int yoffs = -1; yoffs <=1; yoffs ++){
                         for(int xoffs = -1; xoffs <=1; xoffs ++){
                             for(int i=0;i<samples[a].size();i++){
-                                int pixelY = a/width * yoffs;
+                                int pixelY = a/width + yoffs;
                                 int pixelX = a%width + xoffs;
                                 if(pixelX > 0 && pixelX < width){
                                     if(pixelY > 0 && pixelY < height){
@@ -90,11 +91,14 @@ void Bucket::render()
                     }
                 }
                 if(getVariance(checkSamples) > 0.01f){
+					refine = true;
+                }
+				if(refine){
                     int pixelId = x+y*m_width;
                     int numSamples = m_numMaxSamples - m_numMinSamples;
                     sample(numSamples, pixelId, samples[a]);
                     //debug[a] = true;
-                }
+				}
                 a++;
             }
         }
@@ -141,6 +145,5 @@ float Bucket::getVariance(std::vector<RGBA*> &samples)
 	}
 	accum = accum/(samples.size()-1);
 	accum = sqrtf(accum);
-	//std::cout << "accum: " << accum << std::endl;
 	return accum;
 }

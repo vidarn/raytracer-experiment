@@ -7,6 +7,7 @@ class RandomSampler: public Sampler
     public:
         RandomSampler();
 		virtual Vec3 getSquareSample();
+		virtual Vec3 getDiskSample();
     private:
 };
 

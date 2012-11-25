@@ -85,6 +85,8 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             camera = scene.camera.data
             fov = ctypes.c_float(camera.angle)
             stream.write(bytes(fov))
+            focus_dist = ctypes.c_float(camera.dof_distance)
+            stream.write(bytes(focus_dist))
                     
         def render(self,scene):
             self.image_path = "/tmp/frame" + str(scene.frame_current).zfill(4) + ".tif"
