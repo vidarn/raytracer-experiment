@@ -231,6 +231,7 @@ KDTreeLeafNode::KDTreeLeafNode(std::vector<int> &objects, KDTree* owner)
 
 void KDTreeLeafNode::hit(Ray &ray, ShadeRec &sr, float tMin, float tMax)
 {
+    sr.m_hitT = tMax;
     for(int i=0; i<m_numObjects;i++){
         m_objects[i]->hit(ray, sr);
     }
