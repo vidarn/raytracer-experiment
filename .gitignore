@@ -6,3 +6,4 @@ out_old.tif
 .qiv-select*
 callgrind*
 *.blend*
+*.obj

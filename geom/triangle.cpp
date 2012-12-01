@@ -101,9 +101,22 @@ void Triangle::shadeInfo(Ray &ray, ShadeRec &sr) const
     b1 *= m_barry[2];
     b0 -= b1*m_barry[3];
 
+    if(isnan(b0)){
+        b0 = 0.0f;
+    }
+    if(isnan(b1)){
+        b1 = 0.0f;
+    }
+
+    b0 = b0 < 0.0f ? 0.0f : b0;
+    b0 = b0 > 1.0f ? 1.0f : b0;
+    b1 = b1 < 0.0f ? 0.0f : b1;
+    b1 = b1 > 1.0f ? 1.0f : b1;
+
     sr.setMaterial(m_material);
     Vec3 normal = *(m_normals[0]) * b0;
     normal +=*(m_normals[1]) * b1;
     normal +=*(m_normals[2]) * (1.0f - b1 - b0);
+    normal.normalize();
     sr.setNormal(normal);
 }
