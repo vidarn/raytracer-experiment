@@ -4,6 +4,7 @@
 #include "../aggregates/aaBoundingBox.h"
 #include "../utils/matrix4x4.h"
 #include "../file/file.h"
+#include <cstdlib>
 #include <cfloat>
 
 Scene::~Scene()
@@ -35,10 +36,10 @@ RGBA Scene::trace(Ray &ray)
         shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
 		shadeRec.m_triangle->shadeInfo(ray,shadeRec);
         shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
-        for(int i = 0; i < m_lights.size(); i++){
-            if(shadeRec.getMaterial() != 0){
-                col = shadeRec.getMaterial()->shade(shadeRec, m_lights[i], this) + col;
-            }
+        int i = rand()%m_lights.size();
+        if(shadeRec.getMaterial() != 0){
+            col = shadeRec.getMaterial()->shade(shadeRec, m_lights[i], this);
+            col *= float(m_lights.size());
         }
         col[3] = 1.0f;
     }

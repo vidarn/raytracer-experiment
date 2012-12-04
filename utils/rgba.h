@@ -18,7 +18,7 @@ class RGBA
 		RGBA operator+(RGBA &other);
 		RGBA& operator-=(RGBA &other);
 		RGBA operator-(RGBA &other);
-		RGBA& operator*=(float &other);
+		RGBA& operator*=(const float &other);
 		RGBA operator*(float &other) const;
 		void clamp(float val=1.0);
 		float value();

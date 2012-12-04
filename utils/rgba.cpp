@@ -32,7 +32,7 @@ RGBA RGBA::operator-(RGBA &other)
 	return tmp;
 }
 
-RGBA& RGBA::operator*=(float &other)
+RGBA& RGBA::operator*=(const float &other)
 {
 	m_col[0] *= other;
 	m_col[1] *= other;

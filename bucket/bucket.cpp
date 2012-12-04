@@ -9,8 +9,8 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
     m_done = false;
     m_borderDrawn = false;
     m_outlineSize = 5;
-    m_numMinSamples = 1;
-    m_numMaxSamples = 8;
+    m_numMinSamples = 8;
+    m_numMaxSamples = 512;
     m_sampler = new RandomSampler();
     m_numPixels = (endPixel[0] - startPixel[0]) * (endPixel[1] - startPixel[1]);
 }
