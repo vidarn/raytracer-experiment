@@ -5,26 +5,35 @@ RandomSampler::RandomSampler()
 {
 }
 
-Vec3 RandomSampler::getSquareSample()
+void RandomSampler::generate1DSequence(Vec3 *samples,int numSamples)
 {
-    Vec3 sample;
-    for(int i=0; i<2; i++){
-        sample[i] = float(rand())/float(RAND_MAX);
+    for(int i=0;i<numSamples;i++){
+        samples[i][0] = float(rand())/float(RAND_MAX);
     }
-    return sample;
 }
 
-Vec3 RandomSampler::getDiskSample()
+void RandomSampler::generateSquareSequence(Vec3 *samples,int numSamples)
 {
-	bool found = false;
-	Vec3 sample;
-	while(!found){
-		sample = getSquareSample();
-		sample[0] = 1.0f - 2.0f*sample[0];
-		sample[1] = 1.0f - 2.0f*sample[1];
-		if(sqrtf(sample[0]*sample[0] + sample[1]*sample[1]) <= 1.0f){
-			found = true;
-		}
-	}
-	return sample;
+    for(int i=0; i<numSamples; i++){
+        for(int j=0; j<2; j++){
+            samples[i][j] = float(rand())/float(RAND_MAX);
+        }
+    }
+}
+
+void RandomSampler::generateDiskSequence(Vec3 *samples,int numSamples)
+{
+    for(int i=0;i<numSamples;i++){
+        bool found = false;
+        while(!found){
+            for(int j=0; j<2; j++){
+                samples[i][j] = float(rand())/float(RAND_MAX);
+            }
+            samples[i][0] = 1.0f - 2.0f*samples[i][0];
+            samples[i][1] = 1.0f - 2.0f*samples[i][1];
+            if(sqrtf(samples[i][0]*samples[i][0] + samples[i][1]*samples[i][1]) <= 1.0f){
+                found = true;
+            }
+        }
+    }
 }

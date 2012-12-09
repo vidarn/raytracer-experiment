@@ -1,4 +1,5 @@
 #include "bucket.h"
+#include "../sampler/sampling.h"
 
 Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPixel[2], int width):m_viewPlane(viewPlane), m_scene(scene), m_width(width)
 {
@@ -9,9 +10,9 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
     m_done = false;
     m_borderDrawn = false;
     m_outlineSize = 5;
-    m_numMinSamples = 8;
-    m_numMaxSamples = 512;
-    m_sampler = new RandomSampler();
+    m_numMinSamples = 4;
+    m_numMaxSamples = 6*6;
+    m_sampler = new StratifiedSampler();
     m_numPixels = (endPixel[0] - startPixel[0]) * (endPixel[1] - startPixel[1]);
 }
 
@@ -61,7 +62,6 @@ void Bucket::render()
             int pixelId = x+y*m_width;
             int numSamples = m_numMinSamples;
             sample(numSamples, pixelId, samples[a]);
-            debug[a] = false;
             a++;
         }
     }
@@ -90,12 +90,13 @@ void Bucket::render()
                         }
                     }
                 }
-                if(getVariance(checkSamples) > 0.01f){
+                if(getVariance(checkSamples) > 0.02f){
 					refine = true;
                 }
 				if(refine){
                     int pixelId = x+y*m_width;
-                    int numSamples = m_numMaxSamples - m_numMinSamples;
+                    int numSamples = m_numMaxSamples;
+                    samples[a].clear();
                     sample(numSamples, pixelId, samples[a]);
                     //debug[a] = true;
 				}
@@ -113,7 +114,7 @@ void Bucket::render()
             }
             int i = x+y*m_width;
             if(debug[a]){
-                color[2] = 1.0f;
+                color[0] = 1.0f;
             }
             m_viewPlane->setPixelValue(i,color);
             a++;
@@ -124,10 +125,12 @@ void Bucket::render()
 
 void Bucket::sample(int numSamples, int pixelId, std::vector<RGBA> &samples)
 {
+    Sampling sampling(numSamples,1,1,1,m_sampler);
 	for(int i=0; i<numSamples; i++){
-		Vec3 tmp_sample = m_sampler->getSquareSample();
-		Ray ray = m_viewPlane->getPixelRay(pixelId,tmp_sample);
-		samples.push_back(m_scene->trace(ray));
+		Ray ray = m_viewPlane->getPixelRay(pixelId,sampling);
+        RGBA col = m_scene->trace(ray,sampling);
+		samples.push_back(col);
+        sampling.increaseIndex();
 	}
 }
 

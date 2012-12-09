@@ -27,7 +27,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
         stream.read( reinterpret_cast<char*>( &type ), sizeof type );
         if(stream.good()){
             Matrix4x4 transform(stream);
-            RGBA col = RGBA(0.8,0.2,0.1,1.0);
+            RGBA col = RGBA(0.7,0.6,0.8,1.0);
             Material *mat = new Material(col);
             Mesh *mesh;
             PointLight *pointLight;

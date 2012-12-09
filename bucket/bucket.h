@@ -3,7 +3,7 @@
 #include "../viewPlane/viewPlane.h"
 #include "../scene/scene.h"
 #include "../sampler/randomSampler.h"
-#include "../sampler/uniformSampler.h"
+#include "../sampler/stratifiedSampler.h"
 #include <vector>
 
 class Bucket

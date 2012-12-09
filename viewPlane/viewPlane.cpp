@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "../sampler/randomSampler.h"
 
 ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *filename)
 {
@@ -23,13 +22,13 @@ ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *f
         m_pixels[i] = defaultPixel;
     }
 	m_filename = filename;
-	m_sampler = new RandomSampler();
 }
 
-Ray ViewPlane::getPixelRay(int index, Vec3 sample)
+Ray ViewPlane::getPixelRay(int index, Sampling &sampling)
 {
     float x = index % m_resolution[0];
     float y = index / m_resolution[0];
+    Vec3 sample = sampling.getDiskSample(0);
     x += sample[0];
     y += sample[1];
     float posX = -1.0 + 2.0*((float) x)/((float) m_resolution[0]);
@@ -43,16 +42,16 @@ Ray ViewPlane::getPixelRay(int index, Vec3 sample)
     Ray ray(origin,direction,false);
 	ray.m_origin[0] = 0.0f;
 	ray.m_origin[1] = 0.0f;
-	getDofRay(ray);
+	getDofRay(ray, sampling);
 	ray.computePlucker();
     return ray;
 }
 
-void ViewPlane::getDofRay(Ray &ray)
+void ViewPlane::getDofRay(Ray &ray, Sampling &sampling)
 {
 	if(m_focusDist > 0.0f){
 		Vec3 p = ray.getPointAtPos(m_focusDist);
-		ray.m_origin += m_sampler->getDiskSample()*0.5f;
+		ray.m_origin += sampling.getDiskSample(0)*0.5f;
 		ray.m_dir = p - ray.m_origin;
 	}
 }

@@ -25,7 +25,7 @@ void Scene::build(ViewPlane &viewPlane)
 	m_tree.build(triangles);
 }
 
-RGBA Scene::trace(Ray &ray)
+RGBA Scene::trace(Ray &ray, Sampling &sampling)
 {
 	RGBA col;
     float minT = FLT_MAX;
@@ -36,9 +36,10 @@ RGBA Scene::trace(Ray &ray)
         shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
 		shadeRec.m_triangle->shadeInfo(ray,shadeRec);
         shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
-        int i = rand()%m_lights.size();
+        float fLightIndex = sampling.get1DSample(0)[0];
+        int lightIndex = floor(fLightIndex*m_lights.size());
         if(shadeRec.getMaterial() != 0){
-            col = shadeRec.getMaterial()->shade(shadeRec, m_lights[i], this);
+            col = shadeRec.getMaterial()->shade(shadeRec, m_lights[lightIndex], this);
             col *= float(m_lights.size());
         }
         col[3] = 1.0f;

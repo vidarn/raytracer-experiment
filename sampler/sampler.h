@@ -6,8 +6,9 @@
 class Sampler
 {
 	public:
-		virtual Vec3 getSquareSample() = 0;
-		virtual Vec3 getDiskSample() = 0;
+		virtual void generate1DSequence(Vec3 *samples,int numSamples) = 0;
+		virtual void generateSquareSequence(Vec3 *samples,int numSamples) = 0;
+		virtual void generateDiskSequence(Vec3 *samples,int numSamples) = 0;
 };
 
 #endif
