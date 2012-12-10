@@ -1,6 +1,11 @@
 #include "material.h"
 #include "../scene/scene.h"
 
+Material::Material(std::ifstream &stream)
+{
+    m_color = RGBA(stream);
+}
+
 void Material::setColor(RGBA color)
 {
 	m_color = color;

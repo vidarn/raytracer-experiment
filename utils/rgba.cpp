@@ -1,5 +1,12 @@
 #include "rgba.h"
 
+RGBA::RGBA(std::ifstream &stream)
+{
+	for(int i=0;i<4;i++){
+		stream.read( reinterpret_cast<char*>( &(m_col[i]) ), sizeof m_col[i] );
+	}
+}
+
 RGBA& RGBA::operator+=(const RGBA &other)
 {
 	m_col[0] += other.m_col[0];

@@ -1,5 +1,6 @@
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
+#include <fstream>
 #include "../utils/rgba.h"
 #include "../shadeRec/shadeRec.h"
 #include "../brdf/brdf.h"
@@ -13,11 +14,11 @@ class Material
 {
     public:
         Material(){};
+        Material(std::ifstream &stream);
         Material(RGBA color):m_color(color){};
 		void setColor(RGBA color);
 		RGBA shade(ShadeRec shadeRec, Light *light, Scene *scene);
     private:
-        BRDF *m_brdf;
         RGBA m_color;
 };
 

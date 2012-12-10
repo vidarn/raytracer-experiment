@@ -2,10 +2,12 @@
 #define __RGBA_H__
 #include <cassert>
 #include <iostream>
+#include <fstream>
 
 class RGBA
 {
 	public:
+		RGBA(std::ifstream &stream);
 		RGBA(){m_col[0] = m_col[1] = m_col[2] = m_col[3] = 0.0;};
 		RGBA(float d[4]){m_col[0] = d[0];m_col[1] = d[1];m_col[2] = d[2];m_col[3] = d[3];};
 		RGBA(float r, float g, float b, float a){m_col[0] = r;m_col[1] = g;m_col[2] = b;m_col[3] = a;};

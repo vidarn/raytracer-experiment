@@ -12,6 +12,11 @@ File::File(const char *filename)
 
 void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane)
 {
+    std::vector<Material *> materials;
+    // default material
+    RGBA col = RGBA(0.7,0.7,0.7,1.0);
+    Material *mat = new Material(col);
+    materials.push_back(mat);
     std::ifstream stream;
     stream.open(m_filename);
 	if(stream.good()){
@@ -26,19 +31,26 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
     while(stream.good()){
         stream.read( reinterpret_cast<char*>( &type ), sizeof type );
         if(stream.good()){
-            Matrix4x4 transform(stream);
-            RGBA col = RGBA(0.7,0.6,0.8,1.0);
-            Material *mat = new Material(col);
+            int mat;
+            Matrix4x4 transform;
             Mesh *mesh;
             PointLight *pointLight;
             switch(type){
+                case 0:
+                    std::cout << "Material!\n";
+                    materials.push_back(new Material(stream));
+                    break;
                 case 1:
                     std::cout << "Mesh!\n";
-                    mesh = new Mesh(stream, transform, mat);
+                    transform = Matrix4x4(stream);
+                    stream.read( reinterpret_cast<char*>( &mat ), sizeof mat );
+                    mat++;
+                    mesh = new Mesh(stream, transform, materials[mat]);
                     objects.push_back(mesh);
                     break;
                 case 2:
                     std::cout << "PointLight\n";
+                    transform = Matrix4x4(stream);
                     pointLight = new PointLight(stream,transform);
                     lights.push_back(pointLight);
             }

@@ -21,6 +21,7 @@ class Mesh:
         self.triangles = []
         self.add_mesh_data(mesh)
         self.matrix = matrix
+        self.material = -1
         
     def add_mesh_data(self,mesh):
         for vert in mesh.vertices:
@@ -36,6 +37,8 @@ class Mesh:
         type = ctypes.c_int(1)
         stream.write(bytes(type))
         self.matrix.to_stream(stream)
+        mat = ctypes.c_int(self.material)
+        stream.write(bytes(mat))
         num_points = ctypes.c_int(len(self.points))
         stream.write(bytes(num_points))
         for point in self.points:
@@ -60,6 +63,25 @@ class PointLight():
         self.matrix.to_stream(stream)
         strength = ctypes.c_float(self.strength)
         stream.write(bytes(strength))
+        
+class Material():
+    def __init__(self,material):
+        self.material = material
+        
+    def color_to_stream(self,color,stream):
+        for i in range(3):
+            c = ctypes.c_float(color[i])
+            stream.write(bytes(c))
+        c = ctypes.c_float(1.0)
+        stream.write(bytes(c))
+        
+    def to_stream(self,stream):
+        print("export material")
+        type = ctypes.c_int(0)
+        stream.write(bytes(type))
+        self.color_to_stream(self.material.diffuse_color,stream)
+        #name = ctypes.create_string_buffer(self.material.name)
+#        stream.write(bytes(type))
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
         bl_idname = 'TEST'
@@ -71,11 +93,18 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             self.camera_matrix = bpy.context.scene.camera.matrix_world.copy()
             self.camera_matrix.invert()
             self.objects = []
+            self.materials = []
             for obj in bpy.data.objects:
                 m = Matrix(self.camera_matrix * obj.matrix_world)
                 if obj.type == 'MESH':
                     s = Mesh(obj.data,m)
                     self.objects.append(s)
+                    if len(obj.material_slots) > 0:
+                        mat = Material(obj.material_slots[0].material)
+                        s.material = len(self.materials)
+                        self.materials.append(mat)
+                    else:
+                        print("object " + obj.name + " does not have any material")
                 if obj.type == 'LAMP':
                     print("light!")
                     l = PointLight(obj.data,m)
@@ -92,16 +121,19 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             self.image_path = "/tmp/frame" + str(scene.frame_current).zfill(4) + ".tif"
             stream = open("/tmp/test.scn","wb")
             self.export_camera(scene,stream)
+            for mat in self.materials:
+                mat.to_stream(stream)
             for obj in self.objects:
                 obj.to_stream(stream)
             stream.close()
+            print("--------- done exporting ------------")
             args = (self.path_to_executable,self.image_path)
             process = subprocess.Popen(args, stdout = None)
             while not os.path.isfile(self.image_path):
                 pass
-            last_image_update = os.stat(self.image_path).st_mtime_ns
+            last_image_update = os.stat(self.image_path).st_mtime
             while process.poll() == None:
-                image_update = os.stat(self.image_path).st_mtime_ns
+                image_update = os.stat(self.image_path).st_mtime
                 if image_update != last_image_update:
                     self.update_image()
                     last_image_update = image_update
