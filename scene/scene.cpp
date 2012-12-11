@@ -28,22 +28,22 @@ void Scene::build(ViewPlane &viewPlane)
 RGBA Scene::trace(Ray &ray, Sampling &sampling)
 {
 	RGBA col;
-    float minT = FLT_MAX;
-    ShadeRec shadeRec;
-	m_tree.hit(ray,shadeRec);
-    if(shadeRec.m_hit)
-    {
-        shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
-		shadeRec.m_triangle->shadeInfo(ray,shadeRec);
-        shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
-        float fLightIndex = sampling.get1DSample(0)[0];
-        int lightIndex = floor(fLightIndex*m_lights.size());
-        if(shadeRec.getMaterial() != 0){
-            col = shadeRec.getMaterial()->shade(shadeRec, m_lights[lightIndex], this);
-            col *= float(m_lights.size());
-        }
-        col[3] = 1.0f;
-    }
+	if(ray.m_depth < 10){
+		float minT = FLT_MAX;
+		ShadeRec shadeRec;
+		m_tree.hit(ray,shadeRec);
+		if(shadeRec.m_hit)
+		{
+			shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
+			shadeRec.m_triangle->shadeInfo(ray,shadeRec);
+			shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
+			shadeRec.m_depth = ray.m_depth;
+			if(shadeRec.getMaterial() != 0){
+				col = shadeRec.getMaterial()->shade(shadeRec, this, sampling);
+			}
+			col[3] = 1.0f;
+		}
+	}
     return col;
 }
 

@@ -18,10 +18,10 @@ class Scene
         RGBA trace(Ray &ray, Sampling &sampling);
         float traceShadow(Ray &ray);
         std::vector<GeometricObject *> getObjects();
+		std::vector<Light*> m_lights;
 	private:
 		std::vector<GeometricObject *> m_objects;
 		KDTree m_tree;
-		std::vector<Light*> m_lights;
 		RGBA m_bkgColor;
 };
 

@@ -14,9 +14,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
 {
     std::vector<Material *> materials;
     // default material
-    RGBA col = RGBA(0.7,0.7,0.7,1.0);
-    Material *mat = new Material(col);
-    materials.push_back(mat);
+    materials.push_back(new Material);
     std::ifstream stream;
     stream.open(m_filename);
 	if(stream.good()){

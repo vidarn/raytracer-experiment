@@ -7,19 +7,20 @@
 #include "../brdf/lambert.h"
 #include "../brdf/phong.h"
 #include "../lights/light.h"
+#include "../sampler/sampling.h"
 
 class Scene;
 
 class Material
 {
     public:
-        Material(){};
+        Material():m_color(RGBA(0.7,0.7,0.7,1.0)),m_reflectivity(0.0){};
         Material(std::ifstream &stream);
-        Material(RGBA color):m_color(color){};
 		void setColor(RGBA color);
-		RGBA shade(ShadeRec shadeRec, Light *light, Scene *scene);
+		RGBA shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling);
     private:
         RGBA m_color;
+        float m_reflectivity;
 };
 
 #endif /* end of include guard: __MATERIAL_H__ */

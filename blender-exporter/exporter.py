@@ -76,15 +76,17 @@ class Material():
         stream.write(bytes(c))
         
     def to_stream(self,stream):
-        print("export material")
+        mat = self.material
         type = ctypes.c_int(0)
         stream.write(bytes(type))
-        self.color_to_stream(self.material.diffuse_color,stream)
+        self.color_to_stream(mat.diffuse_color,stream)
+        spec_int = ctypes.c_float(mat.specular_intensity)
+        stream.write(bytes(spec_int))
         #name = ctypes.create_string_buffer(self.material.name)
 #        stream.write(bytes(type))
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
-        bl_idname = 'TEST'
+        bl_idname = 'RAYTRACER'
         bl_label = "Raytracer"
         def __init__(self):
             self.path_to_executable = "/home/vidar/code/raytracer/raytracer"
@@ -151,6 +153,79 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                 
         def __del__(self):
             pass
+        
+  
+from bl_ui import properties_data_camera
+for member in dir(properties_data_camera):
+    subclass = getattr(properties_data_camera, member)
+    try:
+        subclass.COMPAT_ENGINES.add('RAYTRACER')
+    except:
+        pass
+del properties_data_camera
+
+from bl_ui import properties_material
+#properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('RAYTRACER')
+properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('RAYTRACER')
+#for member in dir(properties_material):
+    #print(member)
+ #   subclass = getattr(properties_material, member)
+  #  try:
+   #     subclass.COMPAT_ENGINES.add('RAYTRACER')
+    #except:
+     #   pass
+del properties_material
+
+class MaterialButtonsPanel():
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "material"
+    # COMPAT_ENGINES must be defined in each subclass, external engines can add themselves here
+
+    @classmethod
+    def poll(cls, context):
+        mat = context.material
+        rd = context.scene.render
+        return mat and (rd.use_game_engine is False) and (rd.engine in cls.COMPAT_ENGINES)
+    
+class MATERIAL_PT_raytracer_diffuse(MaterialButtonsPanel, bpy.types.Panel):
+    bl_label = "Diffuse"
+    COMPAT_ENGINES = {'RAYTRACER'}
+
+    def draw_header(self, context):
+        scene = context.material
+
+        #self.layout.prop(scene.pov, "mirror_use_IOR", text="")
+
+    def draw(self, context):
+        layout = self.layout
+
+        mat = context.material
+        layout.active = True
+
+        col = layout.column()
+        col.alignment = 'CENTER'
+        col.prop(mat, "diffuse_color")
+        
+        
+class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
+    bl_label = "Reflection"
+    COMPAT_ENGINES = {'RAYTRACER'}
+
+    def draw_header(self, context):
+        scene = context.material
+
+        #self.layout.prop(scene.pov, "mirror_use_IOR", text="")
+
+    def draw(self, context):
+        layout = self.layout
+
+        mat = context.material
+        layout.active = True
+
+        col = layout.column()
+        col.alignment = 'CENTER'
+        col.prop(mat, "specular_intensity")
  
 if __name__ == "__main__":       
     bpy.utils.unregister_module(__name__)

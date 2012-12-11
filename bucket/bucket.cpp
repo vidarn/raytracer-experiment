@@ -11,7 +11,7 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
     m_borderDrawn = false;
     m_outlineSize = 5;
     m_numMinSamples = 4;
-    m_numMaxSamples = 6*6;
+    m_numMaxSamples = 8*8;
     m_sampler = new StratifiedSampler();
     m_numPixels = (endPixel[0] - startPixel[0]) * (endPixel[1] - startPixel[1]);
 }
@@ -114,7 +114,7 @@ void Bucket::render()
             }
             int i = x+y*m_width;
             if(debug[a]){
-                color[0] = 1.0f;
+                //color[0] = 1.0f;
             }
             m_viewPlane->setPixelValue(i,color);
             a++;
