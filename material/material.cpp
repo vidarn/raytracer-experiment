@@ -25,7 +25,7 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
         int lightIndex = floor(fLightIndex*scene->m_lights.size());
         Light *light = scene->m_lights[lightIndex];
 
-        Vec3 lightDirection = light->getLightDirection(hitPos);
+        Vec3 lightDirection = light->getLightDirection(hitPos, sampling);
         float lightStrength = light->getLightStrength(hitPos);
         float shade = lambert.shade(shadeRec, lightDirection);
         shade *= 1-m_reflectivity;

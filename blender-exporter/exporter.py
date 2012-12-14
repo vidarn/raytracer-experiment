@@ -63,6 +63,28 @@ class PointLight():
         self.matrix.to_stream(stream)
         strength = ctypes.c_float(self.strength)
         stream.write(bytes(strength))
+      
+      
+class AreaLight():
+    def __init__(self,light,matrix):
+        self.matrix = matrix
+        self.strength = light.energy
+        self.size_x = light.size
+        if light.shape == 'SQUARE':
+            self.size_y = light.size
+        else:
+            self.size_y = light.size_y
+        
+    def to_stream(self,stream):
+        type = ctypes.c_int(3)
+        stream.write(bytes(type))
+        self.matrix.to_stream(stream)
+        strength = ctypes.c_float(self.strength)
+        stream.write(bytes(strength))
+        size = ctypes.c_float(self.size_x)
+        stream.write(bytes(size))
+        size = ctypes.c_float(self.size_y)
+        stream.write(bytes(size))
         
 class Material():
     def __init__(self,material):
@@ -108,10 +130,15 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                     else:
                         print("object " + obj.name + " does not have any material")
                 if obj.type == 'LAMP':
-                    print("light!")
-                    l = PointLight(obj.data,m)
-                    self.objects.append(l)
-                    
+                    if obj.data.type == 'POINT':
+                        print("point light!")
+                        l = PointLight(obj.data,m)
+                        self.objects.append(l)
+                    if obj.data.type == 'AREA':
+                        print("area light!")
+                        l = AreaLight(obj.data,m)
+                        self.objects.append(l)
+                        
         def export_camera(self,scene,stream):
             camera = scene.camera.data
             fov = ctypes.c_float(camera.angle)
@@ -165,15 +192,12 @@ for member in dir(properties_data_camera):
 del properties_data_camera
 
 from bl_ui import properties_material
-#properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('RAYTRACER')
 properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('RAYTRACER')
-#for member in dir(properties_material):
-    #print(member)
- #   subclass = getattr(properties_material, member)
-  #  try:
-   #     subclass.COMPAT_ENGINES.add('RAYTRACER')
-    #except:
-     #   pass
+from bl_ui import properties_data_lamp
+properties_data_lamp.DATA_PT_lamp.COMPAT_ENGINES.add('RAYTRACER')
+properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('RAYTRACER')
+
+
 del properties_material
 
 class MaterialButtonsPanel():

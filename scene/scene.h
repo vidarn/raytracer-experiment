@@ -6,6 +6,7 @@
 #include "../geom/geometricObject.h"
 #include "../lights/directional.h"
 #include "../lights/point.h"
+#include "../lights/area.h"
 #include "../aggregates/kdTree.h"
 #include "../viewPlane/viewPlane.h"
 

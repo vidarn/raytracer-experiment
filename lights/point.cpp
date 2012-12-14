@@ -19,7 +19,7 @@ float PointLight::computeStrength(Vec3 &pos)
 	return m_strength;
 }
 
-Vec3 PointLight::computeDirection(Vec3 &pos)
+Vec3 PointLight::computeDirection(Vec3 &pos, Sampling &sampling)
 {
     Vec3 ret = (m_point - pos);
     ret.normalize();

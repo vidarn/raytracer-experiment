@@ -11,7 +11,7 @@ Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, int startPixel[2], int endPix
     m_borderDrawn = false;
     m_outlineSize = 5;
     m_numMinSamples = 2;
-    m_numMaxSamples = 6;
+    m_numMaxSamples = 4;
 	m_numMinSamples *= m_numMinSamples;
 	m_numMaxSamples *= m_numMaxSamples;
     m_sampler = new StratifiedSampler();
@@ -127,7 +127,7 @@ void Bucket::render()
 
 void Bucket::sample(int numSamples, int pixelId, std::vector<RGBA> &samples)
 {
-    Sampling sampling(numSamples,1,1,1,m_sampler);
+    Sampling sampling(numSamples,1,2,1,m_sampler);
 	for(int i=0; i<numSamples; i++){
 		Ray ray = m_viewPlane->getPixelRay(pixelId,sampling);
         RGBA col = m_scene->trace(ray,sampling);

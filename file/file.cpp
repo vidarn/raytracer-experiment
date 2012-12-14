@@ -33,6 +33,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
             Matrix4x4 transform;
             Mesh *mesh;
             PointLight *pointLight;
+            AreaLight *areaLight;
             switch(type){
                 case 0:
                     std::cout << "Material!\n";
@@ -51,6 +52,13 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
                     transform = Matrix4x4(stream);
                     pointLight = new PointLight(stream,transform);
                     lights.push_back(pointLight);
+                    break;
+                case 3:
+                    std::cout << "AreaLight\n";
+                    transform = Matrix4x4(stream);
+                    areaLight = new AreaLight(stream,transform);
+                    lights.push_back(areaLight);
+                    break;
             }
         }
     }

@@ -8,7 +8,7 @@ class PointLight: public Light
 		PointLight(std::ifstream &stream, Matrix4x4 transform);
 		PointLight(float strength, Matrix4x4 transform);
         virtual float computeStrength(Vec3 &pos);
-        virtual Vec3 computeDirection(Vec3 &pos);
+        virtual Vec3 computeDirection(Vec3 &pos, Sampling &sampling);
 	private:
         Vec3 m_point;
 };
