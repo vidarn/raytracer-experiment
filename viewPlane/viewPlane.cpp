@@ -17,22 +17,23 @@ ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *f
     m_size[1] = sizeY;
     m_pixels.reserve(m_resolution[0]*m_resolution[1]);
     m_pixels.resize(m_resolution[0]*m_resolution[1]);
-    RGBA defaultPixel(0.0f,0.0f,0.0f,1.0f);
+    m_numSamples.reserve(m_resolution[0]*m_resolution[1]);
+    m_numSamples.resize(m_resolution[0]*m_resolution[1]);
+    m_mutexes = new pthread_mutex_t[m_resolution[0]*m_resolution[1]];
     for(int i=0;i<m_resolution[0]*m_resolution[1];i++){
-        m_pixels[i] = defaultPixel;
+        pthread_mutex_init(&(m_mutexes[i]),NULL);
+        m_numSamples[i] = 0;
     }
 	m_filename = filename;
 }
 
-Ray ViewPlane::getPixelRay(int index, Sampling &sampling)
+Ray ViewPlane::getPixelRay(int x, int y, Sampling &sampling)
 {
-    float x = index % m_resolution[0];
-    float y = index / m_resolution[0];
-    Vec3 sample = sampling.getDiskSample(0);
-    x += sample[0];
-    y += sample[1];
-    float posX = -1.0 + 2.0*((float) x)/((float) m_resolution[0]);
-    float posY = -1.0 + 2.0*((float) y)/((float) m_resolution[1]);
+    Vec3 sample = sampling.getSquareSample(1);
+    float posX = float(x) + sample[0];
+    float posY = float(y) + sample[1];
+    posX = -1.0 + 2.0*((float) posX)/((float) m_resolution[0]);
+    posY = -1.0 + 2.0*((float) posY)/((float) m_resolution[1]);
     posX *= m_size[0];
     posY *= m_size[1];
     Vec3 origin(posX,posY,0.0);
@@ -56,9 +57,12 @@ void ViewPlane::getDofRay(Ray &ray, Sampling &sampling)
 	}
 }
 
-void ViewPlane::setPixelValue(int index, RGBA color)
+void ViewPlane::setPixelValue(int x, int y, RGBA color)
 {
-    m_pixels[index] = color;
+    pthread_mutex_lock(&(m_mutexes[x + y*m_resolution[0]]));
+    m_pixels[x + y*m_resolution[0]] += color;
+    m_numSamples[x + y*m_resolution[0]]++;
+    pthread_mutex_unlock(&(m_mutexes[x + y*m_resolution[0]]));
 }
 
 void ViewPlane::saveToTiff()
@@ -76,6 +80,15 @@ void ViewPlane::saveToTiff()
     char *image=new char [m_resolution[0]*m_resolution[1]*sampleperpixel];
     for(int i = 0;i<m_resolution[0]*m_resolution[1];i++){
         RGBA pixel = m_pixels[i];
+        if(m_numSamples[i] > 0){
+            pixel *= 1.0f/float(m_numSamples[i]);
+        }
+        else{
+            pixel = RGBA(0.5f,0.5f,0.5f,0.0f);
+        }
+        pixel[0] = pow(pixel[0],1.0f/2.2f);
+        pixel[1] = pow(pixel[1],1.0f/2.2f);
+        pixel[2] = pow(pixel[2],1.0f/2.2f);
 		pixel.clamp();
         image[i*sampleperpixel] = pixel.r()*255;
         image[i*sampleperpixel+1] = pixel.g()*255;

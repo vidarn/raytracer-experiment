@@ -4,6 +4,9 @@
 Material::Material(std::ifstream &stream)
 {
     m_color = RGBA(stream);
+	m_color[0] = pow(m_color[0],2.2f);
+	m_color[1] = pow(m_color[1],2.2f);
+	m_color[2] = pow(m_color[2],2.2f);
     stream.read( reinterpret_cast<char*>( &m_reflectivity ), sizeof m_reflectivity );
 }
 
