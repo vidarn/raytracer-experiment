@@ -102,17 +102,18 @@ class Material():
         type = ctypes.c_int(0)
         stream.write(bytes(type))
         self.color_to_stream(mat.diffuse_color,stream)
-        spec_int = ctypes.c_float(mat.specular_intensity)
+        spec_int = ctypes.c_float(mat.raytracer.reflectivity/100.0)
         stream.write(bytes(spec_int))
-        #name = ctypes.create_string_buffer(self.material.name)
-#        stream.write(bytes(type))
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
         bl_idname = 'RAYTRACER'
         bl_label = "Raytracer"
         def __init__(self):
-            self.path_to_executable = "/home/vidar/code/raytracer/raytracer"
+            self.path_to_executable = "/home/vidarn/code/raytracer/new/raytracer"
+            self.res_x = 512
+            self.res_y = 512
             pass
+        
         def update(self,data,scene):
             self.camera_matrix = bpy.context.scene.camera.matrix_world.copy()
             self.camera_matrix.invert()
@@ -145,10 +146,22 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             stream.write(bytes(fov))
             focus_dist = ctypes.c_float(camera.dof_distance)
             stream.write(bytes(focus_dist))
+            
+        def export_render_settings(self,scene,stream):
+            res_x = ctypes.c_int(self.res_x)
+            stream.write(bytes(res_x))
+            res_y = ctypes.c_int(self.res_y)
+            stream.write(bytes(res_y))
+            threads = ctypes.c_int(scene.raytracer.threads)
+            stream.write(bytes(threads))
+            
                     
         def render(self,scene):
+            self.res_x = int(scene.render.resolution_x * (scene.render.resolution_percentage / 100.0))
+            self.res_y = int(scene.render.resolution_y * (scene.render.resolution_percentage / 100.0))
             self.image_path = "/tmp/frame" + str(scene.frame_current).zfill(4) + ".tif"
             stream = open("/tmp/test.scn","wb")
+            self.export_render_settings(scene,stream)
             self.export_camera(scene,stream)
             for mat in self.materials:
                 mat.to_stream(stream)
@@ -169,7 +182,7 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             self.update_image()
             
         def update_image(self):
-            result =self.begin_result(0,0,512,512)
+            result =self.begin_result(0,0,self.res_x,self.res_y)
             lay = result.layers[0]
             f = open(self.image_path)
             fcntl.lockf(f,fcntl.LOCK_SH)
@@ -196,6 +209,9 @@ properties_material.MATERIAL_PT_context_material.COMPAT_ENGINES.add('RAYTRACER')
 from bl_ui import properties_data_lamp
 properties_data_lamp.DATA_PT_lamp.COMPAT_ENGINES.add('RAYTRACER')
 properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('RAYTRACER')
+from bl_ui import properties_render
+properties_render.RENDER_PT_render.COMPAT_ENGINES.add('RAYTRACER')
+properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('RAYTRACER')
 
 
 del properties_material
@@ -249,8 +265,62 @@ class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
 
         col = layout.column()
         col.alignment = 'CENTER'
-        col.prop(mat, "specular_intensity")
+        col.prop(mat.raytracer, "reflectivity")
+        
+        
+class RenderButtonsPanel():
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "render"
+    # COMPAT_ENGINES must be defined in each subclass, external engines can add themselves here
+
+    @classmethod
+    def poll(cls, context):
+        rd = context.scene.render
+        return (rd.use_game_engine == False) and (rd.engine in cls.COMPAT_ENGINES)
+
+class RENDER_PT_raytracer_threads(RenderButtonsPanel, bpy.types.Panel):
+    bl_label = "Threads"
+    COMPAT_ENGINES = {'RAYTRACER'}
+
+    def draw_header(self, context):
+        scene = context.material
+
+        #self.layout.prop(scene.pov, "mirror_use_IOR", text="")
+
+    def draw(self, context):
+        layout = self.layout
+
+        scene = context.scene
+        layout.active = True
+
+        col = layout.column()
+        col.alignment = 'CENTER'
+        col.prop(scene.raytracer, "threads")
+        
+class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
+    reflectivity = bpy.props.FloatProperty(
+            name="Reflectivity",
+            description="Reflectivity of the material",
+            subtype="PERCENTAGE",
+            default=0.0,
+            min=0.0,
+            max=100.0)
+
+class RaytracerSettingsScene(bpy.types.PropertyGroup):
+    threads = bpy.props.IntProperty(
+            name="Threads",
+            description="Number of renderer threads",
+            subtype="UNSIGNED",
+            default=2,
+            min=1,
+            max=200)
+        
+def register():
+    bpy.utils.register_module(__name__)
+    bpy.types.Material.raytracer = bpy.props.PointerProperty(type=RaytracerSettingsMaterial)
+    bpy.types.Scene.raytracer = bpy.props.PointerProperty(type=RaytracerSettingsScene)
  
 if __name__ == "__main__":       
     bpy.utils.unregister_module(__name__)
-    bpy.utils.register_module(__name__)
+    register()
