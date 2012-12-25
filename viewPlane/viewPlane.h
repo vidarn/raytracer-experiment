@@ -11,7 +11,7 @@
 class ViewPlane
 {
     public:
-        ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *filename);
+        ViewPlane(const char *filename);
         ~ViewPlane(){};
         int getNumPixels(){return m_resolution[0]*m_resolution[1];};
         int getWidth(){return m_resolution[0];};
@@ -21,6 +21,7 @@ class ViewPlane
         void saveToTiff();
 		void setFov(float fov);
 		void setFocusDistance(float focusDist){m_focusDist = focusDist;};
+		void setResolution(int resX, int resY);
 
         int m_resolution[2];
 

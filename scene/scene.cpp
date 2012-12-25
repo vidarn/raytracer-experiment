@@ -16,7 +16,7 @@ void Scene::build(ViewPlane &viewPlane)
 {
 	std::vector<GeometricObject *> objects;
     File file("/tmp/test.scn");
-    file.read(objects, m_lights,viewPlane);
+    file.read(objects, m_lights,viewPlane,m_settings);
 	std::vector<Triangle *> triangles;
 	for(int i=0; i<objects.size();i++){
 		objects[i]->refine(triangles);
@@ -43,6 +43,9 @@ RGBA Scene::trace(Ray &ray, Sampling &sampling)
 			}
 			col[3] = 1.0f;
 		}
+        else{
+            col[0] = col[1] = col[2] = 1.0f;
+        }
 	}
     return col;
 }

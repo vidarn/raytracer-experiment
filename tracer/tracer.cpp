@@ -7,8 +7,7 @@ static void *renderBucketProcess(void *threadid);
 void Tracer::render()
 {
 	std::vector<pthread_t> threads;
-	int numThreads = 2;
-	for(int i = 0;i < numThreads; i++){
+	for(int i = 0;i < m_scene->m_settings.m_threads; i++){
 		pthread_t thread;
 		Bucket *bucket = new Bucket(m_viewPlane, m_scene);
 		pthread_create(&thread, NULL, renderBucketProcess, (void*)(bucket));

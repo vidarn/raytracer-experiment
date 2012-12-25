@@ -10,7 +10,7 @@ File::File(const char *filename)
     m_filename[strlen(filename)] = '\0';
 }
 
-void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane)
+void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings)
 {
     std::vector<Material *> materials;
     // default material
@@ -18,6 +18,11 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
     std::ifstream stream;
     stream.open(m_filename);
 	if(stream.good()){
+        int x,y;
+        stream.read( reinterpret_cast<char*>( &x ), sizeof x );
+        stream.read( reinterpret_cast<char*>( &y ), sizeof y );
+        stream.read( reinterpret_cast<char*>( &settings.m_threads ), sizeof settings.m_threads );
+        viewPlane.setResolution(x,y);
 		float fov;
         stream.read( reinterpret_cast<char*>( &fov ), sizeof fov );
 		viewPlane.setFov(fov);

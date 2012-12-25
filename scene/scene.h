@@ -9,6 +9,7 @@
 #include "../lights/area.h"
 #include "../aggregates/kdTree.h"
 #include "../viewPlane/viewPlane.h"
+#include "../settings/settings.h"
 
 class Scene
 {
@@ -20,6 +21,7 @@ class Scene
         float traceShadow(Ray &ray);
         std::vector<GeometricObject *> getObjects();
 		std::vector<Light*> m_lights;
+        Settings m_settings;
 	private:
 		std::vector<GeometricObject *> m_objects;
 		KDTree m_tree;

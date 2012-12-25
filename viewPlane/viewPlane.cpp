@@ -6,25 +6,32 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-ViewPlane::ViewPlane(int resX, int resY, float sizeX, float sizeY, const char *filename)
+ViewPlane::ViewPlane(const char *filename)
+{
+	m_mutexes = NULL;
+	m_filename = filename;
+}
+
+void ViewPlane::setResolution(int resX, int resY)
 {
     m_resolution[0] = resX;
     m_resolution[1] = resY;
     if(resY == 0){
         m_resolution[1] = m_resolution[0];
     }
-    m_size[0] = sizeX;
-    m_size[1] = sizeY;
     m_pixels.reserve(m_resolution[0]*m_resolution[1]);
     m_pixels.resize(m_resolution[0]*m_resolution[1]);
     m_numSamples.reserve(m_resolution[0]*m_resolution[1]);
     m_numSamples.resize(m_resolution[0]*m_resolution[1]);
+	if(m_mutexes != NULL)
+		delete m_mutexes;
     m_mutexes = new pthread_mutex_t[m_resolution[0]*m_resolution[1]];
     for(int i=0;i<m_resolution[0]*m_resolution[1];i++){
         pthread_mutex_init(&(m_mutexes[i]),NULL);
         m_numSamples[i] = 0;
     }
-	m_filename = filename;
+	m_size[0] = 1.0f;
+    m_size[1] = 1.0f*float(m_resolution[1])/float(m_resolution[0]);
 }
 
 Ray ViewPlane::getPixelRay(int x, int y, Sampling &sampling)

@@ -35,7 +35,7 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
         shade *= lightStrength;
         col = m_color*shade;
 
-        delta = 0.001f;
+        delta = 0.0001f;
 
         tmp = lightDirection * delta;
         tmp = hitPos + tmp;

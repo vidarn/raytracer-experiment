@@ -12,10 +12,10 @@ int main(int argc, char** argv)
 	if(argc == 2){
 		filename = argv[1];
 	}
-    ViewPlane viewPlane(512,512,1.0f,1.0f,filename);
-	viewPlane.saveToTiff();
+    ViewPlane viewPlane(filename);
     Scene scene;
     scene.build(viewPlane);
+	viewPlane.saveToTiff();
     Tracer tracer(&scene, &viewPlane);
     tracer.render();
 }
