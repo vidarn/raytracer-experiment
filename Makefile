@@ -14,7 +14,7 @@ OBJ += brdf/brdf.o brdf/lambert.o brdf/phong.o
 OBJ += lights/light.o lights/directional.o lights/point.o lights/area.o
 OBJ += settings/settings.o
 OBJ += file/file.o
-FLG = -pthread -O3 -DNDEBUG
+FLG = -pthread -O3
 LIB = -ltiff
 
 $(OUT):$(OBJ)

@@ -12,6 +12,7 @@ class ViewPlane
 {
     public:
         ViewPlane(const char *filename);
+        ViewPlane();
         ~ViewPlane(){};
         int getNumPixels(){return m_resolution[0]*m_resolution[1];};
         int getWidth(){return m_resolution[0];};
@@ -28,7 +29,6 @@ class ViewPlane
 		friend std::ostream& operator<<(std::ostream &out, ViewPlane &vp);
     private:
 		void getDofRay(Ray &ray, Sampling &sampling);
-        pthread_mutex_t *m_mutexes;
 
         std::vector<RGBA> m_pixels;
         std::vector<int> m_numSamples;

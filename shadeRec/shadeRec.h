@@ -23,10 +23,9 @@ class ShadeRec
 		const Triangle *m_triangle;
         bool m_hit;
 		int m_depth;
-    private:
-        Vec3 m_iDir;
 		Vec3 m_normal;
         Material *m_material;
+        Vec3 m_iDir;
 };
 
 #endif

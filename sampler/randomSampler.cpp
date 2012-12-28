@@ -1,5 +1,6 @@
 #include "randomSampler.h"
 #include <cstdlib>
+#include <cmath>
 
 RandomSampler::RandomSampler()
 {
@@ -36,4 +37,9 @@ void RandomSampler::generateDiskSequence(Vec3 *samples,int numSamples)
             }
         }
     }
+}
+
+void RandomSampler::generateHemisphereSequence(Vec3 *samples,int numSamples)
+{
+    generateSquareSequence(samples,numSamples);
 }

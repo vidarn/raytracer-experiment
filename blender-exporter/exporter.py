@@ -104,12 +104,14 @@ class Material():
         self.color_to_stream(mat.diffuse_color,stream)
         spec_int = ctypes.c_float(mat.raytracer.reflectivity/100.0)
         stream.write(bytes(spec_int))
+        spec_gloss = ctypes.c_float(mat.raytracer.glossiness)
+        stream.write(bytes(spec_gloss))
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
         bl_idname = 'RAYTRACER'
         bl_label = "Raytracer"
         def __init__(self):
-            self.path_to_executable = "/home/vidarn/code/raytracer/new/raytracer"
+            self.path_to_executable = "/home/vidar/code/raytracer/raytracer"
             self.res_x = 512
             self.res_y = 512
             pass
@@ -266,6 +268,7 @@ class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
         col = layout.column()
         col.alignment = 'CENTER'
         col.prop(mat.raytracer, "reflectivity")
+        col.prop(mat.raytracer, "glossiness")
         
         
 class RenderButtonsPanel():
@@ -306,6 +309,13 @@ class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
             default=0.0,
             min=0.0,
             max=100.0)
+    glossiness = bpy.props.FloatProperty(
+            name="Glossiness",
+            description="Glossiness of the material",
+            subtype="UNSIGNED",
+            default=500.0,
+            min=0.0,
+            max=10000.0)
 
 class RaytracerSettingsScene(bpy.types.PropertyGroup):
     threads = bpy.props.IntProperty(

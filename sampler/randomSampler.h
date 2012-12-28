@@ -9,6 +9,7 @@ class RandomSampler: public Sampler
 		virtual void generate1DSequence(Vec3 *samples,int numSamples);
 		virtual void generateSquareSequence(Vec3 *samples,int numSamples);
 		virtual void generateDiskSequence(Vec3 *samples,int numSamples);
+		virtual void generateHemisphereSequence(Vec3 *samples,int numSamples);
     private:
 };
 

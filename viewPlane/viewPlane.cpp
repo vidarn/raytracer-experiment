@@ -8,8 +8,11 @@
 
 ViewPlane::ViewPlane(const char *filename)
 {
-	m_mutexes = NULL;
 	m_filename = filename;
+}
+
+ViewPlane::ViewPlane()
+{
 }
 
 void ViewPlane::setResolution(int resX, int resY)
@@ -23,11 +26,7 @@ void ViewPlane::setResolution(int resX, int resY)
     m_pixels.resize(m_resolution[0]*m_resolution[1]);
     m_numSamples.reserve(m_resolution[0]*m_resolution[1]);
     m_numSamples.resize(m_resolution[0]*m_resolution[1]);
-	if(m_mutexes != NULL)
-		delete m_mutexes;
-    m_mutexes = new pthread_mutex_t[m_resolution[0]*m_resolution[1]];
     for(int i=0;i<m_resolution[0]*m_resolution[1];i++){
-        pthread_mutex_init(&(m_mutexes[i]),NULL);
         m_numSamples[i] = 0;
     }
 	m_size[0] = 1.0f;
@@ -66,10 +65,8 @@ void ViewPlane::getDofRay(Ray &ray, Sampling &sampling)
 
 void ViewPlane::setPixelValue(int x, int y, RGBA color)
 {
-    pthread_mutex_lock(&(m_mutexes[x + y*m_resolution[0]]));
     m_pixels[x + y*m_resolution[0]] += color;
     m_numSamples[x + y*m_resolution[0]]++;
-    pthread_mutex_unlock(&(m_mutexes[x + y*m_resolution[0]]));
 }
 
 void ViewPlane::saveToTiff()

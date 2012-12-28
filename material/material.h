@@ -21,6 +21,7 @@ class Material
     private:
         RGBA m_color;
         float m_reflectivity;
+        float m_glossiness;
 };
 
 #endif /* end of include guard: __MATERIAL_H__ */

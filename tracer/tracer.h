@@ -16,6 +16,7 @@ class Tracer
 	private:
 		Scene *m_scene;
 		ViewPlane *m_viewPlane;
+        Bucket **m_buckets;
 };
 
 #endif

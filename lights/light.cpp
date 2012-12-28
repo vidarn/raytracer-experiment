@@ -6,14 +6,14 @@ Light::Light(float strength):
 {
 }
 
-float Light::getLightStrength(Vec3 pos)
+float Light::getLightStrength(Vec3 &pos)
 {
     float result;
     result = m_strength*computeStrength(pos);
     return result;
 }
 
-Vec3 Light::getLightDirection(Vec3 pos, Sampling &sampling)
+Vec3 Light::getLightDirection(ShadeRec &sr, Sampling &sampling)
 {
-    return computeDirection(pos, sampling);
+    return computeDirection(sr, sampling);
 }

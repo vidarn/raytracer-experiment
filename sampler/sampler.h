@@ -9,6 +9,7 @@ class Sampler
 		virtual void generate1DSequence(Vec3 *samples,int numSamples) = 0;
 		virtual void generateSquareSequence(Vec3 *samples,int numSamples) = 0;
 		virtual void generateDiskSequence(Vec3 *samples,int numSamples) = 0;
+		virtual void generateHemisphereSequence(Vec3 *samples,int numSamples) = 0;
 };
 
 #endif
