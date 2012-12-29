@@ -20,7 +20,7 @@ void Bucket::render()
 
 void Bucket::sample()
 {
-    Sampling sampling(1,1,3,1,1,m_sampler);
+    Sampling sampling(1,m_scene->m_settings.m_lightSamples,3,1,1,m_sampler);
     Vec3 p = sampling.getSquareSample(0);
     int x = floor(p[0]*float(m_viewPlane->getWidth()));
     int y = floor(p[1]*float(m_viewPlane->getHeight()));

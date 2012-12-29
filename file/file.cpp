@@ -22,6 +22,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
         stream.read( reinterpret_cast<char*>( &x ), sizeof x );
         stream.read( reinterpret_cast<char*>( &y ), sizeof y );
         stream.read( reinterpret_cast<char*>( &settings.m_threads ), sizeof settings.m_threads );
+        stream.read( reinterpret_cast<char*>( &settings.m_lightSamples ), sizeof settings.m_lightSamples );
         viewPlane.setResolution(x,y);
 		float fov;
         stream.read( reinterpret_cast<char*>( &fov ), sizeof fov );

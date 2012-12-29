@@ -156,6 +156,8 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             stream.write(bytes(res_y))
             threads = ctypes.c_int(scene.raytracer.threads)
             stream.write(bytes(threads))
+            light_samples = ctypes.c_int(scene.raytracer.light_samples)
+            stream.write(bytes(light_samples))
             
                     
         def render(self,scene):
@@ -289,8 +291,6 @@ class RENDER_PT_raytracer_threads(RenderButtonsPanel, bpy.types.Panel):
     def draw_header(self, context):
         scene = context.material
 
-        #self.layout.prop(scene.pov, "mirror_use_IOR", text="")
-
     def draw(self, context):
         layout = self.layout
 
@@ -300,6 +300,24 @@ class RENDER_PT_raytracer_threads(RenderButtonsPanel, bpy.types.Panel):
         col = layout.column()
         col.alignment = 'CENTER'
         col.prop(scene.raytracer, "threads")
+        
+class RENDER_PT_raytracer_settings(RenderButtonsPanel, bpy.types.Panel):
+    bl_label = "Settings"
+    COMPAT_ENGINES = {'RAYTRACER'}
+
+    def draw_header(self, context):
+        scene = context.material
+
+    def draw(self, context):
+        layout = self.layout
+
+        scene = context.scene
+        layout.active = True
+
+        col = layout.column()
+        col.alignment = 'CENTER'
+        col.prop(scene.raytracer, "light_samples")
+        
         
 class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
     reflectivity = bpy.props.FloatProperty(
@@ -323,6 +341,13 @@ class RaytracerSettingsScene(bpy.types.PropertyGroup):
             description="Number of renderer threads",
             subtype="UNSIGNED",
             default=2,
+            min=1,
+            max=200)
+    light_samples = bpy.props.IntProperty(
+            name="Light Samples",
+            description="Number of light samples per camera sample",
+            subtype="UNSIGNED",
+            default=5,
             min=1,
             max=200)
         
