@@ -55,7 +55,6 @@ void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bo
         while(numRetries < 3){
             splitPosition = findSplitPos(objects,bounds,totalBounds,axis);
             if(splitPosition == -1){
-                std::cout << " retry\n";
                 numRetries++;
                 axis = (axis+1)%3;
             }
@@ -64,7 +63,6 @@ void KDTree::buildNode(std::vector<int> &objects, std::vector<AABoundingBox> &bo
             }
         }
         if(splitPosition == -1){
-            std::cout << "Could not find good split!\n";
             splitPosition = objects.size();
         }
         interiorNode->setDepth(depth);
@@ -102,6 +100,7 @@ char KDTree::findSplitAxis(std::vector<int> &objects, std::vector<AABoundingBox>
 
 int KDTree::findSplitPos(std::vector<int> &objects, std::vector<AABoundingBox> &bounds, AABoundingBox &totalBounds, char axis)
 {
+    bool valid = false;
     float min[3], max[3];
     for(int i = 0; i < objects.size(); i++){
         bounds[objects[i]].getBounds(min,max);
@@ -143,6 +142,7 @@ int KDTree::findSplitPos(std::vector<int> &objects, std::vector<AABoundingBox> &
             float cost = m_traversalCost + m_intersectCost * (1.0f - emptyBonus) *
                             (probBelow * nBelow + probAbove * nAbove);
             if(cost < bestCost){
+                valid = (nBelow < objects.size() && nAbove < objects.size());
                 bestCost = cost;
                 bestOffset = i;
             }
@@ -151,7 +151,10 @@ int KDTree::findSplitPos(std::vector<int> &objects, std::vector<AABoundingBox> &
             nBelow++;
         }
     }
-    return bestOffset;
+    if(valid)
+        return bestOffset;
+    else
+        return -1;
 }
 
 void KDTree::hit(Ray &ray, ShadeRec &sr) const
