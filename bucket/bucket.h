@@ -9,7 +9,7 @@
 class Bucket
 {
 	public:
-		Bucket(ViewPlane *viewPlane, Scene *scene);
+		Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id);
         ~Bucket();
 		void render();
 	private:

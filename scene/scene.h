@@ -7,6 +7,7 @@
 #include "../lights/directional.h"
 #include "../lights/point.h"
 #include "../lights/area.h"
+#include "../aggregates/bvh.h"
 #include "../aggregates/kdTree.h"
 #include "../viewPlane/viewPlane.h"
 #include "../settings/settings.h"
@@ -24,7 +25,7 @@ class Scene
         Settings m_settings;
 	private:
 		std::vector<GeometricObject *> m_objects;
-		KDTree m_tree;
+		BVH m_triangles;
 		RGBA m_bkgColor;
 };
 

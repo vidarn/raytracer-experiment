@@ -8,6 +8,7 @@
 
 ViewPlane::ViewPlane(const char *filename)
 {
+    m_mutexes = NULL;
 	m_filename = filename;
 }
 
@@ -26,8 +27,12 @@ void ViewPlane::setResolution(int resX, int resY)
     m_pixels.resize(m_resolution[0]*m_resolution[1]);
     m_numSamples.reserve(m_resolution[0]*m_resolution[1]);
     m_numSamples.resize(m_resolution[0]*m_resolution[1]);
+    if(m_mutexes != NULL) 
+        delete m_mutexes; 
+    m_mutexes = new pthread_mutex_t[m_resolution[0]*m_resolution[1]]; 
     for(int i=0;i<m_resolution[0]*m_resolution[1];i++){
         m_numSamples[i] = 0;
+        pthread_mutex_init(&(m_mutexes[i]),NULL); 
     }
 	m_size[0] = 1.0f;
     m_size[1] = 1.0f*float(m_resolution[1])/float(m_resolution[0]);
@@ -65,12 +70,15 @@ void ViewPlane::getDofRay(Ray &ray, Sampling &sampling)
 
 void ViewPlane::setPixelValue(int x, int y, RGBA color)
 {
+    pthread_mutex_lock(&(m_mutexes[x + y*m_resolution[0]]));
     m_pixels[x + y*m_resolution[0]] += color;
     m_numSamples[x + y*m_resolution[0]]++;
+    pthread_mutex_unlock(&(m_mutexes[x + y*m_resolution[0]]));
 }
 
 void ViewPlane::saveToTiff()
 {
+    int totalNumSamples = 0;
     struct flock fl;
     fl.l_type   = F_WRLCK;
     fl.l_whence = SEEK_SET;
@@ -90,6 +98,7 @@ void ViewPlane::saveToTiff()
         else{
             pixel = RGBA(0.5f,0.5f,0.5f,0.0f);
         }
+        totalNumSamples += m_numSamples[i];
         pixel[0] = pow(pixel[0],1.0f/2.2f);
         pixel[1] = pow(pixel[1],1.0f/2.2f);
         pixel[2] = pow(pixel[2],1.0f/2.2f);
@@ -99,6 +108,7 @@ void ViewPlane::saveToTiff()
         image[i*sampleperpixel+2] = pixel.b()*255;
         image[i*sampleperpixel+3] = pixel.a()*255;
     }
+    std::cout << "num samples: " << totalNumSamples << std::endl;
     TIFFSetField(out, TIFFTAG_IMAGEWIDTH, m_resolution[0]);  
     TIFFSetField(out, TIFFTAG_IMAGELENGTH, m_resolution[1]);    
     TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, sampleperpixel);   

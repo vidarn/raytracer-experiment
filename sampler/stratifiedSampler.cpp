@@ -41,6 +41,11 @@ void StratifiedSampler::generateDiskSequence(Vec3 *samples,int numSamples)
     shuffle(samples, numSamples);
 }
 
+void StratifiedSampler::generateHemisphereSequence(Vec3 *samples,int numSamples)
+{
+    generateSquareSequence(samples,numSamples);
+}
+
 void StratifiedSampler::shuffle(Vec3 *samples, int numSamples)
 {
     std::random_shuffle(samples,&(samples[numSamples-1]));

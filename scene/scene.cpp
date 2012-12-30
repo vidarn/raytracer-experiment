@@ -22,7 +22,7 @@ void Scene::build(ViewPlane &viewPlane)
 		objects[i]->refine(triangles);
 	}
 	std::cout << "num triangles: " << triangles.size() << std::endl;
-	m_tree.build(triangles);
+	m_triangles.build(triangles);
 }
 
 RGBA Scene::trace(Ray &ray, Sampling &sampling)
@@ -31,7 +31,7 @@ RGBA Scene::trace(Ray &ray, Sampling &sampling)
 	if(ray.m_depth < 10){
 		float minT = FLT_MAX;
 		ShadeRec shadeRec;
-		m_tree.hit(ray,shadeRec);
+		m_triangles.hit(ray,shadeRec);
 		if(shadeRec.m_hit)
 		{
 			shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
@@ -54,7 +54,7 @@ float Scene::traceShadow(Ray &ray)
 {
     float minT = FLT_MAX;
     ShadeRec shadeRec;
-	m_tree.hit(ray,shadeRec);
+	m_triangles.hit(ray,shadeRec);
 	return !shadeRec.m_hit;
 }
 

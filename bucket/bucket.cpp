@@ -1,9 +1,9 @@
 #include "bucket.h"
 #include "../sampler/sampling.h"
 
-Bucket::Bucket(ViewPlane *viewPlane, Scene *scene):m_viewPlane(viewPlane), m_scene(scene)
+Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id):m_viewPlane(viewPlane), m_scene(scene)
 {
-    m_sampler = new RandomSampler();
+    m_sampler = new RandomSampler(134134+42343*id);
 }
 
 Bucket::~Bucket()

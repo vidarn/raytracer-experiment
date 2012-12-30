@@ -21,8 +21,9 @@ class Vec3
 		float& x() {return m_d[0];};
 		float& y() {return m_d[1];};
 		float& z() {return m_d[2];};
+		float get(int id) const {return m_d[id];};
 		float distance(const Vec3 &other)const {return (operator-(other)).magnitude();};
-		float& operator[](int id){assert(id < 3 && id>=0);return m_d[id];};
+		float& operator[](int id){return m_d[id];};
 		Vec3& operator+=(const Vec3 &other);
 		Vec3 operator+(Vec3 &other);
 		Vec3& operator-=(const Vec3 &other);
@@ -31,8 +32,8 @@ class Vec3
 		Vec3 operator*(const float &other) const;
 
 		friend std::ostream& operator<<(std::ostream &out, Vec3 &vec);
-	private:
 		float m_d[3];
+	private:
 };
 
 #endif

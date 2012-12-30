@@ -25,32 +25,34 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
     Vec3 tmp;
     Vec3 hitPos = shadeRec.m_hitPos;
 
-    if(scene->m_lights.size() > 0){
-		for(int i=0;i< scene->m_settings.m_lightSamples;i++){
-			float fLightIndex = sampling.get1DSample(i)[0];
-			int lightIndex = floor(fLightIndex*scene->m_lights.size());
-			Light *light = scene->m_lights[lightIndex];
+    if(m_reflectivity < 1.0f){
+		if(scene->m_lights.size() > 0){
+			for(int i=0;i< scene->m_settings.m_lightSamples;i++){
+				float fLightIndex = sampling.get1DSample(i)[0];
+				int lightIndex = floor(fLightIndex*scene->m_lights.size());
+				Light *light = scene->m_lights[lightIndex];
 
-			Vec3 lightDirection = light->getLightDirection(shadeRec, sampling);
-			float lightStrength = light->getLightStrength(hitPos);
-			float shade = lambert.shade(shadeRec, lightDirection);
-			shade *= 1-m_reflectivity;
-			shade *= lightStrength;
-			shade *= float(scene->m_lights.size())/scene->m_settings.m_lightSamples;
+				Vec3 lightDirection = light->getLightDirection(shadeRec, sampling);
+				float lightStrength = light->getLightStrength(hitPos);
+				float shade = lambert.shade(shadeRec, lightDirection);
+				shade *= 1-m_reflectivity;
+				shade *= lightStrength;
+				shade *= float(scene->m_lights.size())/scene->m_settings.m_lightSamples;
 
-			if(!(shade == 0.0f)){
-				delta = 0.0001f;
+				if(!(shade == 0.0f)){
+					delta = 0.0001f;
 
-				tmp = lightDirection * delta;
-				tmp = hitPos + tmp;
-				Ray ray = Ray(tmp,lightDirection,true);
-				ray.computePlucker();
-				ray.m_depth = shadeRec.m_depth+1;
-				float shadow = scene->traceShadow(ray);
-				shade *= shadow;
+					tmp = lightDirection * delta;
+					tmp = hitPos + tmp;
+					Ray ray = Ray(tmp,lightDirection,true);
+					ray.computePlucker();
+					ray.m_depth = shadeRec.m_depth+1;
+					float shadow = scene->traceShadow(ray);
+					shade *= shadow;
+				}
+
+				col += m_color*shade;
 			}
-
-			col += m_color*shade;
 		}
     }
 
