@@ -1,4 +1,5 @@
 #include "matrix4x4.h"
+#include <cstdlib>
 
 Matrix4x4::Matrix4x4()
 {
@@ -26,6 +27,39 @@ Matrix4x4::Matrix4x4(float entries[16])
 	for (int i = 0; i < 16; i++) {
 		m_entries[i] = entries[i];
 	}
+}
+
+Matrix4x4::Matrix4x4(Vec3 &vector)
+{
+    Vec3 up;
+    int a = 0;
+    if(abs(vector[1]) < abs(vector[0]))
+        a = 1;
+    if(abs(vector[2]) < abs(vector[a]))
+        a = 2;
+    up[a] = 1.0f;
+    Vec3 u = vector.cross(up);
+    Vec3 v = vector.cross(u);
+    a = 0;
+    m_entries[a + 0] = u.m_d[0];
+    m_entries[a + 1] = u.m_d[1];
+    m_entries[a + 2] = u.m_d[2];
+    m_entries[a + 3] = 0;
+    a += 4;
+    m_entries[a + 0] = v.m_d[0];
+    m_entries[a + 1] = v.m_d[1];
+    m_entries[a + 2] = v.m_d[2];
+    m_entries[a + 3] = 0;
+    a += 4;
+    m_entries[a + 0] = vector.m_d[0];
+    m_entries[a + 1] = vector.m_d[1];
+    m_entries[a + 2] = vector.m_d[2];
+    m_entries[a + 3] = 0;
+    a += 4;
+    m_entries[a + 0] = 0;
+    m_entries[a + 1] = 0;
+    m_entries[a + 2] = 0;
+    m_entries[a + 3] = 1;
 }
 
 void Matrix4x4::setTranslation(float x, float y, float z)
@@ -92,6 +126,16 @@ Matrix4x4 Matrix4x4::invert()
         }
     }
 	Matrix4x4 invMat;
+	for (int y = 0; y < 4; y++) {
+        int a = 0;
+        int x = y;
+        while(a<4 && tmpMat.m_entries[y+y*4] ==0){
+            x = (x+1)%4;
+			invMat.subMultRow(x,y,-1.0f);
+			tmpMat.subMultRow(x,y,-1.0f);
+            a++;
+        }
+    }
 	for (int y = 0; y < 4; y++) {
 		for (int x = 0; x < y; x++) {
 			float mult = tmpMat.m_entries[x+y*4];

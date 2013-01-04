@@ -19,60 +19,76 @@ void Material::setColor(RGBA color)
 
 RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
 {
+    Matrix4x4 normalMatrix(shadeRec.m_normal);
+    Matrix4x4 normalMatrixInv = normalMatrix.invert();
 	RGBA col;
-	Lambert lambert;
-    float delta;
+	BRDF *brdf;
+    float delta = 0.0001f;
     Vec3 tmp;
     Vec3 hitPos = shadeRec.m_hitPos;
+    Vec3 invI = shadeRec.getIncidentDirection();
+    invI.invert();
+    Vec3 invITrans = normalMatrix.multVec3(invI);
+    Vec3 normal(0.0f,0.0f,1.0f);
+    LambertBRDF lambert;
+    SpecularReflectionBRDF spec;
+    PhongBRDF phong(m_glossiness);
+    if(m_reflectivity > 0.9f){
+        brdf = &phong;
+        if(m_glossiness >= 1000.0f){
+            brdf = &spec;
+        }
+    }
+    else{
+        brdf = &lambert;
+    }
 
-    if(m_reflectivity < 1.0f){
-		if(scene->m_lights.size() > 0){
-			for(int i=0;i< scene->m_settings.m_lightSamples;i++){
-				float fLightIndex = sampling.get1DSample(i)[0];
-				int lightIndex = floor(fLightIndex*scene->m_lights.size());
-				Light *light = scene->m_lights[lightIndex];
+	int lightSamples = scene->m_settings.m_lightSamples;
+	int lightBounces = scene->m_settings.m_lightBounces;
 
-				Vec3 lightDirection = light->getLightDirection(shadeRec, sampling);
-				float lightStrength = light->getLightStrength(hitPos);
-				float shade = lambert.shade(shadeRec, lightDirection);
-				shade *= 1-m_reflectivity;
-				shade *= lightStrength;
-				shade *= float(scene->m_lights.size())/scene->m_settings.m_lightSamples;
-
-				if(!(shade == 0.0f)){
-					delta = 0.0001f;
-
-					tmp = lightDirection * delta;
-					tmp = hitPos + tmp;
-					Ray ray = Ray(tmp,lightDirection,true);
-					ray.computePlucker();
-					ray.m_depth = shadeRec.m_depth+1;
-					float shadow = scene->traceShadow(ray);
-					shade *= shadow;
-				}
-
-				col += m_color*shade;
-			}
+	// calculate path contribution
+	for(int i=0;i< lightSamples;i++){
+		RGBA tmp_color;
+		int lightIndex = floor(sampling.get1DSample(i+(shadeRec.m_depth*lightSamples))[0]*scene->m_lights.size());
+		Light *light = scene->m_lights[lightIndex];
+		Vec3 lightDirection = light->getLightDirection(shadeRec, sampling);
+        Vec3 lightDirectionTrans = normalMatrix.multVec3(lightDirection);
+		float lightStrength = light->getLightStrength(hitPos);
+        float shade = lightDirectionTrans.dot(normal);
+		shade *= brdf->f(invITrans, lightDirectionTrans);
+		shade *= lightStrength;
+		shade *= float(scene->m_lights.size())/scene->m_settings.m_lightSamples;
+		if(shade > 0.0f){
+            tmp = lightDirection * delta;
+			tmp = hitPos + tmp;
+			Ray ray = Ray(tmp,lightDirection,true);
+			ray.computePlucker();
+			ray.m_depth = shadeRec.m_depth+1;
+			float shadow = scene->traceShadow(ray);
+			shade *= shadow;
+            tmp_color = m_color * light->m_color;
+            tmp_color *= shade;
+            col += tmp_color;
 		}
-    }
+	}
 
-
-    if(m_reflectivity > 0.0f){
-        Vec3 invI = shadeRec.getIncidentDirection();
-        invI.invert();
-        Vec3 reflectDir = shadeRec.getNormal().reflect(invI);
-        reflectDir = sampling.getHemisphereSample(0,m_glossiness,reflectDir);
-        tmp = reflectDir * delta;
-        tmp = hitPos + tmp;
-        reflectDir.normalize();
-        Ray ray = Ray(tmp,reflectDir,false);
-        ray.computePlucker();
-        ray.m_depth = shadeRec.m_depth+1;
-        RGBA reflected_col = scene->trace(ray,sampling);
-        reflected_col *= m_reflectivity;
-        col = col + reflected_col;
-    }
-
-
+	if(shadeRec.m_depth+1 < lightBounces){
+		// continue path
+		Vec3 reflectDirTrans;
+        float shade = brdf->sample_f(invITrans, &reflectDirTrans, sampling,shadeRec.m_depth);
+        Vec3 reflectDir = normalMatrixInv.multVec3(reflectDirTrans);
+        shade *= reflectDirTrans.dot(normal);
+        if(shade > 0.0f){
+            tmp = reflectDir * delta;
+            tmp = hitPos + tmp;
+            Ray ray = Ray(tmp,reflectDir,false);
+            ray.computePlucker();
+            ray.m_depth = shadeRec.m_depth+1;
+            RGBA reflected_col = scene->trace(ray,sampling);
+            reflected_col *= shade;
+            col += m_color * reflected_col;
+        }
+	}
+    
 	return col;
 }

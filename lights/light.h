@@ -13,6 +13,7 @@ class Light
         Vec3 getLightDirection(ShadeRec &sr, Sampling &sampling);
         virtual float computeStrength(Vec3 &pos) = 0;
         virtual Vec3 computeDirection(ShadeRec &sr, Sampling &sampling) = 0;
+		RGBA m_color;
     protected:
         float m_strength;
 };

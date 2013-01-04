@@ -1,11 +1,13 @@
 #include "lambert.h"
+#include <cstdlib>
 
-float Lambert::shade(ShadeRec &shadeRec, Vec3 &lightDir) const
+float LambertBRDF::f(Vec3 &in, Vec3 &out) const
 {
-	Vec3 normalVec = shadeRec.getNormal();
-	float val = lightDir.dot(normalVec);
-	if(val < 0.0){
-		val = 0.0;
-	}
-	return val;
+	return 1.0f/M_PI;
+}
+
+float LambertBRDF::sample_f(Vec3 &in, Vec3 *out, Sampling &sampling, int id) const
+{
+	*out = sampling.getHemisphereSample(id);
+    return f(in,*out);
 }

@@ -2,12 +2,15 @@
 #define __PHONG_H__
 #include "brdf.h"
 
-class Phong
+class PhongBRDF: public BRDF
+// Blinn-Phong Rather
 {
 	public:
-		Phong(){};
-		virtual float shade(ShadeRec &shadeRec, Vec3 &lightDir) const;
+		PhongBRDF(float p):m_p(p){};
+		virtual float f(Vec3 &in, Vec3 &out) const;
+        virtual float sample_f(Vec3 &in, Vec3 *out, Sampling &sampling, int id) const;
 	private:
+        float m_p;
 };
 
 #endif

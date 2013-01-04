@@ -2,11 +2,12 @@
 #define __LAMBERT_H__
 #include "brdf.h"
 
-class Lambert: public BRDF
+class LambertBRDF: public BRDF
 {
 	public:
-		Lambert(){};
-		virtual float shade(ShadeRec &shadeRec, Vec3 &lightDir) const;
+		LambertBRDF(){};
+		virtual float f(Vec3 &in, Vec3 &out) const;
+        virtual float sample_f(Vec3 &in, Vec3 *out, Sampling &sampling, int id) const;
 	private:
 };
 

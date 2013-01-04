@@ -13,10 +13,11 @@ class Bucket
         ~Bucket();
 		void render();
 	private:
-		void sample();
+		void sample(int x, int y);
 		ViewPlane *m_viewPlane;
 		Scene *m_scene;
 		Sampler *m_sampler;
+		int m_id;
 };
 
 #endif

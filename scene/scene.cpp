@@ -44,8 +44,11 @@ RGBA Scene::trace(Ray &ray, Sampling &sampling)
 			col[3] = 1.0f;
 		}
         else{
-            col[0] = col[1] = col[2] = 0.2f;
+            col[0] = col[1] = col[2] = 1.0f;
         }
+	}
+	else{
+		col[0] = col[1] = col[2] = 0.0f;
 	}
     return col;
 }

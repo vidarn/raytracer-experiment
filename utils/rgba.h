@@ -17,11 +17,15 @@ class RGBA
 		float b(){return m_col[2];};
 		float a(){return m_col[3];};
 		RGBA& operator+=(const RGBA &other);
-		RGBA operator+(RGBA &other);
-		RGBA& operator-=(RGBA &other);
-		RGBA operator-(RGBA &other);
+		RGBA operator+(const RGBA &other);
+		RGBA& operator-=(const RGBA &other);
+		RGBA operator-(const RGBA &other);
 		RGBA& operator*=(const float &other);
-		RGBA operator*(float &other) const;
+		RGBA operator*(const float &other) const;
+		RGBA& operator*=(const RGBA &other);
+		RGBA operator*(const RGBA &other) const;
+		RGBA& operator/=(const RGBA &other);
+		RGBA operator/(const RGBA &other) const;
 		void clamp(float val=1.0);
 		float value();
 

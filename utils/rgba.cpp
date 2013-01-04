@@ -16,14 +16,14 @@ RGBA& RGBA::operator+=(const RGBA &other)
 	return *this;
 }
 
-RGBA RGBA::operator+(RGBA &other)
+RGBA RGBA::operator+(const RGBA &other)
 {
 	RGBA tmp = *this;
 	tmp += other;
 	return tmp;
 }
 
-RGBA& RGBA::operator-=(RGBA &other)
+RGBA& RGBA::operator-=(const RGBA &other)
 {
 	m_col[0] -= other.m_col[0];
 	m_col[1] -= other.m_col[1];
@@ -32,7 +32,7 @@ RGBA& RGBA::operator-=(RGBA &other)
 	return *this;
 }
 
-RGBA RGBA::operator-(RGBA &other)
+RGBA RGBA::operator-(const RGBA &other)
 {
 	RGBA tmp = *this;
 	tmp -= other;
@@ -48,10 +48,42 @@ RGBA& RGBA::operator*=(const float &other)
 	return *this;
 }
 
-RGBA RGBA::operator*(float &other) const
+RGBA RGBA::operator*(const float &other) const
 {
 	RGBA tmp = *this;
 	tmp *= other;
+	return tmp;
+}
+
+RGBA& RGBA::operator*=(const RGBA &other)
+{
+	m_col[0] *= other.m_col[0];
+	m_col[1] *= other.m_col[1];
+	m_col[2] *= other.m_col[2];
+	m_col[3] *= other.m_col[3];
+	return *this;
+}
+
+RGBA RGBA::operator*(const RGBA &other) const
+{
+	RGBA tmp = *this;
+	tmp *= other;
+	return tmp;
+}
+
+RGBA& RGBA::operator/=(const RGBA &other)
+{
+	m_col[0] /= other.m_col[0];
+	m_col[1] /= other.m_col[1];
+	m_col[2] /= other.m_col[2];
+	m_col[3] /= other.m_col[3];
+	return *this;
+}
+
+RGBA RGBA::operator/(const RGBA &other) const
+{
+	RGBA tmp = *this;
+	tmp /= other;
 	return tmp;
 }
 

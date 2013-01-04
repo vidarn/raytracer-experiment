@@ -7,3 +7,4 @@ out_old.tif
 callgrind*
 *.blend*
 *.obj
+*.png

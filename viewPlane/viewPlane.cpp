@@ -63,7 +63,7 @@ void ViewPlane::getDofRay(Ray &ray, Sampling &sampling)
 {
 	if(m_focusDist > 0.0f){
 		Vec3 p = ray.getPointAtPos(m_focusDist);
-		ray.m_origin += sampling.getDiskSample(0)*0.5f;
+		ray.m_origin += sampling.getDiskSample(0)*0.2f;
 		ray.m_dir = p - ray.m_origin;
 	}
 }
@@ -96,7 +96,7 @@ void ViewPlane::saveToTiff()
             pixel *= 1.0f/float(m_numSamples[i]);
         }
         else{
-            pixel = RGBA(0.5f,0.5f,0.5f,0.0f);
+            pixel = RGBA(0.0f,0.0f,0.0f,0.0f);
         }
         totalNumSamples += m_numSamples[i];
         pixel[0] = pow(pixel[0],1.0f/2.2f);

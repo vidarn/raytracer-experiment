@@ -4,6 +4,13 @@ import os
 import subprocess
 import fcntl
 
+def color_to_stream(color,stream):
+    for i in range(3):
+        c = ctypes.c_float(color[i])
+        stream.write(bytes(c))
+    c = ctypes.c_float(1.0)
+    stream.write(bytes(c))
+
 class Matrix:
     def __init__(self,matrix):
         self.values = []
@@ -69,6 +76,7 @@ class AreaLight():
     def __init__(self,light,matrix):
         self.matrix = matrix
         self.strength = light.energy
+        self.color = light.color
         self.size_x = light.size
         if light.shape == 'SQUARE':
             self.size_y = light.size
@@ -85,23 +93,17 @@ class AreaLight():
         stream.write(bytes(size))
         size = ctypes.c_float(self.size_y)
         stream.write(bytes(size))
+        color_to_stream(self.color,stream)
         
 class Material():
     def __init__(self,material):
         self.material = material
         
-    def color_to_stream(self,color,stream):
-        for i in range(3):
-            c = ctypes.c_float(color[i])
-            stream.write(bytes(c))
-        c = ctypes.c_float(1.0)
-        stream.write(bytes(c))
-        
     def to_stream(self,stream):
         mat = self.material
         type = ctypes.c_int(0)
         stream.write(bytes(type))
-        self.color_to_stream(mat.diffuse_color,stream)
+        color_to_stream(mat.diffuse_color,stream)
         spec_int = ctypes.c_float(mat.raytracer.reflectivity/100.0)
         stream.write(bytes(spec_int))
         spec_gloss = ctypes.c_float(mat.raytracer.glossiness)

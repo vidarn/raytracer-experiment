@@ -18,6 +18,7 @@ class Vec3
 		void normalize();
 		Vec3 getNormalized();
 		void invert();
+        Vec3 alignTo(Vec3 &other);
 		float& x() {return m_d[0];};
 		float& y() {return m_d[1];};
 		float& z() {return m_d[2];};

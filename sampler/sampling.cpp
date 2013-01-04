@@ -62,18 +62,31 @@ Vec3 Sampling::getSquareSample(int id)
     return m_squareSequences[id][m_currentIndex];
 }
 
-Vec3 Sampling::getHemisphereSample(int id, float p)
+Vec3 Sampling::getHemisphereSample(int id)
 {
-    Vec3 ret;
     float a = m_hemisphereSequences[id][m_currentIndex][0];
     float b = m_hemisphereSequences[id][m_currentIndex][1];
-    float cos_phi = cos(2.0f * M_PI * a);
-    float sin_phi = sin(2.0f * M_PI * a);
-    float cos_theta = pow((1.0f - b), 1.0f/(p + 1.0f));
-    float sin_theta = sqrt(1.0f - cos_theta * cos_theta);;
-    ret[0] = sin_theta*cos_phi;
-    ret[1] = sin_theta*sin_phi;
-    ret[2] = cos_theta;
+    Vec3 ret;
+    ret[2] = b;
+    float r = sqrtf(std::max(0.0f,1.0f - ret[2]*ret[2]));
+    float phi = 2 * M_PI * a;
+    ret[0] = r * cosf(phi);
+    ret[1] = r * sinf(phi);
+    return ret;
+}
+
+Vec3 Sampling::getHemisphereSample(int id, float p)
+{
+    float a = m_hemisphereSequences[id][m_currentIndex][0];
+    float b = m_hemisphereSequences[id][m_currentIndex][1];
+    float cosPhi = cos(2.0f * M_PI * a);
+    float sinPhi = sin(2.0f * M_PI * a);
+    float cosTheta = pow((1.0f - b), 1.0f / (p + 1.0f));
+    float sinTheta = sqrtf(1.0f - cosTheta*cosTheta);
+    Vec3 ret;
+    ret.m_d[0] = sinTheta * cosPhi;
+    ret.m_d[1] = sinTheta * sinPhi;
+    ret.m_d[2] = cosTheta;
     return ret;
 }
 

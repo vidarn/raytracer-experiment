@@ -5,6 +5,7 @@
 #include "../shadeRec/shadeRec.h"
 #include "../brdf/brdf.h"
 #include "../brdf/lambert.h"
+#include "../brdf/specularReflection.h"
 #include "../brdf/phong.h"
 #include "../lights/light.h"
 #include "../sampler/sampling.h"

@@ -12,6 +12,7 @@ class Sampling
         Vec3 get1DSample(int id);
         Vec3 getDiskSample(int id);
         Vec3 getSquareSample(int id);
+        Vec3 getHemisphereSample(int id);
         Vec3 getHemisphereSample(int id, float p);
         Vec3 getHemisphereSample(int id, float p, Vec3 &dir);
 

@@ -5,6 +5,7 @@
 #include "tracer/tracer.h"
 #include "utils/matrix4x4.h"
 #include "file/file.h"
+#include "brdf/lambert.h"
 
 int main(int argc, char** argv)
 {

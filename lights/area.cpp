@@ -7,6 +7,10 @@ AreaLight::AreaLight(std::ifstream &stream, Matrix4x4 transform)
     stream.read( reinterpret_cast<char *>( &m_strength), sizeof m_strength);
 	stream.read( reinterpret_cast<char *>( &(m_size[0])), sizeof m_size[0]);
     stream.read( reinterpret_cast<char *>( &(m_size[1])), sizeof m_size[1]);
+    m_color = RGBA(stream);
+	m_color[0] = pow(m_color[0],2.2f);
+	m_color[1] = pow(m_color[1],2.2f);
+	m_color[2] = pow(m_color[2],2.2f);
 }
 
 float AreaLight::computeStrength(Vec3 &pos)

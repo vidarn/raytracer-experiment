@@ -1,4 +1,5 @@
 #include "vec3.h"
+#include <cstdlib>
 
 float Vec3::dot(const Vec3 &other) const
 {
@@ -46,6 +47,25 @@ void Vec3::invert()
 	for (int i = 0; i < 3; i++) {
 		m_d[i] = - m_d[i];
 	}
+}
+
+Vec3 Vec3::alignTo(Vec3 &other)
+{
+    Vec3 ret;
+    Vec3 up;
+    int a = 0;
+    if(abs(m_d[1]) < abs(m_d[0]))
+        a = 1;
+    if(abs(m_d[2]) < abs(m_d[a]))
+        a = 2;
+    up[a] = 1.0f;
+    Vec3 v = other.cross(up);
+    Vec3 u = v.cross(other);
+    ret += u     * m_d[0];
+    ret += v     * m_d[1];
+    ret += other * m_d[2];
+    ret.normalize();
+    return ret;
 }
 
 Vec3& Vec3::operator+=(const Vec3 &other)
