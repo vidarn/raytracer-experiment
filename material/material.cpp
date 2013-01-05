@@ -35,6 +35,7 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
     Matrix4x4 normalMatrixInv = normalMatrix.invert();
 	RGBA col;
 	BRDF *brdf;
+    float pdf;
     float delta = 0.0001f;
     Vec3 tmp;
     Vec3 hitPos = shadeRec.m_hitPos;
@@ -45,11 +46,9 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
     LambertBRDF lambert;
     SpecularReflectionBRDF spec(m_ior);
     PhongBRDF phong(m_glossiness);
+    TorranceSparrowBRDF torranceSparrow(m_glossiness,m_ior);
     if(m_reflectivity > 0.9f){
-        brdf = &phong;
-        if(m_glossiness >= 1000.0f){
-            brdf = &spec;
-        }
+        brdf = &torranceSparrow;
     }
     else{
         brdf = &lambert;
@@ -86,9 +85,10 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
 	if(shadeRec.m_depth+1 < lightBounces){
 		// continue path
 		Vec3 reflectDirTrans;
-        float shade = brdf->sample_f(invITrans, &reflectDirTrans, sampling,shadeRec.m_depth);
+        float shade = brdf->sample_f(invITrans, &reflectDirTrans, &pdf, sampling,shadeRec.m_depth);
         Vec3 reflectDir = normalMatrixInv.multVec3(reflectDirTrans);
         shade *= reflectDirTrans.dot(normal);
+        shade /= pdf;
         if(shade > 0.0f){
             tmp = reflectDir * delta;
             tmp = hitPos + tmp;

@@ -22,6 +22,9 @@ void Tracer::render()
 void *renderBucketProcess(void *param)
 {
 	Bucket *bucket = (Bucket*)param;
-	bucket->render();
+	int numBuckets = bucket->m_scene->m_settings.m_threads;
+	float y = float(bucket->m_id)/float(numBuckets +1.0f);
+	y *= bucket->m_viewPlane->m_resolution[1];
+	bucket->render(0,y);
 }
 

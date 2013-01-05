@@ -7,6 +7,7 @@
 #include "../brdf/lambert.h"
 #include "../brdf/specularReflection.h"
 #include "../brdf/phong.h"
+#include "../brdf/torranceSparrow.h"
 #include "../lights/light.h"
 #include "../sampler/sampling.h"
 #include "../file/image.h"

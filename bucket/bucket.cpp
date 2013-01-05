@@ -12,16 +12,20 @@ Bucket::~Bucket()
     delete m_sampler;
 }
 
-void Bucket::render()
+void Bucket::render(int startX, int startY)
 {
-	int numBuckets = m_scene->m_settings.m_threads;
-	int bucketWidth = ceil(float(m_viewPlane->m_resolution[0])/float(numBuckets));
+	int x = startX;
+	int y = startY;
     while(true){
-		for(int y=0; y<m_viewPlane->m_resolution[1]; y++){
-			for(int x=m_id * bucketWidth; x<(m_id+1)*bucketWidth; x++){
+		while(y<m_viewPlane->m_resolution[1]){
+			while(x<m_viewPlane->m_resolution[0]){
 				sample(x,y);
+				x++;
 			}
+			x = 0;
+			y++;
 		}
+		y = 0;
     }
 }
 

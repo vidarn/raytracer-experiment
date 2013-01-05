@@ -7,7 +7,7 @@ class LambertBRDF: public BRDF
 	public:
 		LambertBRDF(){};
 		virtual float f(Vec3 &in, Vec3 &out) const;
-        virtual float sample_f(Vec3 &in, Vec3 *out, Sampling &sampling, int id) const;
+        virtual float sample_f(Vec3 &in, Vec3 *out, float *pdf, Sampling &sampling, int id) const;
 	private:
 };
 

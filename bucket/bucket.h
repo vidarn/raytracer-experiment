@@ -11,13 +11,13 @@ class Bucket
 	public:
 		Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id);
         ~Bucket();
-		void render();
-	private:
-		void sample(int x, int y);
+		void render(int startX, int startY);
+		int m_id;
 		ViewPlane *m_viewPlane;
 		Scene *m_scene;
+	private:
+		void sample(int x, int y);
 		Sampler *m_sampler;
-		int m_id;
 };
 
 #endif
