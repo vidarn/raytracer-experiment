@@ -118,5 +118,9 @@ void Triangle::shadeInfo(Ray &ray, ShadeRec &sr) const
     normal +=*(m_normals[1]) * b1;
     normal +=*(m_normals[2]) * (1.0f - b1 - b0);
     normal.normalize();
-    sr.setNormal(normal);
+    Vec3 uv = *(m_uvs[0]) * b0;
+    uv +=*(m_uvs[1]) * b1;
+    uv +=*(m_uvs[2]) * (1.0f - b1 - b0);
+    sr.m_uv = uv;
+    sr.m_normal = normal;
 }

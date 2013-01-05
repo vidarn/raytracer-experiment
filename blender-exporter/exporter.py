@@ -10,6 +10,13 @@ def color_to_stream(color,stream):
         stream.write(bytes(c))
     c = ctypes.c_float(1.0)
     stream.write(bytes(c))
+    
+def string_to_stream(string, stream):
+    a = ctypes.c_int(len(string))
+    stream.write(bytes(a))
+    for char in string:
+        a = ctypes.c_char(ord(char))
+        stream.write(bytes(a))
 
 class Matrix:
     def __init__(self,matrix):
@@ -25,6 +32,7 @@ class Matrix:
 class Mesh:
     def __init__(self,mesh,matrix):
         self.points = []
+        self.uvs = []
         self.triangles = []
         self.add_mesh_data(mesh)
         self.matrix = matrix
@@ -33,12 +41,23 @@ class Mesh:
     def add_mesh_data(self,mesh):
         for vert in mesh.vertices:
             self.points.append(vert.co)
-        for polygon in mesh.polygons:
+        uv_layer = mesh.uv_layers.active
+        for i in range(len(mesh.polygons)):
+            polygon = mesh.polygons[i]
+            uvdata = []
+            if uv_layer:
+                for uv in uv_layer.data[polygon.loop_start:polygon.loop_start + polygon.loop_total]:
+                    uvdata.append((uv.uv[0], uv.uv[1]))
+            else:
+                for j in range(len(polygon.vertices)):
+                    uvdata.append((0.0,0.0))
+            self.uvs.append((uvdata[0],uvdata[1],uvdata[2]))
             a = (polygon.vertices[0], polygon.vertices[1], polygon.vertices[2])
             self.triangles.append(a)
             if(len(polygon.vertices) == 4):
                 a = (polygon.vertices[2], polygon.vertices[3], polygon.vertices[0])
                 self.triangles.append(a)
+                self.uvs.append((uvdata[2],uvdata[3],uvdata[0]))
             
     def to_stream(self,stream):
         type = ctypes.c_int(1)
@@ -54,10 +73,16 @@ class Mesh:
                 stream.write(bytes(a))
         num_triangles = ctypes.c_int(len(self.triangles))
         stream.write(bytes(num_triangles))
-        for triangle in self.triangles:
-            for i in triangle:
-                a = ctypes.c_int(i)
+        for i in range(len(self.triangles)):
+            triangle = self.triangles[i]
+            for v in triangle:
+                a = ctypes.c_int(v)
                 stream.write(bytes(a))
+            uv = self.uvs[i]
+            for v in uv:
+                for j in range(2):
+                    a = ctypes.c_float(v[j])
+                    stream.write(bytes(a))
                 
 class PointLight():
     def __init__(self,light,matrix):
@@ -108,6 +133,9 @@ class Material():
         stream.write(bytes(spec_int))
         spec_gloss = ctypes.c_float(mat.raytracer.glossiness)
         stream.write(bytes(spec_gloss))
+        IOR = ctypes.c_float(mat.raytracer.IOR)
+        stream.write(bytes(IOR))
+        string_to_stream(mat.raytracer.diffuse_texture,stream)
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
         bl_idname = 'RAYTRACER'
@@ -252,6 +280,7 @@ class MATERIAL_PT_raytracer_diffuse(MaterialButtonsPanel, bpy.types.Panel):
         col = layout.column()
         col.alignment = 'CENTER'
         col.prop(mat, "diffuse_color")
+        col.prop(mat.raytracer, "diffuse_texture")
         
         
 class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
@@ -273,6 +302,7 @@ class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
         col.alignment = 'CENTER'
         col.prop(mat.raytracer, "reflectivity")
         col.prop(mat.raytracer, "glossiness")
+        col.prop(mat.raytracer, "IOR")
         
         
 class RenderButtonsPanel():
@@ -323,19 +353,31 @@ class RENDER_PT_raytracer_settings(RenderButtonsPanel, bpy.types.Panel):
         
 class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
     reflectivity = bpy.props.FloatProperty(
-            name="Reflectivity",
-            description="Reflectivity of the material",
-            subtype="PERCENTAGE",
-            default=0.0,
-            min=0.0,
-            max=100.0)
+        name="Reflectivity",
+        description="Reflectivity of the material",
+        subtype="PERCENTAGE",
+        default=0.0,
+        min=0.0,
+        max=100.0)
     glossiness = bpy.props.FloatProperty(
-            name="Glossiness",
-            description="Glossiness of the material",
-            subtype="UNSIGNED",
-            default=500.0,
-            min=0.0,
-            max=10000.0)
+        name="Glossiness",
+        description="Glossiness of the material",
+        subtype="UNSIGNED",
+        default=500.0,
+        min=0.0,
+        max=10000.0)
+    IOR = bpy.props.FloatProperty(
+        name="IOR",
+        description="Index of Refraction",
+        subtype="UNSIGNED",
+        default=1.57,
+        min=0.0,
+        max=100.0)
+    diffuse_texture = bpy.props.StringProperty(
+        name="Diffuse Texture",
+        description="Diffuse Texture",
+        subtype='FILE_PATH',
+        default="")
 
 class RaytracerSettingsScene(bpy.types.PropertyGroup):
     threads = bpy.props.IntProperty(
@@ -349,7 +391,7 @@ class RaytracerSettingsScene(bpy.types.PropertyGroup):
             name="Light Samples",
             description="Number of light samples per camera sample",
             subtype="UNSIGNED",
-            default=5,
+            default=1,
             min=1,
             max=200)
         

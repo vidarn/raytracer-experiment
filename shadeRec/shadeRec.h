@@ -24,6 +24,7 @@ class ShadeRec
         bool m_hit;
 		int m_depth;
 		Vec3 m_normal;
+		Vec3 m_uv;
         Material *m_material;
         Vec3 m_iDir;
 };

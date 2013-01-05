@@ -9,6 +9,7 @@
 #include "../brdf/phong.h"
 #include "../lights/light.h"
 #include "../sampler/sampling.h"
+#include "../file/image.h"
 
 class Scene;
 
@@ -23,6 +24,8 @@ class Material
         RGBA m_color;
         float m_reflectivity;
         float m_glossiness;
+        float m_ior;
+		Image* m_texture;
 };
 
 #endif /* end of include guard: __MATERIAL_H__ */

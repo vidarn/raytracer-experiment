@@ -12,10 +12,10 @@ class RGBA
 		RGBA(float d[4]){m_col[0] = d[0];m_col[1] = d[1];m_col[2] = d[2];m_col[3] = d[3];};
 		RGBA(float r, float g, float b, float a){m_col[0] = r;m_col[1] = g;m_col[2] = b;m_col[3] = a;};
 		float& operator[](int id){assert(id < 4 && id>=0);return m_col[id];};
-		float r(){return m_col[0];};
-		float g(){return m_col[1];};
-		float b(){return m_col[2];};
-		float a(){return m_col[3];};
+		float r()const {return m_col[0];};
+		float g()const {return m_col[1];};
+		float b()const {return m_col[2];};
+		float a()const {return m_col[3];};
 		RGBA& operator+=(const RGBA &other);
 		RGBA operator+(const RGBA &other);
 		RGBA& operator-=(const RGBA &other);
@@ -29,7 +29,7 @@ class RGBA
 		void clamp(float val=1.0);
 		float value();
 
-		friend std::ostream& operator<<(std::ostream &out, RGBA &rgba);
+		friend std::ostream& operator<<(std::ostream &out,const RGBA &rgba);
 	private:
 		float m_col[4];
 };

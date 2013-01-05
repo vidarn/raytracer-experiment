@@ -9,7 +9,19 @@ Material::Material(std::ifstream &stream)
 	m_color[2] = pow(m_color[2],2.2f);
     stream.read( reinterpret_cast<char*>( &m_reflectivity ), sizeof m_reflectivity );
     stream.read( reinterpret_cast<char*>( &m_glossiness   ), sizeof m_glossiness   );
-    std::cout << "glossiness: " << m_glossiness << std::endl;
+    stream.read( reinterpret_cast<char*>( &m_ior          ), sizeof m_ior          );
+    int len;
+    stream.read( reinterpret_cast<char*>( &len            ), sizeof len            );
+    char *buffer = new char[len+1];
+    for(int i=0;i<len;i++){
+        stream.read( buffer + i , sizeof(char));
+    }
+    buffer[len] = 0;
+    if(len > 0)
+        m_texture = new Image(buffer);
+    else
+        m_texture = 0;
+    delete buffer;
 }
 
 void Material::setColor(RGBA color)
@@ -31,7 +43,7 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
     Vec3 invITrans = normalMatrix.multVec3(invI);
     Vec3 normal(0.0f,0.0f,1.0f);
     LambertBRDF lambert;
-    SpecularReflectionBRDF spec;
+    SpecularReflectionBRDF spec(m_ior);
     PhongBRDF phong(m_glossiness);
     if(m_reflectivity > 0.9f){
         brdf = &phong;
@@ -66,8 +78,7 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
 			ray.m_depth = shadeRec.m_depth+1;
 			float shadow = scene->traceShadow(ray);
 			shade *= shadow;
-            tmp_color = m_color * light->m_color;
-            tmp_color *= shade;
+            tmp_color = light->m_color * shade;
             col += tmp_color;
 		}
 	}
@@ -86,9 +97,14 @@ RGBA Material::shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling)
             ray.m_depth = shadeRec.m_depth+1;
             RGBA reflected_col = scene->trace(ray,sampling);
             reflected_col *= shade;
-            col += m_color * reflected_col;
+            col += reflected_col;
         }
 	}
+    
+    if(m_texture != 0)
+        col *= m_texture->getPixel(shadeRec.m_uv[0], shadeRec.m_uv[1]);
+    else
+        col *= m_color;
     
 	return col;
 }

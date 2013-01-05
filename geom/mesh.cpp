@@ -21,18 +21,22 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
     }
     int num_triangles;
     stream.read( reinterpret_cast<char*>( &num_triangles ), sizeof num_triangles );
+	m_uvs.resize(num_triangles*3);
     for(int i=0; i<num_triangles; i++){
+        Triangle triangle(this);
         int pointIds[3];
         for(int j=0; j<3; j++){
             stream.read( reinterpret_cast<char*>( &(pointIds[j]) ), sizeof pointIds[j] );
+			triangle.setPoint(&m_points[pointIds[j]],j);
+			triangle.setNormal(&m_normals[pointIds[j]],j);
         }
-        Triangle triangle(this);
-        triangle.setPoint(&m_points[pointIds[0]],0);
-        triangle.setPoint(&m_points[pointIds[1]],1);
-        triangle.setPoint(&m_points[pointIds[2]],2);
-        triangle.setNormal(&m_normals[pointIds[0]],0);
-        triangle.setNormal(&m_normals[pointIds[1]],1);
-        triangle.setNormal(&m_normals[pointIds[2]],2);
+        for(int j=0; j<3; j++){
+			Vec3 uv;
+            stream.read( reinterpret_cast<char*>( &(uv[0]) ),      sizeof uv[0]);
+            stream.read( reinterpret_cast<char*>( &(uv[1]) ),      sizeof uv[1]);
+			m_uvs[i*3 + j] = uv;
+			triangle.setUV(&(m_uvs[i*3 + j]),j);
+		}
 		triangle.setMaterial(m_material);
         addTriangle(triangle);
     }

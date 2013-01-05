@@ -20,6 +20,7 @@ class Mesh:public GeometricObject
         void addToNormal(int id, Vec3 normal);
 		virtual void refine(std::vector<Triangle *> &triangles);
     private:
+        std::vector<Vec3> m_uvs;
         std::vector<Vec3> m_points;
         std::vector<Vec3> m_normals;
         std::vector<Triangle> m_triangles;

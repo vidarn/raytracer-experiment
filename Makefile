@@ -13,8 +13,8 @@ OBJ += material/material.o
 OBJ += brdf/brdf.o brdf/lambert.o brdf/phong.o brdf/specularReflection.o
 OBJ += lights/light.o lights/directional.o lights/point.o lights/area.o
 OBJ += settings/settings.o
-OBJ += file/file.o
-FLG = -pthread -O3
+OBJ += file/file.o file/image.o
+FLG = -pthread -O3 `Magick++-config --cppflags --cxxflags --ldflags --libs`
 LIB = -ltiff
 
 $(OUT):$(OBJ)

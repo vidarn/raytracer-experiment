@@ -99,7 +99,7 @@ float RGBA::value()
 	return (m_col[0] + m_col[1] + m_col[2] ) / 3.0f;
 }
 
-std::ostream& operator<<(std::ostream &out, RGBA &rgba)
+std::ostream& operator<<(std::ostream &out,const RGBA &rgba)
 {
 	out << "RGBA [" << rgba.r() << " , " << rgba.g() << " , " << rgba.b() << " , " << rgba.a() << "]";
 	return out;
