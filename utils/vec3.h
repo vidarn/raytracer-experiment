@@ -26,7 +26,7 @@ class Vec3
 		float distance(const Vec3 &other)const {return (operator-(other)).magnitude();};
 		float& operator[](int id){return m_d[id];};
 		Vec3& operator+=(const Vec3 &other);
-		Vec3 operator+(Vec3 &other);
+		Vec3 operator+(const Vec3 &other)const;
 		Vec3& operator-=(const Vec3 &other);
 		Vec3 operator-(const Vec3 &other)const;
 		Vec3& operator*=(const float &other);

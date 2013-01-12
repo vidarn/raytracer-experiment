@@ -26,3 +26,9 @@ Vec3 PointLight::computeDirection(ShadeRec &sr, Sampling &sampling)
 
 	return ret;
 }
+
+Ray PointLight::getRay(Sampling &sampling)
+{
+	Vec3 dir(0.0f,0.0f,1.0f);
+	return Ray(m_point,dir,false);
+}

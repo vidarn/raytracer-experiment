@@ -18,11 +18,12 @@ class Scene
 		Scene(){};
 		~Scene();
 		void build(ViewPlane &viewPlane);
-        RGBA trace(Ray &ray, Sampling &sampling);
+        void trace(Ray &ray, ShadeRec *shadeRec);
         float traceShadow(Ray &ray);
         std::vector<GeometricObject *> getObjects();
 		std::vector<Light*> m_lights;
         Settings m_settings;
+        int m_numRays;
 	private:
 		std::vector<GeometricObject *> m_objects;
 		BVH m_triangles;

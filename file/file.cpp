@@ -22,8 +22,8 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
         stream.read( reinterpret_cast<char*>( &x ), sizeof x );
         stream.read( reinterpret_cast<char*>( &y ), sizeof y );
         stream.read( reinterpret_cast<char*>( &settings.m_threads ), sizeof settings.m_threads );
-        stream.read( reinterpret_cast<char*>( &settings.m_lightSamples ), sizeof settings.m_lightSamples );
-		settings.m_lightBounces = 7;
+        stream.read( reinterpret_cast<char*>( &settings.m_cameraBounces ), sizeof settings.m_cameraBounces );
+        stream.read( reinterpret_cast<char*>( &settings.m_lightBounces ) , sizeof settings.m_lightBounces  );
         viewPlane.setResolution(x,y);
 		float fov;
         stream.read( reinterpret_cast<char*>( &fov ), sizeof fov );

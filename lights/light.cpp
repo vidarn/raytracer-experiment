@@ -6,11 +6,9 @@ Light::Light(float strength):
 {
 }
 
-float Light::getLightStrength(Vec3 &pos)
+RGBA Light::getLightColor(Vec3 &pos)
 {
-    float result;
-    result = m_strength*computeStrength(pos);
-    return result;
+    return m_color*computeStrength(pos);
 }
 
 Vec3 Light::getLightDirection(ShadeRec &sr, Sampling &sampling)

@@ -29,13 +29,13 @@ Matrix4x4::Matrix4x4(float entries[16])
 	}
 }
 
-Matrix4x4::Matrix4x4(Vec3 &vector)
+Matrix4x4::Matrix4x4(const Vec3 &vector)
 {
     Vec3 up;
     int a = 0;
-    if(abs(vector[1]) < abs(vector[0]))
+    if(abs(vector.m_d[1]) < abs(vector.m_d[0]))
         a = 1;
-    if(abs(vector[2]) < abs(vector[a]))
+    if(abs(vector.m_d[2]) < abs(vector.m_d[a]))
         a = 2;
     up[a] = 1.0f;
     Vec3 u = vector.cross(up);
@@ -187,20 +187,20 @@ Matrix4x4 Matrix4x4::operator*(Matrix4x4 &other)
 	return result;
 }
 
-Vec3 Matrix4x4::multVec3(Vec3 &vec)
+Vec3 Matrix4x4::multVec3(const Vec3 &vec)
 {
 	Vec3 result;
 	for(int y=0;y<3;y++){
 		float val = 0;
 		for(int x=0;x<3;x++){
-			val += m_entries[x+y*4]*vec[x];
+			val += m_entries[x+y*4]*vec.m_d[x];
 		}
 		result[y] = val;
 	}
 	return result;
 }
 
-Vec3 Matrix4x4::multPoint(Vec3 &point)
+Vec3 Matrix4x4::multPoint(const Vec3 &point)
 {
 	Vec3 result = multVec3(point);
 	for(int y=0;y<3;y++){

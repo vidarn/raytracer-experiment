@@ -9,6 +9,7 @@ class PointLight: public Light
 		PointLight(float strength, Matrix4x4 transform);
         virtual float computeStrength(Vec3 &pos);
         virtual Vec3 computeDirection(ShadeRec &sr, Sampling &sampling);
+        virtual Ray getRay(Sampling &sampling);
 	private:
         Vec3 m_point;
 };

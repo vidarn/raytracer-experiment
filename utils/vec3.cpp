@@ -76,7 +76,7 @@ Vec3& Vec3::operator+=(const Vec3 &other)
 	return *this;
 }
 
-Vec3 Vec3::operator+(Vec3 &other)
+Vec3 Vec3::operator+(const Vec3 &other) const
 {
 	Vec3 tmp = *this;
 	tmp += other;

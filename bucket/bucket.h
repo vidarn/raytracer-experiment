@@ -6,6 +6,8 @@
 #include "../sampler/stratifiedSampler.h"
 #include <vector>
 
+class PathNode;
+
 class Bucket
 {
 	public:
@@ -17,7 +19,19 @@ class Bucket
 		Scene *m_scene;
 	private:
 		void sample(int x, int y);
+		void buildPath(PathNode* &path, Ray &ray, Sampling &sampling, int &numNodes,const RGBA &startColor, int start, int end, int samplingId);
 		Sampler *m_sampler;
+        PathNode *m_cameraPath;
+        PathNode *m_lightPath;
+};
+
+class PathNode
+{
+	public:
+		PathNode(){};
+		ShadeRec m_sr;
+		RGBA m_accumColor;
+		Vec3 m_incident;
 };
 
 #endif

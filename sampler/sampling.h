@@ -6,7 +6,8 @@
 class Sampling
 {
     public:
-        Sampling(int numSamples, int num1DSequences, int numSquareSequences, int numDiskSequences, int numHemisphereSequences, Sampler* sampler);
+        Sampling(int numSamples, int num1DSequences, int numSquareSequences,
+                int numDiskSequences, int numHemisphereSequences, Sampler* sampler);
         ~Sampling();
         void increaseIndex();
         Vec3 get1DSample(int id);

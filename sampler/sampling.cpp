@@ -64,15 +64,7 @@ Vec3 Sampling::getSquareSample(int id)
 
 Vec3 Sampling::getHemisphereSample(int id)
 {
-    float a = m_hemisphereSequences[id][m_currentIndex][0];
-    float b = m_hemisphereSequences[id][m_currentIndex][1];
-    Vec3 ret;
-    ret[2] = b;
-    float r = sqrtf(std::max(0.0f,1.0f - ret[2]*ret[2]));
-    float phi = 2 * M_PI * a;
-    ret[0] = r * cosf(phi);
-    ret[1] = r * sinf(phi);
-    return ret;
+    return m_hemisphereSequences[id][m_currentIndex];
 }
 
 Vec3 Sampling::getHemisphereSample(int id, float p)

@@ -186,8 +186,10 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             stream.write(bytes(res_y))
             threads = ctypes.c_int(scene.raytracer.threads)
             stream.write(bytes(threads))
-            light_samples = ctypes.c_int(scene.raytracer.light_samples)
-            stream.write(bytes(light_samples))
+            camera_bounces = ctypes.c_int(scene.raytracer.camera_bounces)
+            stream.write(bytes(camera_bounces))
+            light_bounces = ctypes.c_int(scene.raytracer.light_bounces)
+            stream.write(bytes(light_bounces))
             
                     
         def render(self,scene):
@@ -348,7 +350,8 @@ class RENDER_PT_raytracer_settings(RenderButtonsPanel, bpy.types.Panel):
 
         col = layout.column()
         col.alignment = 'CENTER'
-        col.prop(scene.raytracer, "light_samples")
+        col.prop(scene.raytracer, "light_bounces")
+        col.prop(scene.raytracer, "camera_bounces")
         
         
 class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
@@ -387,11 +390,18 @@ class RaytracerSettingsScene(bpy.types.PropertyGroup):
             default=2,
             min=1,
             max=200)
-    light_samples = bpy.props.IntProperty(
-            name="Light Samples",
-            description="Number of light samples per camera sample",
+    light_bounces = bpy.props.IntProperty(
+            name="Light Bounces",
+            description="Number of light bounces per camera sample",
             subtype="UNSIGNED",
-            default=1,
+            default=4,
+            min=1,
+            max=200)
+    camera_bounces = bpy.props.IntProperty(
+            name="Camera Bounces",
+            description="Number of camera bounces per camera sample",
+            subtype="UNSIGNED",
+            default=4,
             min=1,
             max=200)
         

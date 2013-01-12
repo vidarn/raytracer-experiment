@@ -7,7 +7,7 @@ TorranceSparrowBRDF::TorranceSparrowBRDF(float e, float ior)
 	m_INVTWOPI = 0.5f/M_PI;
 }
 
-float TorranceSparrowBRDF::f(Vec3 &in, Vec3 &out) const
+float TorranceSparrowBRDF::f(const Vec3 &in, const Vec3 &out) const
 {
 	float ret;
 	float cosThetaI = absCosTheta(in );
@@ -32,6 +32,7 @@ float TorranceSparrowBRDF::sample_f(Vec3 &in, Vec3 *out, float *pdf, Sampling &s
 	Vec3 half = Vec3(sinTheta * cosf(phi), sinTheta * sinf(phi), cosTheta);
 	*out = half.reflect(in);
 	*pdf = ((m_exp + 1) * powf(cosTheta, m_exp))/(2.0f *  M_PI * 4.0f * in.dot(half));
+
     return f(in,*out);
 }
 

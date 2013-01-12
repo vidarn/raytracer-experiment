@@ -18,8 +18,8 @@ ViewPlane::ViewPlane()
 
 void ViewPlane::setResolution(int resX, int resY)
 {
-    m_resolution[0] = resX;
-    m_resolution[1] = resY;
+    m_resolution[0] = resX*2;
+    m_resolution[1] = resY*2;
     if(resY == 0){
         m_resolution[1] = m_resolution[0];
     }
@@ -40,7 +40,7 @@ void ViewPlane::setResolution(int resX, int resY)
 
 Ray ViewPlane::getPixelRay(int x, int y, Sampling &sampling)
 {
-    Vec3 sample = sampling.getSquareSample(1);
+    Vec3 sample = sampling.getSquareSample(0);
     float posX = float(x) + sample[0];
     float posY = float(y) + sample[1];
     posX = -1.0 + 2.0*((float) posX)/((float) m_resolution[0]);
@@ -89,45 +89,61 @@ void ViewPlane::saveToTiff()
     fcntl(fd, F_SETLKW, &fl);
     TIFF* out = TIFFOpen(m_filename, "w");
     int sampleperpixel = 4;
-    char *image=new char [m_resolution[0]*m_resolution[1]*sampleperpixel];
-    for(int i = 0;i<m_resolution[0]*m_resolution[1];i++){
-        RGBA pixel = m_pixels[i];
-        if(m_numSamples[i] > 0){
-            pixel *= 1.0f/float(m_numSamples[i]);
-        }
-        else{
-            pixel = RGBA(0.0f,0.0f,0.0f,0.0f);
-        }
-        totalNumSamples += m_numSamples[i];
-        pixel[0] = pow(pixel[0],1.0f/2.2f);
-        pixel[1] = pow(pixel[1],1.0f/2.2f);
-        pixel[2] = pow(pixel[2],1.0f/2.2f);
-		pixel.clamp();
-        image[i*sampleperpixel] = pixel.r()*255;
-        image[i*sampleperpixel+1] = pixel.g()*255;
-        image[i*sampleperpixel+2] = pixel.b()*255;
-        image[i*sampleperpixel+3] = pixel.a()*255;
+	int res[2] = {m_resolution[0]/2, m_resolution[1]/2};
+    char *image=new char [res[0]*res[1]*sampleperpixel];
+    for(int imageX = 0; imageX<res[0]; imageX++){
+		for(int imageY = 0; imageY<res[1]; imageY++){
+			int i = imageY * res[0] + imageX;
+			RGBA pixel;
+			float subPixels = 0;
+			for(int y = 0; y<2; y++){
+				for(int x = 0; x<2; x++){
+					int a = (imageY*2+y)*m_resolution[0] + imageX*2+x;
+					RGBA tmpPixel = m_pixels[a];
+					if(m_numSamples[a] > 0){
+						tmpPixel *= 1.0f/float(m_numSamples[a]);
+						subPixels += 1.0f;
+					}
+					else{
+						tmpPixel = RGBA(0.0f,0.0f,0.0f,0.0f);
+					}
+					tmpPixel.clamp();
+					pixel += tmpPixel;
+					totalNumSamples += m_numSamples[a];
+				}
+			}
+			if(subPixels > 0.0f)
+				pixel *= 1.0f/subPixels;
+			pixel[0] = pow(pixel[0],1.0f/2.2f);
+			pixel[1] = pow(pixel[1],1.0f/2.2f);
+			pixel[2] = pow(pixel[2],1.0f/2.2f);
+			pixel.clamp();
+			image[i*sampleperpixel] = pixel.r()*255;
+			image[i*sampleperpixel+1] = pixel.g()*255;
+			image[i*sampleperpixel+2] = pixel.b()*255;
+			image[i*sampleperpixel+3] = pixel.a()*255;
+		}
     }
     std::cout << "num samples: " << totalNumSamples << std::endl;
-    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, m_resolution[0]);  
-    TIFFSetField(out, TIFFTAG_IMAGELENGTH, m_resolution[1]);    
+    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, res[0]);  
+    TIFFSetField(out, TIFFTAG_IMAGELENGTH,  res[1]);    
     TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, sampleperpixel);   
     TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);    
     TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);    
     TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    tsize_t linebytes = sampleperpixel * m_resolution[0];
+    tsize_t linebytes = sampleperpixel *  res[0];
     unsigned char *buf = NULL;        
     if (TIFFScanlineSize(out) < linebytes)
         buf =(unsigned char *)_TIFFmalloc(linebytes);
     else
         buf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
 
-    TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, m_resolution[0]*sampleperpixel));
+    TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out,  res[0]*sampleperpixel));
 
-    for (uint32 row = 0; row < m_resolution[1]; row++)
+    for (uint32 row = 0; row <  res[1]; row++)
     {
-        memcpy(buf, &image[(m_resolution[1]-row-1)*linebytes], linebytes);    
+        memcpy(buf, &image[( res[1]-row-1)*linebytes], linebytes);    
         if (TIFFWriteScanline(out, buf, row, 0) < 0)
         break;
     }

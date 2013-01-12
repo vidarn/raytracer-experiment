@@ -20,11 +20,27 @@ float AreaLight::computeStrength(Vec3 &pos)
 
 Vec3 AreaLight::computeDirection(ShadeRec &sr, Sampling &sampling)
 {
-	Vec3 point = sampling.getSquareSample(2);
+	Vec3 point = sampling.getSquareSample(1);
     point[0] = m_size[0]*(point[0] - 0.5f);
     point[1] = m_size[1]*(point[1] - 0.5f);
 	point = m_transform.multPoint(point);
     Vec3 ret = (point - sr.m_hitPos);
     ret.normalize();
 	return ret;
+}
+
+Ray AreaLight::getRay(Sampling &sampling)
+{
+	Vec3 point = sampling.getSquareSample(1);
+    point[0] = m_size[0]*(point[0] - 0.5f);
+    point[1] = m_size[1]*(point[1] - 0.5f);
+	point = m_transform.multPoint(point);
+	Vec3 dir(0.0f,0.0f,-1.0f);
+	dir = sampling.getHemisphereSample(0,0.0f);
+	dir   = m_transform.multVec3(dir);
+	dir.invert();
+	Ray ray(point,dir,false);
+	ray.computePlucker();
+	ray.m_depth = 2;
+	return ray;
 }

@@ -1,7 +1,7 @@
 #include "lambert.h"
 #include <cstdlib>
 
-float LambertBRDF::f(Vec3 &in, Vec3 &out) const
+float LambertBRDF::f(const Vec3 &in, const Vec3 &out) const
 {
 	return 1.0f/M_PI;
 }

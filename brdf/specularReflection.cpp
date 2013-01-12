@@ -1,7 +1,7 @@
 #include "specularReflection.h"
 #include <cstdlib>
 
-float SpecularReflectionBRDF::f(Vec3 &in, Vec3 &out) const
+float SpecularReflectionBRDF::f(const Vec3 &in, const Vec3 &out) const
 {
 	return 0.0f;
 }

@@ -13,15 +13,15 @@ class Matrix4x4
         Matrix4x4(std::ifstream &stream);
         Matrix4x4(float entries[4][4]);
         Matrix4x4(float entries[16]);
-        Matrix4x4(Vec3 &vector);
+        Matrix4x4(const Vec3 &vector);
         void setIdentity();
         void setTranslation(float x, float y, float z);
         void setScaling(float x, float y, float z);
         void setRotation(int axis, float angle);
         Matrix4x4 invert();
         Matrix4x4 operator*(Matrix4x4 &other);
-        Vec3 multPoint(Vec3 &vec);
-        Vec3 multVec3(Vec3 &vec);
+        Vec3 multPoint(const Vec3 &vec);
+        Vec3 multVec3(const Vec3 &vec);
 		float& operator[](int id){assert(id < 16 && id>=0);return m_entries[id];};
 
 		friend std::ostream& operator<<(std::ostream &out, Matrix4x4 &mat);

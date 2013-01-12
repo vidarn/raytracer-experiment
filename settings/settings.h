@@ -4,7 +4,7 @@
 class Settings{
     public:
         int m_threads;
-        int m_lightSamples;
+		int m_cameraBounces;
 		int m_lightBounces;
 };
 

@@ -23,34 +23,23 @@ void Scene::build(ViewPlane &viewPlane)
 	}
 	std::cout << "num triangles: " << triangles.size() << std::endl;
 	m_triangles.build(triangles);
+    m_numRays = 0;
 }
 
-RGBA Scene::trace(Ray &ray, Sampling &sampling)
+void Scene::trace(Ray &ray, ShadeRec *shadeRec)
 {
-	RGBA col;
 	if(ray.m_depth < 10){
 		float minT = FLT_MAX;
-		ShadeRec shadeRec;
-		m_triangles.hit(ray,shadeRec);
-		if(shadeRec.m_hit)
+		m_triangles.hit(ray,*shadeRec);
+		if(shadeRec->m_hit)
 		{
-			shadeRec.m_hitPos = ray.getPointAtPos(shadeRec.m_hitT);
-			shadeRec.m_triangle->shadeInfo(ray,shadeRec);
-			shadeRec.setIncidentDirection(ray.m_dir.getNormalized());
-			shadeRec.m_depth = ray.m_depth;
-			if(shadeRec.getMaterial() != 0){
-				col = shadeRec.getMaterial()->shade(shadeRec, this, sampling);
-			}
-			col[3] = 1.0f;
+			shadeRec->m_hitPos = ray.getPointAtPos(shadeRec->m_hitT);
+			shadeRec->m_triangle->shadeInfo(ray,*shadeRec);
+			shadeRec->setIncidentDirection(ray.m_dir.getNormalized());
 		}
-        else{
-            col[0] = col[1] = col[2] = 0.0f;
-        }
 	}
-	else{
-		col[0] = col[1] = col[2] = 0.0f;
-	}
-    return col;
+    shadeRec->m_depth = ray.m_depth;
+    m_numRays++;
 }
 
 float Scene::traceShadow(Ray &ray)
@@ -58,6 +47,7 @@ float Scene::traceShadow(Ray &ray)
     float minT = FLT_MAX;
     ShadeRec shadeRec;
 	m_triangles.hit(ray,shadeRec);
+    m_numRays++;
 	return !shadeRec.m_hit;
 }
 

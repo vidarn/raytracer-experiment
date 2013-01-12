@@ -12,6 +12,8 @@ class Ray
 
 		friend std::ostream& operator<<(std::ostream &out, Ray &vec);
 
+        static int numRays;
+
 		float m_tMin;
 		Vec3 m_origin;
 		Vec3 m_dir;
