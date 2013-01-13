@@ -20,6 +20,7 @@ class BVH
         int flattenTree(BVHBuildNode *buildNode, int *offset);
         void recursiveDelete(BVHBuildNode *node);
         BVHBuildNode *recursiveBuild(int start, int end, int *numTotalNodes);
+        void findSAHSplit(int dim, int start, int end, AABoundingBox &bboxCentroids, AABoundingBox &bbox, float *splitCost, int *splitBucket);
 		void createLeafNode(int start, int end, AABoundingBox &bbox, BVHBuildNode *node);
 		std::vector<Triangle *> m_triangles;
 		std::vector<Triangle *> m_orderedTriangles;
@@ -81,6 +82,26 @@ class CompareToMid
 	private:
 		int m_dim;
 		float m_mid;
+};
+
+class CompareToBucket
+{
+	public:
+		CompareToBucket(int dim,float bucket, int numBuckets, const AABoundingBox &bound):m_dim(dim),m_bucket(bucket), m_numBuckets(numBuckets),m_centroidBounds(bound){};
+		bool operator()(const BVHTriangleInfo &a) const;
+	private:
+		int m_dim;
+        int m_bucket;
+        int m_numBuckets;
+        const AABoundingBox &m_centroidBounds;
+};
+
+class SAHBucket
+{
+    public:
+        SAHBucket(){m_numTris =0;}
+        int m_numTris;
+        AABoundingBox m_bbox;
 };
 
 #endif /* end of include guard: __BVH_H__ */

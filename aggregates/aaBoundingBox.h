@@ -15,8 +15,8 @@ class AABoundingBox
         void clear();
         float surfaceArea();
         Vec3 diagonalVec();
-        float min(int axis){return m_min[axis];};
-        float max(int axis){return m_max[axis];};
+        float min(int axis) const {return m_min[axis];};
+        float max(int axis) const {return m_max[axis];};
         Vec3 min() const {return Vec3(m_min[0],m_min[1],m_min[2]);};
         Vec3 max() const {return Vec3(m_max[0],m_max[1],m_max[2]);};
         void setMin(float min[3]);

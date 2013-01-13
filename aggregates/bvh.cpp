@@ -15,7 +15,6 @@ void BVH::build(std::vector<Triangle *> triangles)
     flattenTree(buildRoot,&offset);
     recursiveDelete(buildRoot);
     m_buildData.clear();
-    std::cout << "size of linear node: " << sizeof(BVHLinearNode) << std::endl;
     //writeObjFile("/tmp/bvh.obj");
 }
 
@@ -68,18 +67,72 @@ BVHBuildNode *BVH::recursiveBuild(int start, int end, int *numTotalNodes)
 		int dim = bboxCentroids.getMaximumExtent();
 		if(bboxCentroids.min(dim) == bboxCentroids.max(dim)){
 			createLeafNode(start,end,bbox,node);
-			return node;
 		}
-		float middlePos = 0.5f * (bboxCentroids.min(dim) + bboxCentroids.max(dim));
-		BVHTriangleInfo *midPtr = std::partition(&m_buildData[start], &m_buildData[end], CompareToMid(dim, middlePos));
-		int mid = midPtr - &m_buildData[0];
-        if(mid == start || mid == end){
-            mid = start+1;
+        else{
+            float splitCost;
+            int splitBucket;
+            findSAHSplit(dim,start,end,bboxCentroids,bbox, &splitCost, &splitBucket);
+            if(numTriangles > 6 || splitCost < numTriangles){
+                BVHTriangleInfo *midPtr = std::partition(&m_buildData[start], &m_buildData[end], CompareToBucket(dim, splitBucket, 12, bboxCentroids));
+                int mid = midPtr - &m_buildData[0];
+                if(mid == start || mid == end){
+                    mid = start+1;
+                }
+                node->initInterior(dim, recursiveBuild(start,mid,numTotalNodes), recursiveBuild(mid,end,numTotalNodes));
+            }
+            else{
+                createLeafNode(start,end,bbox,node);
+            }
         }
-		node->initInterior(dim, recursiveBuild(start,mid,numTotalNodes), recursiveBuild(mid,end,numTotalNodes));
 	}
 	
 	return node;
+}
+
+void BVH::findSAHSplit(int dim, int start, int end, AABoundingBox &bboxCentroids, AABoundingBox &bbox, float *splitCost, int *splitBucket)
+{
+    const int numBuckets = 12;
+    SAHBucket buckets[numBuckets];
+    for(int i=start; i<end; i++){
+        BVHTriangleInfo &node = m_buildData[i];
+        int b = numBuckets * (node.m_centroid.m_d[dim] - bboxCentroids.min(dim) ) /
+            (bboxCentroids.max(dim) - bboxCentroids.min(dim));
+        if(b == numBuckets)
+            b = numBuckets - 1;
+        SAHBucket &bucket = buckets[b];
+        bucket.m_bbox.join(node.m_bbox);
+        bucket.m_numTris++;
+    }
+
+    float cost[numBuckets-1];
+    for(int i=0; i<numBuckets-1; i++){
+        AABoundingBox b0, b1;
+        float c0, c1;
+        c0 = c1 = 0.0f;
+        for(int j=0; j<i; j++){
+            b0.join(buckets[j].m_bbox);
+            c0 += buckets[j].m_numTris;
+        }
+        for(int j=i+1; j<numBuckets; j++){
+            b1.join(buckets[j].m_bbox);
+            c1 += buckets[j].m_numTris;
+        }
+        float sa0 = c0 > 0 ?b0.surfaceArea() : 0;
+        float sa1 = c1 > 0 ?b1.surfaceArea() : 0;
+        cost[i] = 0.5 + (c0 * sa0 + c1 * sa1)/bbox.surfaceArea();
+    }
+
+    float minCost = cost[0];
+    int minCostSplit = 0;
+    for(int i=1;i<numBuckets-1;i++){
+        if(cost[i]<minCost){
+            minCost = cost[i];
+            minCostSplit = i;
+        }
+    }
+
+    *splitCost = minCost;
+    *splitBucket = minCostSplit;
 }
 
 void BVH::createLeafNode(int start, int end, AABoundingBox &bbox, BVHBuildNode *node)
@@ -172,4 +225,13 @@ void BVH::recursiveWriteObjFile(std::vector<Vec3> &points, int offset )
         recursiveWriteObjFile(points, offset+1);
         recursiveWriteObjFile(points, node->m_secondChildOffset);
     }
+}
+
+bool CompareToBucket::operator()(const BVHTriangleInfo &a) const
+{
+    int b = m_numBuckets * (a.m_centroid.m_d[m_dim] - m_centroidBounds.min(m_dim)) / 
+                        (m_centroidBounds.max(m_dim) - m_centroidBounds.min(m_dim));
+    if(b == m_numBuckets)
+        b--;
+    return b <= m_bucket;
 }
