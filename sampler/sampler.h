@@ -6,10 +6,13 @@
 class Sampler
 {
 	public:
-		virtual void generate1DSequence(Vec3 *samples,int numSamples) = 0;
-		virtual void generateSquareSequence(Vec3 *samples,int numSamples) = 0;
-		virtual void generateDiskSequence(Vec3 *samples,int numSamples) = 0;
-		virtual void generateHemisphereSequence(Vec3 *samples,int numSamples) = 0;
+        float get1DSample();
+        Vec3  getDiskSample();
+        Vec3  getSquareSample();
+        Vec3  getUniformHemisphereSample();
+        Vec3  getCosineHemisphereSample();
+    private:
+        virtual float getSample() = 0;
 };
 
 #endif

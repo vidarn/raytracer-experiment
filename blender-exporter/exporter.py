@@ -129,8 +129,13 @@ class Material():
         type = ctypes.c_int(0)
         stream.write(bytes(type))
         color_to_stream(mat.diffuse_color,stream)
+        color_to_stream(mat.raytracer.coating_color,stream)
+        metal = ctypes.c_char(mat.raytracer.metal)
+        stream.write(bytes(metal))
         spec_int = ctypes.c_float(mat.raytracer.reflectivity/100.0)
         stream.write(bytes(spec_int))
+        coat_thickness = ctypes.c_float(mat.raytracer.thickness)
+        stream.write(bytes(coat_thickness))
         spec_gloss = ctypes.c_float(mat.raytracer.glossiness)
         stream.write(bytes(spec_gloss))
         IOR = ctypes.c_float(mat.raytracer.IOR)
@@ -163,10 +168,10 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                     else:
                         print("object " + obj.name + " does not have any material")
                 if obj.type == 'LAMP':
-                    if obj.data.type == 'POINT':
-                        print("point light!")
-                        l = PointLight(obj.data,m)
-                        self.objects.append(l)
+                    #if obj.data.type == 'POINT':
+                     #   print("point light!")
+                      #  l = PointLight(obj.data,m)
+                       # self.objects.append(l)
                     if obj.data.type == 'AREA':
                         print("area light!")
                         l = AreaLight(obj.data,m)
@@ -265,13 +270,11 @@ class MaterialButtonsPanel():
         return mat and (rd.use_game_engine is False) and (rd.engine in cls.COMPAT_ENGINES)
     
 class MATERIAL_PT_raytracer_diffuse(MaterialButtonsPanel, bpy.types.Panel):
-    bl_label = "Diffuse"
+    bl_label = "Base"
     COMPAT_ENGINES = {'RAYTRACER'}
 
     def draw_header(self, context):
         scene = context.material
-
-        #self.layout.prop(scene.pov, "mirror_use_IOR", text="")
 
     def draw(self, context):
         layout = self.layout
@@ -281,18 +284,17 @@ class MATERIAL_PT_raytracer_diffuse(MaterialButtonsPanel, bpy.types.Panel):
 
         col = layout.column()
         col.alignment = 'CENTER'
+        col.prop(mat.raytracer, "metal")
         col.prop(mat, "diffuse_color")
         col.prop(mat.raytracer, "diffuse_texture")
         
         
-class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
-    bl_label = "Reflection"
+class MATERIAL_PT_raytracer_coating(MaterialButtonsPanel, bpy.types.Panel):
+    bl_label = "Coating"
     COMPAT_ENGINES = {'RAYTRACER'}
 
     def draw_header(self, context):
         scene = context.material
-
-        #self.layout.prop(scene.pov, "mirror_use_IOR", text="")
 
     def draw(self, context):
         layout = self.layout
@@ -302,7 +304,8 @@ class MATERIAL_PT_raytracer_reflection(MaterialButtonsPanel, bpy.types.Panel):
 
         col = layout.column()
         col.alignment = 'CENTER'
-        col.prop(mat.raytracer, "reflectivity")
+        col.prop(mat.raytracer, "coating_color")
+        col.prop(mat.raytracer, "thickness")
         col.prop(mat.raytracer, "glossiness")
         col.prop(mat.raytracer, "IOR")
         
@@ -362,6 +365,23 @@ class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
         default=0.0,
         min=0.0,
         max=100.0)
+    metal = bpy.props.BoolProperty(
+        name = "Metal"
+    )
+    thickness = bpy.props.FloatProperty(
+        name="Thickness",
+        description="Thickness of the coating",
+        subtype="UNSIGNED",
+        default=0.0,
+        min=0.0,
+        max=100.0)
+    coating_color = bpy.props.FloatVectorProperty(
+        name="Color",
+        description="Color of the coating",
+        subtype="COLOR_GAMMA",
+        default=(0.8,0.8,0.8),
+        min=0.0,
+        max=1.0)
     glossiness = bpy.props.FloatProperty(
         name="Glossiness",
         description="Glossiness of the material",
@@ -373,11 +393,11 @@ class RaytracerSettingsMaterial(bpy.types.PropertyGroup):
         name="IOR",
         description="Index of Refraction",
         subtype="UNSIGNED",
-        default=1.57,
+        default=1.0,
         min=0.0,
         max=100.0)
     diffuse_texture = bpy.props.StringProperty(
-        name="Diffuse Texture",
+        name="Texture",
         description="Diffuse Texture",
         subtype='FILE_PATH',
         default="")

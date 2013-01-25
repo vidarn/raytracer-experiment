@@ -42,13 +42,13 @@ void Scene::trace(Ray &ray, ShadeRec *shadeRec)
     m_numRays++;
 }
 
-float Scene::traceShadow(Ray &ray)
+float Scene::traceShadow(Ray &ray, float maxT)
 {
     float minT = FLT_MAX;
     ShadeRec shadeRec;
 	m_triangles.hit(ray,shadeRec);
     m_numRays++;
-	return !shadeRec.m_hit;
+	return !(shadeRec.m_hit && shadeRec.m_hitT < maxT);
 }
 
 std::vector<GeometricObject *> Scene::getObjects()

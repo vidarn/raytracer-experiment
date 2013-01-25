@@ -10,10 +10,11 @@
 #include "../brdf/phong.h"
 #include "../brdf/torranceSparrow.h"
 #include "../lights/light.h"
-#include "../sampler/sampling.h"
+#include "../sampler/sampler.h"
 #include "../file/image.h"
 
 class Scene;
+class MaterialLayer;
 
 class Material
 {
@@ -21,15 +22,30 @@ class Material
         Material();
         Material(std::ifstream &stream);
 		void setColor(RGBA color);
-		RGBA shade(ShadeRec shadeRec, Scene *scene, Sampling &sampling, Ray *nextRay, RGBA *reflectedMult, float *pdf);
+        void getColor(const ShadeRec &sr, RGBA *col);
+		void shade(ShadeRec &shadeRec, Scene *scene, Sampler &sampler, Ray *nextRay, RGBA *reflectedMult, float *pdf);
         void shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col, float pdf);
     private:
+		void absorb(RGBA *col, MaterialLayer &layer, const float cosTheta);
         RGBA m_color;
+        RGBA m_coatingColor;
         float m_reflectivity;
         float m_glossiness;
         float m_ior;
+		float m_thickness;
 		Image *m_texture;
-        BRDF  *m_brdf;
+        MaterialLayer *m_layers;
+        int m_numLayers;
+		RGBA *m_layerReflectionBuffers;
+};
+
+class MaterialLayer
+{
+    public:
+        BRDF *m_brdf;
+        float m_thickness;
+        float m_ior;
+        RGBA m_absorbColor;
 };
 
 #endif /* end of include guard: __MATERIAL_H__ */

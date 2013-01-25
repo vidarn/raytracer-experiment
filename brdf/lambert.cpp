@@ -6,9 +6,9 @@ float LambertBRDF::f(const Vec3 &in, const Vec3 &out) const
 	return 1.0f/M_PI;
 }
 
-float LambertBRDF::sample_f(Vec3 &in, Vec3 *out, float *pdf, Sampling &sampling, int id) const
+float LambertBRDF::sample_f(Vec3 &in, Vec3 *out, float *pdf, Sampler &sampler, int id) const
 {
-	*out = sampling.getHemisphereSample(id,1.0f);
+	*out = sampler.getCosineHemisphereSample();
 	*pdf = absCosTheta(*out)/M_PI;
     return f(in,*out);
 }

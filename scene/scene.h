@@ -19,7 +19,7 @@ class Scene
 		~Scene();
 		void build(ViewPlane &viewPlane);
         void trace(Ray &ray, ShadeRec *shadeRec);
-        float traceShadow(Ray &ray);
+        float traceShadow(Ray &ray, float maxT);
         std::vector<GeometricObject *> getObjects();
 		std::vector<Light*> m_lights;
         Settings m_settings;

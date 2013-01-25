@@ -2,10 +2,12 @@
 #define __SHADE_REC_H__
 #include "../utils/rgba.h"
 #include "../utils/vec3.h"
+#include "../brdf/brdf.h"
 #include <cfloat>
 
 class Material;
 class Triangle;
+class BRDF;
 
 class ShadeRec
 {
@@ -27,6 +29,7 @@ class ShadeRec
 		Vec3 m_uv;
         Material *m_material;
         Vec3 m_iDir;
+		BRDF *m_brdf;
 };
 
 #endif

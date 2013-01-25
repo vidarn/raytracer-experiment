@@ -3,7 +3,7 @@
 #include "../utils/rgba.h"
 #include "../utils/ray.h"
 #include "../utils/matrix4x4.h"
-#include "../sampler/sampling.h"
+#include "../sampler/sampler.h"
 #include <vector>
 #include <tiffio.h>
 #include <tiffio.hxx>
@@ -17,7 +17,7 @@ class ViewPlane
         int getNumPixels(){return m_resolution[0]*m_resolution[1];};
         int getWidth(){return m_resolution[0];};
         int getHeight(){return m_resolution[1];};
-        Ray getPixelRay(int x, int y, Sampling &sampling);
+        Ray getPixelRay(int x, int y, Sampler &sampler);
         void setPixelValue(int x, int y, RGBA color);
         void saveToTiff();
 		void setFov(float fov);
@@ -28,7 +28,7 @@ class ViewPlane
 
 		friend std::ostream& operator<<(std::ostream &out, ViewPlane &vp);
     private:
-		void getDofRay(Ray &ray, Sampling &sampling);
+		void getDofRay(Ray &ray, Sampler &sampler);
         pthread_mutex_t *m_mutexes; 
 
         std::vector<RGBA> m_pixels;

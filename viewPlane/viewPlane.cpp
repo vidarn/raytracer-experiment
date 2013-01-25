@@ -38,9 +38,9 @@ void ViewPlane::setResolution(int resX, int resY)
     m_size[1] = 1.0f*float(m_resolution[1])/float(m_resolution[0]);
 }
 
-Ray ViewPlane::getPixelRay(int x, int y, Sampling &sampling)
+Ray ViewPlane::getPixelRay(int x, int y, Sampler &sampler)
 {
-    Vec3 sample = sampling.getSquareSample(0);
+    Vec3 sample = sampler.getSquareSample();
     float posX = float(x) + sample[0];
     float posY = float(y) + sample[1];
     posX = -1.0 + 2.0*((float) posX)/((float) m_resolution[0]);
@@ -54,16 +54,16 @@ Ray ViewPlane::getPixelRay(int x, int y, Sampling &sampling)
     Ray ray(origin,direction,false);
 	ray.m_origin[0] = 0.0f;
 	ray.m_origin[1] = 0.0f;
-	getDofRay(ray, sampling);
+	getDofRay(ray, sampler);
 	ray.computePlucker();
     return ray;
 }
 
-void ViewPlane::getDofRay(Ray &ray, Sampling &sampling)
+void ViewPlane::getDofRay(Ray &ray, Sampler &sampler)
 {
 	if(m_focusDist > 0.0f){
 		Vec3 p = ray.getPointAtPos(m_focusDist);
-		ray.m_origin += sampling.getDiskSample(0)*0.2f;
+		ray.m_origin += sampler.getDiskSample()*0.2f;
 		ray.m_dir = p - ray.m_origin;
 	}
 }

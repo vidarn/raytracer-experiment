@@ -19,7 +19,7 @@ class Bucket
 		Scene *m_scene;
 	private:
 		void sample(int x, int y);
-		void buildPath(PathNode* &path, Ray &ray, Sampling &sampling, int &numNodes,const RGBA &startColor, int start, int end, int samplingId);
+		void buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &startColor, int start, int end);
 		Sampler *m_sampler;
         PathNode *m_cameraPath;
         PathNode *m_lightPath;
