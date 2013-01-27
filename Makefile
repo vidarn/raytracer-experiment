@@ -15,7 +15,7 @@ OBJ += lights/light.o lights/directional.o lights/point.o lights/area.o
 OBJ += settings/settings.o
 OBJ += file/file.o file/image.o
 FLG = -pthread -O3 `Magick++-config --cppflags --cxxflags --ldflags --libs`
-LIB = -ltiff
+LIB = -ltiff -lOpenImageIO
 
 $(OUT):$(OBJ)
 	g++ -o $(OUT) $(OBJ) $(FLG) $(LIB)

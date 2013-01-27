@@ -20,6 +20,7 @@ class Material
 {
     public:
         Material();
+        ~Material();
         Material(std::ifstream &stream);
 		void setColor(RGBA color);
         void getColor(const ShadeRec &sr, RGBA *col);
@@ -37,6 +38,9 @@ class Material
         MaterialLayer *m_layers;
         int m_numLayers;
 		RGBA *m_layerReflectionBuffers;
+		Vec3 *m_outDirs;
+		RGBA *m_outColors;
+		float *m_layerWeights;
 };
 
 class MaterialLayer

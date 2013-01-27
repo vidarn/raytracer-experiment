@@ -18,8 +18,11 @@ AreaLight::AreaLight(std::ifstream &stream, Matrix4x4 transform)
 
 float AreaLight::computeStrength(Vec3 &dir, Vec3 &point, Vec3 &samplePos, float *pdf)
 {
-    *pdf = 1.0f / m_area;
-	return m_strength * std::max(0.0f,m_normal.dot(dir));
+    *pdf =  samplePos.distanceSquared(point)/ (fabsf(m_normal.dot(dir)) * m_area);
+    if(dir.dot(m_normal) > 0.0f)
+        return m_strength;
+    else
+        return 0.0f;
 }
 
 Vec3 AreaLight::computeDirection(ShadeRec &sr, Sampler &sampler)

@@ -5,8 +5,7 @@
 #include "../utils/matrix4x4.h"
 #include "../sampler/sampler.h"
 #include <vector>
-#include <tiffio.h>
-#include <tiffio.hxx>
+#include <OpenImageIO/imageio.h>
 
 class ViewPlane
 {
@@ -19,7 +18,7 @@ class ViewPlane
         int getHeight(){return m_resolution[1];};
         Ray getPixelRay(int x, int y, Sampler &sampler);
         void setPixelValue(int x, int y, RGBA color);
-        void saveToTiff();
+        void saveToImage();
 		void setFov(float fov);
 		void setFocusDistance(float focusDist){m_focusDist = focusDist;};
 		void setResolution(int resX, int resY);

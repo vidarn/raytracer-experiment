@@ -96,7 +96,6 @@ void Bucket::sample(int x, int y)
 
             float pdf;
             col =  light->getLightColor(dir, cameraNode.m_sr.m_hitPos, lightNode.m_sr.m_hitPos, &pdf);
-			RGBA debugTmp = col;
 			float shadeVal = float(m_scene->m_lights.size());
 
             shadeVal *= m_scene->traceShadow(ray,maxT);

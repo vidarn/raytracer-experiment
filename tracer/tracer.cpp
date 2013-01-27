@@ -15,7 +15,7 @@ void Tracer::render()
 	}
     while(true){
 		sleep(2);
-		m_viewPlane->saveToTiff();
+		m_viewPlane->saveToImage();
         //std::cout << "num rays:    " << m_scene->m_numRays << std::endl;
     }
 }

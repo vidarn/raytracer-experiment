@@ -15,6 +15,9 @@ Material::Material()
     m_layers[0].m_absorbColor = m_color;
     m_layers[0].m_thickness = 0.0f;
     m_numLayers = 1;
+    m_outDirs   = new Vec3[m_numLayers];
+    m_outColors = new RGBA[m_numLayers];
+    m_layerWeights = new float[m_numLayers];
 }
 
 Material::Material(std::ifstream &stream)
@@ -60,6 +63,22 @@ Material::Material(std::ifstream &stream)
     m_layers[1].m_ior = m_ior;
     m_layers[1].m_absorbColor = m_color;
     m_layers[1].m_thickness = 0.0f;
+    
+    m_outDirs   = new Vec3[m_numLayers];
+    m_outColors = new RGBA[m_numLayers];
+    m_layerWeights = new float[m_numLayers];
+}
+Material::~Material()
+{
+    for(int i=0;i<m_numLayers;i++){
+        delete m_layers[i].m_brdf;
+    }
+    delete[] m_layers;
+    if(m_texture != 0)
+        delete m_texture;
+    delete[] m_outDirs;
+    delete[] m_outColors;
+    delete[] m_layerWeights;
 }
 
 void Material::setColor(RGBA color)
@@ -93,44 +112,41 @@ void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
     Vec3 normal(0.0f,0.0f,1.0f);
     Vec3 reflectDirTrans;
 
-    Vec3 *outDirs   = new Vec3[m_numLayers];
-    RGBA *outColors = new RGBA[m_numLayers];
-    float *layerWeights = new float[m_numLayers];
     float totalLayerWeight = 0;
     for(int i=0;i<m_numLayers;i++){
         BRDF *brdf = m_layers[i].m_brdf;
         Vec3 inDir  = invITrans;
-        outColors[i] = RGBA(1.0f,1.0f,1.0f,1.0f);
+        m_outColors[i] = RGBA(1.0f,1.0f,1.0f,1.0f);
         float ior = 1.0f;
         for(int j=0;j<i;j++){
-            outColors[i] *= 1.0f - brdf->fresnel(fabsf(inDir.m_d[2]), ior, m_layers[j].m_ior);
-            //inDir  = brdf->snell(inDir,  m_layers[j].m_ior/ior);
-            absorb(outColors + i, m_layers[j], fabsf(inDir.m_d[2]));
+            m_outColors[i] *= 1.0f - brdf->fresnel(fabsf(inDir.m_d[2]), ior, m_layers[j].m_ior);
+            inDir  = brdf->snell(inDir,  m_layers[j].m_ior/ior);
+            absorb(m_outColors + i, m_layers[j], fabsf(inDir.m_d[2]));
             ior = m_layers[j].m_ior;
         }
-        float shadeVal = m_layers[i].m_brdf->sample_f(inDir, &(outDirs[i]), pdf, sampler, sr.m_depth);
+        float shadeVal = m_layers[i].m_brdf->sample_f(inDir, &(m_outDirs[i]), pdf, sampler, sr.m_depth);
         for(int j=i-1;j>=0;j--){
             ior = 1.0f;
             if(j>0){
                 ior = m_layers[j-1].m_ior;
             }
-            absorb(outColors + i, m_layers[j], fabsf(outDirs[i].m_d[2]));
-            //outDirs[i] = brdf->snell(outDirs[i], ior/m_layers[j].m_ior);
+            absorb(m_outColors + i, m_layers[j], fabsf(m_outDirs[i].m_d[2]));
+            m_outDirs[i] = brdf->snell(m_outDirs[i], ior/m_layers[j].m_ior);
         }
         if(*pdf > 0.0f){
-            shadeVal *= fabsf(outDirs[i].m_d[2]);
+            shadeVal *= fabsf(m_outDirs[i].m_d[2]);
             shadeVal /= *pdf;
             shadeVal = std::max(0.0f,shadeVal);
-            outColors[i] *= shadeVal;
+            m_outColors[i] *= shadeVal;
             if(i == m_numLayers - 1){
-                outColors[i] *= m_layers[i].m_absorbColor;
+                m_outColors[i] *= m_layers[i].m_absorbColor;
             }
-            layerWeights[i] = std::max(outColors[i][0], std::max(outColors[i][1], outColors[i][2]));
-            totalLayerWeight += layerWeights[i];
+            m_layerWeights[i] = std::max(m_outColors[i][0], std::max(m_outColors[i][1], m_outColors[i][2]));
+            totalLayerWeight += m_layerWeights[i];
         }
         else{
-            layerWeights[i] = 0.0f;
-            outColors[i] *= 0.0f;
+            m_layerWeights[i] = 0.0f;
+            m_outColors[i] *= 0.0f;
         }
     }
 
@@ -139,27 +155,24 @@ void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
     int layer = 0;
     float tmpAccum = 0.0f;
     for(int i=0;i<m_numLayers;i++){
-        tmpAccum += layerWeights[i];
+        tmpAccum += m_layerWeights[i];
         if(layerSample < tmpAccum){
             layer = i;
-            layerPdf = layerWeights[i]/totalLayerWeight;
+            layerPdf = m_layerWeights[i]/totalLayerWeight;
             break;
         }
     }
-    *reflectedMult  = outColors[layer];
+    *reflectedMult  = m_outColors[layer];
     if(layerPdf > 0.0f)
         *reflectedMult *= 1.0f/layerPdf;
     
-    Vec3 reflectDir = normalMatrixInv.multVec3(outDirs[layer]);
+    Vec3 reflectDir = normalMatrixInv.multVec3(m_outDirs[layer]);
+    reflectDir.normalize();
     tmp = reflectDir * delta;
     tmp = hitPos + tmp;
     *nextRay = Ray(tmp,reflectDir,false);
     nextRay->computePlucker();
     nextRay->m_depth = sr.m_depth+1;
-
-    delete[] outDirs;
-    delete[] outColors;
-    delete[] layerWeights;
 
 }
 

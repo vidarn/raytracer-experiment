@@ -12,14 +12,14 @@
 int main(int argc, char** argv)
 {
     Magick::InitializeMagick(*argv);
-	const char * filename = "/tmp/out.tif";
+	const char * filename = "/tmp/out.png";
 	if(argc == 2){
 		filename = argv[1];
 	}
     ViewPlane viewPlane(filename);
     Scene scene;
     scene.build(viewPlane);
-	viewPlane.saveToTiff();
+	viewPlane.saveToImage();
     Tracer tracer(&scene, &viewPlane);
     tracer.render();
 }

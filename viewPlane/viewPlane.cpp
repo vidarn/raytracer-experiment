@@ -76,24 +76,16 @@ void ViewPlane::setPixelValue(int x, int y, RGBA color)
     pthread_mutex_unlock(&(m_mutexes[x + y*m_resolution[0]]));
 }
 
-void ViewPlane::saveToTiff()
+void ViewPlane::saveToImage()
 {
+    OIIO_NAMESPACE_USING;
     int totalNumSamples = 0;
-    struct flock fl;
-    fl.l_type   = F_WRLCK;
-    fl.l_whence = SEEK_SET;
-    fl.l_start  = 0;
-    fl.l_len    = 0;
-    fl.l_pid    = getpid();
-    int fd = open(m_filename,O_WRONLY);
-    fcntl(fd, F_SETLKW, &fl);
-    TIFF* out = TIFFOpen(m_filename, "w");
-    int sampleperpixel = 4;
+    int channels = 4;
 	int res[2] = {m_resolution[0]/2, m_resolution[1]/2};
-    char *image=new char [res[0]*res[1]*sampleperpixel];
+    char *pixels= new char [res[0]*res[1]*channels];
     for(int imageX = 0; imageX<res[0]; imageX++){
 		for(int imageY = 0; imageY<res[1]; imageY++){
-			int i = imageY * res[0] + imageX;
+			int i = (res[1] - 1 - imageY) * res[0] + imageX;
 			RGBA pixel;
 			float subPixels = 0;
 			for(int y = 0; y<2; y++){
@@ -118,40 +110,20 @@ void ViewPlane::saveToTiff()
 			pixel[1] = pow(pixel[1],1.0f/2.2f);
 			pixel[2] = pow(pixel[2],1.0f/2.2f);
 			pixel.clamp();
-			image[i*sampleperpixel] = pixel.r()*255;
-			image[i*sampleperpixel+1] = pixel.g()*255;
-			image[i*sampleperpixel+2] = pixel.b()*255;
-			image[i*sampleperpixel+3] = pixel.a()*255;
+			pixels[i*channels] = pixel.r()*255;
+			pixels[i*channels+1] = pixel.g()*255;
+			pixels[i*channels+2] = pixel.b()*255;
+			pixels[i*channels+3] = pixel.a()*255;
 		}
     }
     std::cout << "num samples: " << totalNumSamples << std::endl;
-    TIFFSetField(out, TIFFTAG_IMAGEWIDTH, res[0]);  
-    TIFFSetField(out, TIFFTAG_IMAGELENGTH,  res[1]);    
-    TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, sampleperpixel);   
-    TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);    
-    TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);    
-    TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-    tsize_t linebytes = sampleperpixel *  res[0];
-    unsigned char *buf = NULL;        
-    if (TIFFScanlineSize(out) < linebytes)
-        buf =(unsigned char *)_TIFFmalloc(linebytes);
-    else
-        buf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
-
-    TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out,  res[0]*sampleperpixel));
-
-    for (uint32 row = 0; row <  res[1]; row++)
-    {
-        memcpy(buf, &image[( res[1]-row-1)*linebytes], linebytes);    
-        if (TIFFWriteScanline(out, buf, row, 0) < 0)
-        break;
-    }
-
-    TIFFClose(out);
-    fl.l_type   = F_UNLCK;
-    fcntl(fd, F_SETLK, &fl);
-    close(fd);
+    ImageOutput *out = ImageOutput::create(m_filename);
+    if(!out)
+        std::cerr << "ERROR: Could not open image \"" << m_filename << "\" for writing" << std::endl;
+    ImageSpec spec(res[0],res[1], channels, TypeDesc::UINT8);
+    out->open(m_filename, spec);
+    out->write_image(TypeDesc::UINT8, pixels);
+    out->close();
 }
 
 void ViewPlane::setFov(float fov)

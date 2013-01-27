@@ -1,5 +1,6 @@
 #include "matrix4x4.h"
 #include <cstdlib>
+#include <string.h>
 
 Matrix4x4::Matrix4x4()
 {
@@ -17,7 +18,7 @@ Matrix4x4::Matrix4x4(float entries[4][4])
 {
 	for (int y = 0; y < 4; y++) {
 		for (int x = 0; x < 4; x++) {
-			m_entries[x+y*4] = entries[x][y];
+			m_entries[x+y*4] = entries[y][x];
 		}
 	}
 }
@@ -39,7 +40,9 @@ Matrix4x4::Matrix4x4(const Vec3 &vector)
         a = 2;
     up[a] = 1.0f;
     Vec3 u = vector.cross(up);
+	u.normalize();
     Vec3 v = vector.cross(u);
+	v.normalize();
     a = 0;
     m_entries[a + 0] = u.m_d[0];
     m_entries[a + 1] = u.m_d[1];
@@ -119,43 +122,65 @@ void Matrix4x4::setIdentity()
 
 Matrix4x4 Matrix4x4::invert()
 {
-	Matrix4x4 tmpMat;
-    for (int y = 0; y < 4; y++){
-        for (int x = 0; x < 4; x++){
-            tmpMat.m_entries[x+y*4] = m_entries[x+y*4];
+	// Shamelessy stolen from PBRT
+    int indxc[4], indxr[4];
+    int ipiv[4] = { 0, 0, 0, 0 };
+    float minv[4][4];
+    memcpy(minv, m_entries, 4*4*sizeof(float));
+    for (int i = 0; i < 4; i++) {
+        int irow = -1, icol = -1;
+        float big = 0.;
+        // Choose pivot
+        for (int j = 0; j < 4; j++) {
+            if (ipiv[j] != 1) {
+                for (int k = 0; k < 4; k++) {
+                    if (ipiv[k] == 0) {
+                        if (fabsf(minv[j][k]) >= big) {
+                            big = float(fabsf(minv[j][k]));
+                            irow = j;
+                            icol = k;
+                        }
+                    }
+                    else if (ipiv[k] > 1)
+						std::cerr << "Singular matrix in MatrixInvert";
+                }
+            }
+        }
+        ++ipiv[icol];
+        // Swap rows _irow_ and _icol_ for pivot
+        if (irow != icol) {
+            for (int k = 0; k < 4; ++k)
+                std::swap(minv[irow][k], minv[icol][k]);
+        }
+        indxr[i] = irow;
+        indxc[i] = icol;
+        if (minv[icol][icol] == 0.)
+			std::cerr << "Singular matrix in MatrixInvert";
+
+        // Set $m[icol][icol]$ to one by scaling row _icol_ appropriately
+        float pivinv = 1.f / minv[icol][icol];
+        minv[icol][icol] = 1.f;
+        for (int j = 0; j < 4; j++)
+            minv[icol][j] *= pivinv;
+
+        // Subtract this row from others to zero out their columns
+        for (int j = 0; j < 4; j++) {
+            if (j != icol) {
+                float save = minv[j][icol];
+                minv[j][icol] = 0;
+                for (int k = 0; k < 4; k++)
+                    minv[j][k] -= minv[icol][k]*save;
+            }
         }
     }
-	Matrix4x4 invMat;
-	for (int y = 0; y < 4; y++) {
-        int a = 0;
-        int x = y;
-        while(a<4 && tmpMat.m_entries[y+y*4] ==0){
-            x = (x+1)%4;
-			invMat.subMultRow(x,y,-1.0f);
-			tmpMat.subMultRow(x,y,-1.0f);
-            a++;
+    // Swap columns to reflect permutation
+    for (int j = 3; j >= 0; j--) {
+        if (indxr[j] != indxc[j]) {
+            for (int k = 0; k < 4; k++)
+                std::swap(minv[k][indxr[j]], minv[k][indxc[j]]);
         }
     }
-	for (int y = 0; y < 4; y++) {
-		for (int x = 0; x < y; x++) {
-			float mult = tmpMat.m_entries[x+y*4];
-			invMat.subMultRow(x,y,mult);
-			tmpMat.subMultRow(x,y,mult);
-		}
-		float diagVal = tmpMat.m_entries[y+y*4];
-		invMat.multRow(y,1.0/diagVal);
-		tmpMat.multRow(y,1.0/diagVal);
-	}
-	// we should now have ones in the diagonal and zeroes int the lower left half
-	// let's fix the upper right half
-	for (int y = 2; y >= 0; y--) {
-		for (int x = 3; x > y; x--) {
-			float mult = tmpMat.m_entries[x+y*4];
-			tmpMat.subMultRow(x,y,mult);
-			invMat.subMultRow(x,y,mult);
-		}
-	}
-	return invMat;
+    return Matrix4x4(minv);
 }
 
 void Matrix4x4::multRow(int row, float mult)
