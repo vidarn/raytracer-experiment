@@ -10,7 +10,7 @@ File::File(const char *filename)
     m_filename[strlen(filename)] = '\0';
 }
 
-void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings)
+void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings, ImageHandler *imageHandler)
 {
     std::vector<Material *> materials;
     // default material
@@ -44,7 +44,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
             switch(type){
                 case 0:
                     std::cout << "Material!\n";
-                    materials.push_back(new Material(stream));
+                    materials.push_back(new Material(stream,imageHandler));
                     break;
                 case 1:
                     std::cout << "Mesh!\n";

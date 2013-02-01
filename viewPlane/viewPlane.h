@@ -7,6 +7,8 @@
 #include <vector>
 #include <OpenImageIO/imageio.h>
 
+OIIO_NAMESPACE_USING;
+
 class ViewPlane
 {
     public:
@@ -36,6 +38,8 @@ class ViewPlane
 		float m_focusDist;
 		Vec3 m_origin;
 		const char *m_filename;
+        ImageOutput *m_imageOutput;
+        ImageSpec m_imageSpec;
 };
 
 #endif

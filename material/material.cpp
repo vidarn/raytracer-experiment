@@ -7,7 +7,6 @@ Material::Material()
 	m_reflectivity = 0.0f;
 	m_glossiness = 0.0f;
 	m_ior = 1.5f;
-	m_texture = 0;
     m_layerReflectionBuffers = new RGBA[1];
     m_layers = new MaterialLayer[1];
     m_layers[0].m_brdf = new LambertBRDF;
@@ -18,9 +17,11 @@ Material::Material()
     m_outDirs   = new Vec3[m_numLayers];
     m_outColors = new RGBA[m_numLayers];
     m_layerWeights = new float[m_numLayers];
+    m_imageHandler = 0;
+    m_image = -1;
 }
 
-Material::Material(std::ifstream &stream)
+Material::Material(std::ifstream &stream, ImageHandler *imageHandler)
 {
     m_color = RGBA(stream);
 	m_color[0] = pow(m_color[0],2.2f);
@@ -43,10 +44,11 @@ Material::Material(std::ifstream &stream)
         stream.read( buffer + i , sizeof(char));
     }
     buffer[len] = 0;
-    if(len > 0)
-        m_texture = new Image(buffer);
+    m_imageHandler = imageHandler;
+    if(len>0)
+        m_image = m_imageHandler->loadImage(buffer);
     else
-        m_texture = 0;
+        m_image = -1;
     delete buffer;
 
     m_numLayers = 2;
@@ -74,8 +76,6 @@ Material::~Material()
         delete m_layers[i].m_brdf;
     }
     delete[] m_layers;
-    if(m_texture != 0)
-        delete m_texture;
     delete[] m_outDirs;
     delete[] m_outColors;
     delete[] m_layerWeights;
@@ -86,17 +86,12 @@ void Material::setColor(RGBA color)
 	m_color = color;
 }
 
-void Material::getColor(const ShadeRec &sr, RGBA *col)
+RGBA Material::getColor(const ShadeRec &sr)
 {
-    if(sr.m_brdf->m_type == BRDF_DIFFUSE){
-        if(m_texture == 0)
-            *col = m_color;
-        else
-            *col = m_texture->getPixel(sr.m_uv.m_d[0], sr.m_uv.m_d[1]);
-    }
-    else{
-        *col = RGBA(1.0f,1.0f,1.0f,1.0f);
-    }
+    if(m_image == -1)
+        return m_color;
+    else
+        return m_imageHandler->getPixel(m_image,sr.m_uv.m_d[0],sr.m_uv.m_d[1]);
 }
 
 void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay, RGBA *reflectedMult, float *pdf)
@@ -139,7 +134,7 @@ void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
             shadeVal = std::max(0.0f,shadeVal);
             m_outColors[i] *= shadeVal;
             if(i == m_numLayers - 1){
-                m_outColors[i] *= m_layers[i].m_absorbColor;
+                m_outColors[i] *= getColor(sr);
             }
             m_layerWeights[i] = std::max(m_outColors[i][0], std::max(m_outColors[i][1], m_outColors[i][2]));
             totalLayerWeight += m_layerWeights[i];
@@ -221,7 +216,7 @@ void Material::shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* 
                 absorb(&accumCol, layer, fabsf(inTrans.m_d[2]));
             }
             else{
-                totalShade += layerCol * layer.m_absorbColor;
+                totalShade += layerCol * getColor(sr);
             }
         }
         shade /= pdf;

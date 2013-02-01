@@ -21,9 +21,9 @@ class Material
     public:
         Material();
         ~Material();
-        Material(std::ifstream &stream);
+        Material(std::ifstream &stream, ImageHandler *imageHandler);
 		void setColor(RGBA color);
-        void getColor(const ShadeRec &sr, RGBA *col);
+        RGBA getColor(const ShadeRec &sr);
 		void shade(ShadeRec &shadeRec, Scene *scene, Sampler &sampler, Ray *nextRay, RGBA *reflectedMult, float *pdf);
         void shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col, float pdf);
     private:
@@ -34,13 +34,14 @@ class Material
         float m_glossiness;
         float m_ior;
 		float m_thickness;
-		Image *m_texture;
         MaterialLayer *m_layers;
         int m_numLayers;
 		RGBA *m_layerReflectionBuffers;
 		Vec3 *m_outDirs;
 		RGBA *m_outColors;
 		float *m_layerWeights;
+        ImageHandler* m_imageHandler;
+        int m_image;
 };
 
 class MaterialLayer

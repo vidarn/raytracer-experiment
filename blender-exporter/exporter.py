@@ -198,6 +198,7 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             
                     
         def render(self,scene):
+            import time
             self.res_x = int(scene.render.resolution_x * (scene.render.resolution_percentage / 100.0))
             self.res_y = int(scene.render.resolution_y * (scene.render.resolution_percentage / 100.0))
             self.image_path = "/tmp/frame" + str(scene.frame_current).zfill(4) + ".tif"
@@ -216,6 +217,7 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                 pass
             last_image_update = os.stat(self.image_path).st_mtime
             while process.poll() == None:
+                time.sleep(0.5)
                 image_update = os.stat(self.image_path).st_mtime
                 if image_update != last_image_update:
                     self.update_image()

@@ -1,39 +1,55 @@
 #include "image.h"
 #include <iostream>
 
-Image::Image()
+ImageHandler::ImageHandler()
 {
-	m_width = 0;
-	m_height = 0;
-	m_pixels = 0;
+	m_cache = ImageCache::create();
+	m_cache->attribute("max_memory_MB", 500.0);
+	m_cache->attribute("autotile", 64);
+	m_cache->attribute("forcefloat", 1);
+    m_numImages = 0;
 }
 
-Image::Image(const char *filename)
+ImageHandler::~ImageHandler()
 {
-	m_image.read(filename);
-	m_width  = m_image.columns();
-	m_height = m_image.rows();
-	m_pixels = m_image.getConstPixels(0,0,m_width, m_height);
-	using namespace Magick;
-	m_invMax = 1.0f/float(MaxRGB);
+	ImageCache::destroy(m_cache);
 }
 
-RGBA Image::getPixel(float x, float y) const
+int ImageHandler::loadImage(const char *filename)
 {
+    int id = m_numImages++;
+    std::cout << "loading image " << filename << std::endl;
+    m_images.insert(std::make_pair(id,ustring(filename)));
+    return id;
+}
+
+RGBA ImageHandler::getPixel(int image, float x, float y)
+{
+    ustring &filename = m_images[image];
 	RGBA ret;
-	if(m_width > 0 && m_height > 0){
-		int ix = x * m_width;
-		int iy = y * m_height;
-		ix = ix % int(m_width);
-		if(ix < 0)
-			ix += m_width;
-		iy = m_height - iy;
-		iy = iy % int(m_height);
-		if(iy < 0)
-			iy += m_height;
-		iy *= m_width;
-		const Magick::PixelPacket *p = m_pixels + ix + iy;
-		ret = RGBA(p->red*m_invMax, p->green*m_invMax, p->blue*m_invMax, p->opacity*m_invMax);
+	int channels = 4;
+	float pixels[channels];
+	ImageSpec spec;
+	bool ok = m_cache->get_imagespec(filename, spec);
+	if(ok){
+        if(x<0.0f)
+            x = 1.0f - fmodf(-x,1.0f);
+        else
+            x = fmodf(x,1.0f);
+        if(y<0.0f)
+            y = 1.0f - fmodf(-y,1.0f);
+        else
+            y = fmodf(y,1.0f);
+		int ix = x * spec.width;
+		int iy = (1.0f-y) * spec.height;
+		ok = m_cache->get_pixels(filename, 0, 0, ix, ix+1, iy, iy+1, 0, 1, TypeDesc::FLOAT, pixels);
+        if(ok)
+            ret = RGBA(pixels[0], pixels[1], pixels[2], pixels[3]);
+        else
+            std::cout << geterror() << " " << filename <<std::endl;
 	}
+    else{
+        std::cout << geterror() << " " << filename <<std::endl;
+    }
 	return ret;
 }

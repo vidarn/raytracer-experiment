@@ -1,20 +1,23 @@
 #ifndef __IMAGE_H_
 #define __IMAGE_H_
-#include <Magick++.h>
 #include "../utils/rgba.h"
+#include <OpenImageIO/imagecache.h>
 
-class Image
+OIIO_NAMESPACE_USING;
+
+typedef std::map<int, ustring> ImageMap;
+
+class ImageHandler
 {
 	public:
-		Image();
-		Image(const char *filename);
-		RGBA getPixel(float x, float y) const;
+		ImageHandler();
+		~ImageHandler();
+        int loadImage(const char *filename);
+		RGBA getPixel(int image, float x, float y);
 	private:
-		float m_invMax;
-		float m_width;
-		float m_height;
-		const Magick::PixelPacket *m_pixels;
-		Magick::Image m_image;
+		ImageCache *m_cache;
+        ImageMap m_images;
+        int m_numImages;
 };
 
 #endif /* end of include guard: __IMAGE_H_ */

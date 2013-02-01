@@ -7,11 +7,9 @@
 #include "file/file.h"
 #include "file/image.h"
 #include "brdf/lambert.h"
-#include <Magick++.h>
 
 int main(int argc, char** argv)
 {
-    Magick::InitializeMagick(*argv);
 	const char * filename = "/tmp/out.png";
 	if(argc == 2){
 		filename = argv[1];

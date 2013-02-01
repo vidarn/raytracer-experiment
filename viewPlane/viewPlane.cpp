@@ -10,6 +10,7 @@ ViewPlane::ViewPlane(const char *filename)
 {
     m_mutexes = NULL;
 	m_filename = filename;
+    m_imageOutput = ImageOutput::create(m_filename);
 }
 
 ViewPlane::ViewPlane()
@@ -36,6 +37,9 @@ void ViewPlane::setResolution(int resX, int resY)
     }
 	m_size[0] = 1.0f;
     m_size[1] = 1.0f*float(m_resolution[1])/float(m_resolution[0]);
+	int res[2] = {m_resolution[0]/2, m_resolution[1]/2};
+    int channels = 4;
+    m_imageSpec = ImageSpec(res[0],res[1], channels, TypeDesc::UINT8);
 }
 
 Ray ViewPlane::getPixelRay(int x, int y, Sampler &sampler)
@@ -78,52 +82,61 @@ void ViewPlane::setPixelValue(int x, int y, RGBA color)
 
 void ViewPlane::saveToImage()
 {
-    OIIO_NAMESPACE_USING;
     int totalNumSamples = 0;
     int channels = 4;
 	int res[2] = {m_resolution[0]/2, m_resolution[1]/2};
-    char *pixels= new char [res[0]*res[1]*channels];
-    for(int imageX = 0; imageX<res[0]; imageX++){
-		for(int imageY = 0; imageY<res[1]; imageY++){
-			int i = (res[1] - 1 - imageY) * res[0] + imageX;
-			RGBA pixel;
-			float subPixels = 0;
-			for(int y = 0; y<2; y++){
-				for(int x = 0; x<2; x++){
-					int a = (imageY*2+y)*m_resolution[0] + imageX*2+x;
-					RGBA tmpPixel = m_pixels[a];
-					if(m_numSamples[a] > 0){
-						tmpPixel *= 1.0f/float(m_numSamples[a]);
-						subPixels += 1.0f;
-					}
-					else{
-						tmpPixel = RGBA(0.0f,0.0f,0.0f,0.0f);
-					}
-					tmpPixel.clamp();
-					pixel += tmpPixel;
-					totalNumSamples += m_numSamples[a];
-				}
-			}
-			if(subPixels > 0.0f)
-				pixel *= 1.0f/subPixels;
-			pixel[0] = pow(pixel[0],1.0f/2.2f);
-			pixel[1] = pow(pixel[1],1.0f/2.2f);
-			pixel[2] = pow(pixel[2],1.0f/2.2f);
-			pixel.clamp();
-			pixels[i*channels] = pixel.r()*255;
-			pixels[i*channels+1] = pixel.g()*255;
-			pixels[i*channels+2] = pixel.b()*255;
-			pixels[i*channels+3] = pixel.a()*255;
-		}
-    }
-    std::cout << "num samples: " << totalNumSamples << std::endl;
-    ImageOutput *out = ImageOutput::create(m_filename);
-    if(!out)
+    char *pixels= new char [res[0]*channels];
+    if(!m_imageOutput)
         std::cerr << "ERROR: Could not open image \"" << m_filename << "\" for writing" << std::endl;
-    ImageSpec spec(res[0],res[1], channels, TypeDesc::UINT8);
-    out->open(m_filename, spec);
-    out->write_image(TypeDesc::UINT8, pixels);
-    out->close();
+    else{
+        struct flock fl;
+        fl.l_type = F_WRLCK;
+        fl.l_whence = SEEK_SET;
+        fl.l_start = 0;
+        fl.l_len = 0;
+        fl.l_pid = getpid();
+        int fd = open(m_filename,O_WRONLY);
+        fcntl(fd,F_SETLK, &fl);
+        m_imageOutput->open(m_filename, m_imageSpec);
+        for(int imageY = 0; imageY<res[1]; imageY++){
+            for(int imageX = 0; imageX<res[0]; imageX++){
+                RGBA pixel;
+                float subPixels = 0;
+                for(int y = 0; y<2; y++){
+                    for(int x = 0; x<2; x++){
+                        int a = (m_resolution[1] - 1 -((imageY)*2+y))*m_resolution[0] + imageX*2+x;
+                        RGBA tmpPixel = m_pixels[a];
+                        if(m_numSamples[a] > 0){
+                            tmpPixel *= 1.0f/float(m_numSamples[a]);
+                            subPixels += 1.0f;
+                        }
+                        else{
+                            tmpPixel = RGBA(0.0f,0.0f,0.0f,0.0f);
+                        }
+                        tmpPixel.clamp();
+                        pixel += tmpPixel;
+                        totalNumSamples += m_numSamples[a];
+                    }
+                }
+                if(subPixels > 0.0f)
+                    pixel *= 1.0f/subPixels;
+                pixel[0] = pow(pixel[0],1.0f/2.2f);
+                pixel[1] = pow(pixel[1],1.0f/2.2f);
+                pixel[2] = pow(pixel[2],1.0f/2.2f);
+                pixel.clamp();
+                pixels[imageX*channels] = pixel.r()*255;
+                pixels[imageX*channels+1] = pixel.g()*255;
+                pixels[imageX*channels+2] = pixel.b()*255;
+                pixels[imageX*channels+3] = pixel.a()*255;
+            }
+            m_imageOutput->write_scanline(imageY, 0, TypeDesc::UINT8, pixels);
+        }
+        std::cout << "num samples: " << totalNumSamples << std::endl;
+        m_imageOutput->close();
+        fl.l_type = F_UNLCK;
+        fcntl(fd,F_SETLK,&fl);
+        close(fd);
+    }
 }
 
 void ViewPlane::setFov(float fov)

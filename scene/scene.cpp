@@ -16,7 +16,7 @@ void Scene::build(ViewPlane &viewPlane)
 {
 	std::vector<GeometricObject *> objects;
     File file("/tmp/test.scn");
-    file.read(objects, m_lights,viewPlane,m_settings);
+    file.read(objects, m_lights,viewPlane,m_settings,&m_imageHandler);
 	std::vector<Triangle *> triangles;
 	for(int i=0; i<objects.size();i++){
 		objects[i]->refine(triangles);

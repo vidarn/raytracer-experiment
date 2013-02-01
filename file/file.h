@@ -8,7 +8,7 @@ class File
 {
     public:
         File(const char *filename);
-        void read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings);
+        void read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings, ImageHandler *imageHandler);
     private:
         char *m_filename;
 };

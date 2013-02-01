@@ -11,6 +11,7 @@
 #include "../aggregates/kdTree.h"
 #include "../viewPlane/viewPlane.h"
 #include "../settings/settings.h"
+#include "../file/image.h"
 
 class Scene
 {
@@ -28,6 +29,7 @@ class Scene
 		std::vector<GeometricObject *> m_objects;
 		BVH m_triangles;
 		RGBA m_bkgColor;
+        ImageHandler m_imageHandler;
 };
 
 #endif
