@@ -1,0 +1,19 @@
+export shader parameters from blender
+export shader groups from blender
+use shading normal from osl
+-- pass closure parameters to brdfs
+move brdfs to one class? (to avoid all the malloc's)
+speed up blender export
+use IMath classes for vectors etc.
+add other transformations
+add derivative information
+move to CMake?
+implement brdfs described in osl spec
+implement QMC
+implement refraction
+implement emissive geometry
+implement environment shader
+implement motion blur
+implement bidirectional path tracing
+implement sss
+implement strand rendering

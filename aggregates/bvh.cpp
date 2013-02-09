@@ -95,7 +95,7 @@ void BVH::findSAHSplit(int dim, int start, int end, AABoundingBox &bboxCentroids
     SAHBucket buckets[numBuckets];
     for(int i=start; i<end; i++){
         BVHTriangleInfo &node = m_buildData[i];
-        int b = numBuckets * (node.m_centroid.m_d[dim] - bboxCentroids.min(dim) ) /
+        int b = numBuckets * (node.m_centroid[dim] - bboxCentroids.min(dim) ) /
             (bboxCentroids.max(dim) - bboxCentroids.min(dim));
         if(b == numBuckets)
             b = numBuckets - 1;
@@ -229,7 +229,7 @@ void BVH::recursiveWriteObjFile(std::vector<Vec3> &points, int offset )
 
 bool CompareToBucket::operator()(const BVHTriangleInfo &a) const
 {
-    int b = m_numBuckets * (a.m_centroid.m_d[m_dim] - m_centroidBounds.min(m_dim)) / 
+    int b = m_numBuckets * (a.m_centroid[m_dim] - m_centroidBounds.min(m_dim)) / 
                         (m_centroidBounds.max(m_dim) - m_centroidBounds.min(m_dim));
     if(b == m_numBuckets)
         b--;

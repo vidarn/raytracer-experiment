@@ -1,6 +1,8 @@
 #include "image.h"
 #include <iostream>
 
+using namespace OIIO;
+
 ImageHandler::ImageHandler()
 {
 	m_cache = ImageCache::create();
@@ -53,3 +55,4 @@ RGBA ImageHandler::getPixel(int image, float x, float y)
     }
 	return ret;
 }
+

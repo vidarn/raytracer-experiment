@@ -1,0 +1,6 @@
+#include "stdosl.h"
+shader
+vn_default ()
+{
+   Ci = 0.8 * diffuse(N);
+}

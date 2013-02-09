@@ -32,7 +32,7 @@ class ViewPlane
 		void getDofRay(Ray &ray, Sampler &sampler);
         pthread_mutex_t *m_mutexes; 
 
-        std::vector<RGBA> m_pixels;
+        RGBA* m_pixels;
         std::vector<int> m_numSamples;
         float m_size[2];
 		float m_focusDist;

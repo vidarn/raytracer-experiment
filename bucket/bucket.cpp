@@ -1,12 +1,16 @@
 #include "bucket.h"
 #include "../sampler/sampler.h"
 
-Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id):m_viewPlane(viewPlane), m_scene(scene)
+Bucket::Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id,
+		OSL::ShadingSystem *shadingSys)
+:m_viewPlane(viewPlane), m_scene(scene)
 {
 	m_id = id;
     m_sampler = new RandomSampler(134134+42343*id);
 	m_cameraPath = new PathNode[scene->m_settings.m_cameraBounces];
 	m_lightPath  = new PathNode[scene->m_settings.m_lightBounces ];
+	m_shadingSystem = shadingSys;
+	m_shadingContext = m_shadingSystem->get_context(NULL);
 }
 
 Bucket::~Bucket()
@@ -35,9 +39,21 @@ void Bucket::render(int startX, int startY)
     }
 }
 
+void Bucket::getCol(ShadeRec &sr, RGBA &finalCol)
+{
+	OSL::ShaderGlobals sg;
+	memset(&sg,0,sizeof(OSL::ShaderGlobals));
+	for(int i=0;i<3;i++){
+		sg.P[i] = sr.m_hitPos[i];
+		sg.Ng[i] = sg.N[i] = sr.m_normal[i];
+		sg.I[i] = sr.m_iDir[i];
+	}
+	sg.u = sr.m_uv[0];
+	sg.v = sr.m_uv[1];
+}
+
 void Bucket::buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &startColor, int start, int end)
 {
-    float pdf;
     RGBA col;
     RGBA tmpCol;
     RGBA nextCol = startColor;
@@ -48,9 +64,9 @@ void Bucket::buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &star
         node.m_sr.m_depth = i;
         m_scene->trace(ray,&node.m_sr);
 		if(node.m_sr.m_hit){
-			node.m_incident = ray.m_dir.getNormalized();
-			node.m_incident.invert();
-			node.m_sr.m_material->shade(node.m_sr,m_scene, *m_sampler, &ray, &tmpCol, &pdf);
+			node.m_incident = ray.m_dir.normalized();
+			node.m_incident *= -1.0f;
+			node.m_sr.m_material->shade(node.m_sr,m_scene, *m_sampler, &ray, &tmpCol, m_shadingContext);
 			node.m_accumColor = nextCol;
 			nextCol *= tmpCol;
 			numNodes++;
@@ -66,8 +82,8 @@ void Bucket::sample(int x, int y)
 	int lightBounces = m_scene->m_settings.m_lightBounces;
 	int cameraBounces = m_scene->m_settings.m_cameraBounces;
     Ray ray = m_viewPlane->getPixelRay(x,y,*m_sampler);
-    RGBA finalCol;
-    RGBA col;
+    RGBA finalCol(0.0f);
+    RGBA col(0.0f);
 	int numCameraNodes = 0;
 	int numLightNodes = 1;
 
@@ -84,7 +100,7 @@ void Bucket::sample(int x, int y)
 		for(int i=0;i<numLightNodes;i++){
 			PathNode &lightNode  =  m_lightPath[i];
 			Vec3 dir = lightNode.m_sr.m_hitPos - cameraNode.m_sr.m_hitPos;
-            float maxT = dir.magnitude();
+            float maxT = dir.length();
 			dir.normalize();
 
 			float delta = 0.001f;
@@ -96,11 +112,11 @@ void Bucket::sample(int x, int y)
 
             float pdf;
             col =  light->getLightColor(dir, cameraNode.m_sr.m_hitPos, lightNode.m_sr.m_hitPos, &pdf);
-			float shadeVal = float(m_scene->m_lights.size());
+			float shadeVal = float(m_scene->m_lights.size())/pdf;
 
             shadeVal *= m_scene->traceShadow(ray,maxT);
             col *= cameraNode.m_accumColor;
-            cameraNode.m_sr.m_material->shade(cameraNode.m_incident, dir, cameraNode.m_sr, &col, pdf);
+            cameraNode.m_sr.m_material->shade(cameraNode.m_incident, dir, cameraNode.m_sr, &col, m_shadingContext);
             col *= shadeVal;
 
             finalCol += col;
@@ -109,6 +125,9 @@ void Bucket::sample(int x, int y)
     if(numCameraNodes != 0){
         finalCol[3] = 1.0f;
     }
+	else{
+        finalCol = RGBA(0.0f,0.0f,0.0f,0.0f);
+	}
 
     m_viewPlane->setPixelValue(x,y,finalCol);
 }

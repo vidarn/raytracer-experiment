@@ -33,6 +33,6 @@ Vec3 Sampler::getUniformHemisphereSample(){
 
 Vec3 Sampler::getCosineHemisphereSample(){
     Vec3 ret = getDiskSample();
-    ret[2] = sqrtf(std::max(0.0f, 1.0f - ret.m_d[0] * ret.m_d[0] - ret.m_d[1] * ret.m_d[1]));
+    ret[2] = sqrtf(std::max(0.0f, 1.0f - ret[0] * ret[0] - ret[1] * ret[1]));
     return ret;
 }

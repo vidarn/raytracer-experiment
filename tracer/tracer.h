@@ -5,12 +5,14 @@
 #include "../sampler/sampler.h"
 #include "../bucket/bucket.h"
 #include <pthread.h>
+#include <OSL/oslexec.h>
+#include "../osl/simplerend.h"
 
 class Tracer
 {
 	public:
-        Tracer(Scene *scene, ViewPlane *viewPlane):m_scene(scene),m_viewPlane(viewPlane){};
-        ~Tracer(){};
+        Tracer(Scene *scene, ViewPlane *viewPlane);
+        ~Tracer();
         void render();
 
 	private:

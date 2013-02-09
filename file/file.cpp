@@ -10,11 +10,11 @@ File::File(const char *filename)
     m_filename[strlen(filename)] = '\0';
 }
 
-void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings, ImageHandler *imageHandler)
+void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings, OSL::ShadingSystem *shadingSys)
 {
     std::vector<Material *> materials;
     // default material
-    materials.push_back(new Material);
+    materials.push_back(new Material(shadingSys));
     std::ifstream stream;
     stream.open(m_filename);
 	if(stream.good()){
@@ -44,7 +44,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
             switch(type){
                 case 0:
                     std::cout << "Material!\n";
-                    materials.push_back(new Material(stream,imageHandler));
+                    materials.push_back(new Material(stream, shadingSys));
                     break;
                 case 1:
                     std::cout << "Mesh!\n";

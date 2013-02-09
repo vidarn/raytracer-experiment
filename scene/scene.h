@@ -11,7 +11,18 @@
 #include "../aggregates/kdTree.h"
 #include "../viewPlane/viewPlane.h"
 #include "../settings/settings.h"
-#include "../file/image.h"
+#include <OSL/oslexec.h>
+#include "../osl/simplerend.h"
+#include "../brdf/lambert.h"
+#include "../brdf/specularReflection.h"
+#include "../brdf/torranceSparrow.h"
+
+enum ClosureIDs {
+    DIFFUSE_ID,
+    SPECULAR_ID,
+    TORRANCE_SPARROW_ID,
+};
+
 
 class Scene
 {
@@ -25,11 +36,14 @@ class Scene
 		std::vector<Light*> m_lights;
         Settings m_settings;
         int m_numRays;
+		OSL::ShadingSystem *m_shadingSys;
 	private:
+		void registerClosures();
 		std::vector<GeometricObject *> m_objects;
 		BVH m_triangles;
 		RGBA m_bkgColor;
-        ImageHandler m_imageHandler;
+		OSL::SimpleRenderer m_rend;
+		OSL::ErrorHandler m_errorhandler;
 };
 
 #endif

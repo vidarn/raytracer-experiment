@@ -14,7 +14,7 @@ float PhongBRDF::f(Vec3 &in, Vec3 &out) const
 float PhongBRDF::sample_f(Vec3 &in, Vec3 *out, float *pdf, Sampler &sampler, int id) const
 {
     Vec3 normal(0.0f, 0.0f, 1.0f);
-    Vec3 refl(-in.m_d[0],-in.m_d[1],in.m_d[2]);
+    Vec3 refl(-in[0],-in[1],in[2]);
 	*out = sampler.getUniformHemisphereSample();
 	*pdf = 0.25f/M_PI;
     return 1.0f / out->dot(normal);

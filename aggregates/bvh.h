@@ -78,7 +78,7 @@ class CompareToMid
 {
 	public:
 		CompareToMid(int dim,float mid):m_dim(dim),m_mid(mid){};
-		bool operator()(const BVHTriangleInfo &a){return a.m_centroid.get(m_dim) < m_mid;}
+		bool operator()(const BVHTriangleInfo &a){return a.m_centroid[m_dim] < m_mid;}
 	private:
 		int m_dim;
 		float m_mid;

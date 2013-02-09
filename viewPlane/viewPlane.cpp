@@ -24,8 +24,8 @@ void ViewPlane::setResolution(int resX, int resY)
     if(resY == 0){
         m_resolution[1] = m_resolution[0];
     }
-    m_pixels.reserve(m_resolution[0]*m_resolution[1]);
-    m_pixels.resize(m_resolution[0]*m_resolution[1]);
+	m_pixels = new RGBA[m_resolution[0] * m_resolution[1]];
+	memset(m_pixels,0,sizeof(RGBA) * m_resolution[0] * m_resolution[1]);
     m_numSamples.reserve(m_resolution[0]*m_resolution[1]);
     m_numSamples.resize(m_resolution[0]*m_resolution[1]);
     if(m_mutexes != NULL) 
@@ -100,7 +100,7 @@ void ViewPlane::saveToImage()
         m_imageOutput->open(m_filename, m_imageSpec);
         for(int imageY = 0; imageY<res[1]; imageY++){
             for(int imageX = 0; imageX<res[0]; imageX++){
-                RGBA pixel;
+                RGBA pixel(0);
                 float subPixels = 0;
                 for(int y = 0; y<2; y++){
                     for(int x = 0; x<2; x++){
@@ -113,7 +113,7 @@ void ViewPlane::saveToImage()
                         else{
                             tmpPixel = RGBA(0.0f,0.0f,0.0f,0.0f);
                         }
-                        tmpPixel.clamp();
+						clamp(tmpPixel);
                         pixel += tmpPixel;
                         totalNumSamples += m_numSamples[a];
                     }
@@ -123,11 +123,11 @@ void ViewPlane::saveToImage()
                 pixel[0] = pow(pixel[0],1.0f/2.2f);
                 pixel[1] = pow(pixel[1],1.0f/2.2f);
                 pixel[2] = pow(pixel[2],1.0f/2.2f);
-                pixel.clamp();
-                pixels[imageX*channels] = pixel.r()*255;
-                pixels[imageX*channels+1] = pixel.g()*255;
-                pixels[imageX*channels+2] = pixel.b()*255;
-                pixels[imageX*channels+3] = pixel.a()*255;
+				clamp(pixel);
+                pixels[imageX*channels]   = pixel.r*255;
+                pixels[imageX*channels+1] = pixel.g*255;
+                pixels[imageX*channels+2] = pixel.b*255;
+                pixels[imageX*channels+3] = pixel.a*255;
             }
             m_imageOutput->write_scanline(imageY, 0, TypeDesc::UINT8, pixels);
         }
@@ -151,16 +151,16 @@ std::ostream& operator<<(std::ostream &out, ViewPlane &vp)
     for(int y=0; y< vp.m_resolution[1];y++){
         for(int x=0; x< vp.m_resolution[0];x++){
             RGBA color = vp.m_pixels[x+y*vp.m_resolution[0]];
-            if(color.r() < 0.25){
+            if(color.r < 0.25){
                 out << "  ";
             }
-            if(color.r() >= 0.25 && color.r() < 0.5){
+            if(color.r >= 0.25 && color.r < 0.5){
                 out << ".'";
             }
-            if(color.r() >= 0.5 && color.r() < 0.75){
+            if(color.r >= 0.5 && color.r < 0.75){
                 out << "//";
             }
-            if(color.r() >= 0.75){
+            if(color.r >= 0.75){
                 out << "XX";
             }
         }

@@ -5,24 +5,31 @@
 #include "../sampler/randomSampler.h"
 #include "../sampler/stratifiedSampler.h"
 #include <vector>
+#include <OSL/oslexec.h>
+#include <OSL/oslclosure.h>
 
 class PathNode;
 
 class Bucket
 {
 	public:
-		Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id);
+		Bucket(ViewPlane *viewPlane, Scene *scene, unsigned int id,
+				OSL::ShadingSystem *shadingSys);
         ~Bucket();
 		void render(int startX, int startY);
 		int m_id;
 		ViewPlane *m_viewPlane;
 		Scene *m_scene;
 	private:
+		void getCol(ShadeRec &sr, RGBA &finalCol);
+		void buildPath(PathNode* &path, Ray &ray, int &numNodes,
+				const RGBA &startColor, int start, int end);
 		void sample(int x, int y);
-		void buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &startColor, int start, int end);
 		Sampler *m_sampler;
         PathNode *m_cameraPath;
         PathNode *m_lightPath;
+		OSL::ShadingSystem *m_shadingSystem;
+		OSL::ShadingContext *m_shadingContext;
 };
 
 class PathNode

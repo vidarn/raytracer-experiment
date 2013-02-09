@@ -38,15 +38,15 @@ bool AABoundingBox::testBBox(Ray &ray, float &retTmin, float &retTmax) const
     retTmin = FLT_MAX;
 	retTmax = -FLT_MAX;
 	for (int i = 0; i < 3; i++) {
-		if(ray.m_dir.m_d[i] == 0.0){
-			if(ray.m_origin.m_d[i] < m_min[i] || ray.m_origin.m_d[i] > m_max[i]){
+		if(ray.m_dir[i] == 0.0){
+			if(ray.m_origin[i] < m_min[i] || ray.m_origin[i] > m_max[i]){
 				return false;
 			}
 			continue;
 		}
-		float invD = 1.0/ray.m_dir.m_d[i];
-		tmin = (m_min[i]-ray.m_origin.m_d[i])*invD;
-		tmax = (m_max[i]-ray.m_origin.m_d[i])*invD;
+		float invD = 1.0/ray.m_dir[i];
+		tmin = (m_min[i]-ray.m_origin[i])*invD;
+		tmax = (m_max[i]-ray.m_origin[i])*invD;
 		if(invD < 0.0){
 			float tmp = tmin;
 			tmin = tmax;
@@ -65,16 +65,16 @@ bool AABoundingBox::testBBox(Ray &ray, float &retTmin, float &retTmax) const
 bool AABoundingBox::hit(Ray &ray, Vec3 &invDir, bool *dirIsNegative ) const
 {
     const float *bounds[2] = {m_min,m_max};
-    float tmin =  (bounds[  dirIsNegative[0]][0] - ray.m_origin.m_d[0]) * invDir.m_d[0];
-    float tmax =  (bounds[1-dirIsNegative[0]][0] - ray.m_origin.m_d[0]) * invDir.m_d[0];
-    float tymin = (bounds[  dirIsNegative[1]][1] - ray.m_origin.m_d[1]) * invDir.m_d[1];
-    float tymax = (bounds[1-dirIsNegative[1]][1] - ray.m_origin.m_d[1]) * invDir.m_d[1];
+    float tmin =  (bounds[  dirIsNegative[0]][0] - ray.m_origin[0]) * invDir[0];
+    float tmax =  (bounds[1-dirIsNegative[0]][0] - ray.m_origin[0]) * invDir[0];
+    float tymin = (bounds[  dirIsNegative[1]][1] - ray.m_origin[1]) * invDir[1];
+    float tymax = (bounds[1-dirIsNegative[1]][1] - ray.m_origin[1]) * invDir[1];
     if((tmin > tymax) || (tymin > tmax))
         return false;
     if(tymin > tmin) tmin = tymin;
     if(tymax < tmax) tmax = tymax;
-    float tzmin = (bounds[  dirIsNegative[2]][2] - ray.m_origin.m_d[2]) * invDir.m_d[2];
-    float tzmax = (bounds[1-dirIsNegative[2]][2] - ray.m_origin.m_d[2]) * invDir.m_d[2];
+    float tzmin = (bounds[  dirIsNegative[2]][2] - ray.m_origin[2]) * invDir[2];
+    float tzmax = (bounds[1-dirIsNegative[2]][2] - ray.m_origin[2]) * invDir[2];
     if((tmin > tzmax) || (tzmin > tmax))
         return false;
     return true;
@@ -135,7 +135,7 @@ void AABoundingBox::join(const AABoundingBox &other)
 void AABoundingBox::join(const Vec3 &other)
 {
     for(int i=0;i<3;i++){
-        m_min[i] = m_min[i] < other.get(i) ? m_min[i] : other.get(i);
-        m_max[i] = m_max[i] > other.get(i) ? m_max[i] : other.get(i);
+        m_min[i] = m_min[i] < other[i] ? m_min[i] : other[i];
+        m_max[i] = m_max[i] > other[i] ? m_max[i] : other[i];
     }
 }

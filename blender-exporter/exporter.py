@@ -7,9 +7,9 @@ import fcntl
 def color_to_stream(color,stream):
     for i in range(3):
         c = ctypes.c_float(color[i])
-        stream.write(bytes(c))
+        #stream.write(bytes(c))
     c = ctypes.c_float(1.0)
-    stream.write(bytes(c))
+    #stream.write(bytes(c))
     
 def string_to_stream(string, stream):
     a = ctypes.c_int(len(string))
@@ -98,27 +98,23 @@ class PointLight():
       
       
 class AreaLight():
-    def __init__(self,light,matrix):
-        self.matrix = matrix
-        self.strength = light.energy
-        self.color = light.color
-        self.size_x = light.size
-        if light.shape == 'SQUARE':
-            self.size_y = light.size
-        else:
-            self.size_y = light.size_y
         
-    def to_stream(self,stream):
+    @staticmethod
+    def to_stream(light,matrix,stream):
         type = ctypes.c_int(3)
         stream.write(bytes(type))
-        self.matrix.to_stream(stream)
-        strength = ctypes.c_float(self.strength)
+        matrix.to_stream(stream)
+        strength = ctypes.c_float(light.energy)
         stream.write(bytes(strength))
-        size = ctypes.c_float(self.size_x)
+        size = ctypes.c_float(light.size)
         stream.write(bytes(size))
-        size = ctypes.c_float(self.size_y)
+        if light.shape == 'SQUARE':
+            size_y = light.size
+        else:
+            size_y = light.size_y
+        size = ctypes.c_float(size_y)
         stream.write(bytes(size))
-        color_to_stream(self.color,stream)
+        color_to_stream(light.color,stream)
         
 class Material():
     def __init__(self,material):
@@ -128,19 +124,7 @@ class Material():
         mat = self.material
         type = ctypes.c_int(0)
         stream.write(bytes(type))
-        color_to_stream(mat.diffuse_color,stream)
-        color_to_stream(mat.raytracer.coating_color,stream)
-        metal = ctypes.c_char(mat.raytracer.metal)
-        stream.write(bytes(metal))
-        spec_int = ctypes.c_float(mat.raytracer.reflectivity/100.0)
-        stream.write(bytes(spec_int))
-        coat_thickness = ctypes.c_float(mat.raytracer.thickness)
-        stream.write(bytes(coat_thickness))
-        spec_gloss = ctypes.c_float(mat.raytracer.glossiness)
-        stream.write(bytes(spec_gloss))
-        IOR = ctypes.c_float(mat.raytracer.IOR)
-        stream.write(bytes(IOR))
-        string_to_stream(mat.raytracer.diffuse_texture,stream)
+        string_to_stream(os.path.splitext(mat.raytracer.diffuse_texture)[0],stream)
 
 class RaytracerRenderEngine(bpy.types.RenderEngine):
         bl_idname = 'RAYTRACER'
@@ -167,15 +151,6 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                         self.materials.append(mat)
                     else:
                         print("object " + obj.name + " does not have any material")
-                if obj.type == 'LAMP':
-                    #if obj.data.type == 'POINT':
-                     #   print("point light!")
-                      #  l = PointLight(obj.data,m)
-                       # self.objects.append(l)
-                    if obj.data.type == 'AREA':
-                        print("area light!")
-                        l = AreaLight(obj.data,m)
-                        self.objects.append(l)
                         
         def export_camera(self,scene,stream):
             camera = scene.camera.data
@@ -209,6 +184,13 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                 mat.to_stream(stream)
             for obj in self.objects:
                 obj.to_stream(stream)
+            for obj in bpy.data.objects:
+                m = Matrix(self.camera_matrix * obj.matrix_world)
+                if obj.type == 'LAMP':
+                    if obj.data.type == 'AREA':
+                        print("area light!")
+                        l = AreaLight.to_stream(obj.data,m, stream)
+                        self.objects.append(l)
             stream.close()
             print("--------- done exporting ------------")
             args = (self.path_to_executable,self.image_path)

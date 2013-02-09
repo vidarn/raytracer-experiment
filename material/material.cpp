@@ -1,244 +1,177 @@
 #include "material.h"
 #include "../scene/scene.h"
 
-Material::Material()
+Material::Material(OSL::ShadingSystem *shadingSys)
 {
-    m_color = RGBA(0.4f,0.4f,0.4f,1.0f);
-	m_reflectivity = 0.0f;
-	m_glossiness = 0.0f;
-	m_ior = 1.5f;
-    m_layerReflectionBuffers = new RGBA[1];
-    m_layers = new MaterialLayer[1];
-    m_layers[0].m_brdf = new LambertBRDF;
-    m_layers[0].m_ior = m_ior;
-    m_layers[0].m_absorbColor = m_color;
-    m_layers[0].m_thickness = 0.0f;
-    m_numLayers = 1;
-    m_outDirs   = new Vec3[m_numLayers];
-    m_outColors = new RGBA[m_numLayers];
-    m_layerWeights = new float[m_numLayers];
-    m_imageHandler = 0;
-    m_image = -1;
+    m_shadingSystem = shadingSys;
+    shadingSys->ShaderGroupBegin();
+    shadingSys->Shader("surface","/home/vidar/code/raytracer/shaders/vn_default",NULL);
+    m_shader = shadingSys->state();
+    shadingSys->ShaderGroupEnd();
 }
 
-Material::Material(std::ifstream &stream, ImageHandler *imageHandler)
+Material::Material(std::ifstream &stream,OSL::ShadingSystem *shadingSys)
 {
-    m_color = RGBA(stream);
-	m_color[0] = pow(m_color[0],2.2f);
-	m_color[1] = pow(m_color[1],2.2f);
-	m_color[2] = pow(m_color[2],2.2f);
-    m_coatingColor = RGBA(stream);
-	m_coatingColor[0] = pow(m_coatingColor[0],2.2f);
-	m_coatingColor[1] = pow(m_coatingColor[1],2.2f);
-	m_coatingColor[2] = pow(m_coatingColor[2],2.2f);
-    char metal;
-    stream.read( reinterpret_cast<char*>( &metal ), sizeof metal );
-    stream.read( reinterpret_cast<char*>( &m_reflectivity ), sizeof m_reflectivity );
-    stream.read( reinterpret_cast<char*>( &m_thickness    ), sizeof m_thickness    );
-    stream.read( reinterpret_cast<char*>( &m_glossiness   ), sizeof m_glossiness   );
-    stream.read( reinterpret_cast<char*>( &m_ior          ), sizeof m_ior          );
     int len;
     stream.read( reinterpret_cast<char*>( &len            ), sizeof len            );
-    char *buffer = new char[len+1];
+    char *buffer   = new char[len+1];
     for(int i=0;i<len;i++){
         stream.read( buffer + i , sizeof(char));
     }
-    buffer[len] = 0;
-    m_imageHandler = imageHandler;
-    if(len>0)
-        m_image = m_imageHandler->loadImage(buffer);
-    else
-        m_image = -1;
-    delete buffer;
-
-    m_numLayers = 2;
-    m_layerReflectionBuffers = new RGBA[m_numLayers];
-    m_layers = new MaterialLayer[m_numLayers];
-    m_layers[0].m_brdf = new TorranceSparrowBRDF(m_glossiness, m_ior);
-    m_layers[0].m_ior = m_ior;
-    m_layers[0].m_absorbColor = m_coatingColor;
-    m_layers[0].m_thickness = m_thickness;
-    if(!metal)
-        m_layers[1].m_brdf = new LambertBRDF;
-    else
-        m_layers[1].m_brdf = new TorranceSparrowBRDF(30.0f, 0.0f);
-    m_layers[1].m_ior = m_ior;
-    m_layers[1].m_absorbColor = m_color;
-    m_layers[1].m_thickness = 0.0f;
-    
-    m_outDirs   = new Vec3[m_numLayers];
-    m_outColors = new RGBA[m_numLayers];
-    m_layerWeights = new float[m_numLayers];
+    buffer[len] = '\0';
+    m_shadingSystem = shadingSys;
+    shadingSys->ShaderGroupBegin();
+    if(len > 0){
+        std::cout << "filename: " << buffer << std::endl;
+        shadingSys->Shader("surface",buffer,NULL);
+    }
+    else{
+        shadingSys->Shader("surface","/home/vidar/code/raytracer/shaders/vn_default",NULL);
+    }
+    m_shader = shadingSys->state();
+    shadingSys->ShaderGroupEnd();
+    delete[] buffer;
 }
+
 Material::~Material()
 {
-    for(int i=0;i<m_numLayers;i++){
-        delete m_layers[i].m_brdf;
+}
+
+void Material::getClosure(const ShadeRec &sr, OSL::ShadingContext *shadingContext, RGBA *col, std::vector<ClosureDesc> &closureList)
+{
+	OSL::ShaderGlobals sg;
+	memset(&sg,0,sizeof(OSL::ShaderGlobals));
+	for(int i=0;i<3;i++){
+		sg.P[i] = sr.m_hitPos[i];
+		sg.Ng[i] = sg.N[i] = sr.m_normal[i];
+		sg.I[i] = sr.m_iDir[i];
+	}
+	sg.u = sr.m_uv[0];
+	sg.v = sr.m_uv[1];
+    OSL::Color3 accum = OSL::Color3(1.0f);
+	if(m_shadingSystem->execute(*shadingContext,*m_shader,sg)){
+		OSL::Color3 cw;
+		const OSL::ClosureColor *clos;
+		clos = sg.Ci;
+		OSL::Color3 c = OSL::Color3(1.0f);
+        processClosure(clos, c, closureList);
+	}
+}
+
+void Material::processClosure(const OSL::ClosureColor *clos, OSL::Color3 col, std::vector<ClosureDesc> &closureList){
+    OSL::Color3 cw;
+    switch(clos->type){
+        case OSL::ClosureColor::MUL:
+            cw = ((const OSL::ClosureMul*) clos)->weight;
+            processClosure(((const OSL::ClosureMul*) clos)->closure, col * cw, closureList);
+            break;
+        case OSL::ClosureColor::ADD:
+            processClosure(((const OSL::ClosureAdd*) clos)->closureA, col, closureList);
+            processClosure(((const OSL::ClosureAdd*) clos)->closureB, col, closureList);
+            break;
+        case OSL::ClosureColor::COMPONENT:
+            const OSL::ClosureComponent * comp = (const OSL::ClosureComponent *)clos;
+            ClosureDesc desc;
+            switch(comp->id){
+                case DIFFUSE_ID:
+                    desc.m_brdf   = new LambertBRDF;
+                    break;
+                case TORRANCE_SPARROW_ID:
+                    desc.m_brdf   = new TorranceSparrowBRDF(0.0f);
+                    break;
+                case SPECULAR_ID:
+                    desc.m_brdf   = new SpecularReflectionBRDF();
+                    break;
+            }
+            desc.m_data   = comp->data();
+            desc.m_col    = col;
+            desc.m_weight = col[0] + col[1] + col[2];
+            closureList.push_back(desc);
+            break;
     }
-    delete[] m_layers;
-    delete[] m_outDirs;
-    delete[] m_outColors;
-    delete[] m_layerWeights;
 }
 
-void Material::setColor(RGBA color)
+void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
+        RGBA *reflectedMult, OSL::ShadingContext *shadingContext)
 {
-	m_color = color;
-}
+    // get closure list
+    std::vector<ClosureDesc> closureList;
+    getClosure(sr, shadingContext, reflectedMult, closureList);
 
-RGBA Material::getColor(const ShadeRec &sr)
-{
-    if(m_image == -1)
-        return m_color;
-    else
-        return m_imageHandler->getPixel(m_image,sr.m_uv.m_d[0],sr.m_uv.m_d[1]);
-}
-
-void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay, RGBA *reflectedMult, float *pdf)
-{
-    Matrix4x4 normalMatrix(sr.m_normal);
-    Matrix4x4 normalMatrixInv = normalMatrix.invert();
-    float delta = 0.0001f;
-    Vec3 tmp;
-    Vec3 hitPos = sr.m_hitPos;
-    Vec3 invI = sr.getIncidentDirection();
-    invI.invert();
-    Vec3 invITrans = normalMatrix.multVec3(invI);
-    Vec3 normal(0.0f,0.0f,1.0f);
-    Vec3 reflectDirTrans;
-
-    float totalLayerWeight = 0;
-    for(int i=0;i<m_numLayers;i++){
-        BRDF *brdf = m_layers[i].m_brdf;
-        Vec3 inDir  = invITrans;
-        m_outColors[i] = RGBA(1.0f,1.0f,1.0f,1.0f);
-        float ior = 1.0f;
-        for(int j=0;j<i;j++){
-            m_outColors[i] *= 1.0f - brdf->fresnel(fabsf(inDir.m_d[2]), ior, m_layers[j].m_ior);
-            inDir  = brdf->snell(inDir,  m_layers[j].m_ior/ior);
-            absorb(m_outColors + i, m_layers[j], fabsf(inDir.m_d[2]));
-            ior = m_layers[j].m_ior;
-        }
-        float shadeVal = m_layers[i].m_brdf->sample_f(inDir, &(m_outDirs[i]), pdf, sampler, sr.m_depth);
-        for(int j=i-1;j>=0;j--){
-            ior = 1.0f;
-            if(j>0){
-                ior = m_layers[j-1].m_ior;
-            }
-            absorb(m_outColors + i, m_layers[j], fabsf(m_outDirs[i].m_d[2]));
-            m_outDirs[i] = brdf->snell(m_outDirs[i], ior/m_layers[j].m_ior);
-        }
-        if(*pdf > 0.0f){
-            shadeVal *= fabsf(m_outDirs[i].m_d[2]);
-            shadeVal /= *pdf;
-            shadeVal = std::max(0.0f,shadeVal);
-            m_outColors[i] *= shadeVal;
-            if(i == m_numLayers - 1){
-                m_outColors[i] *= getColor(sr);
-            }
-            m_layerWeights[i] = std::max(m_outColors[i][0], std::max(m_outColors[i][1], m_outColors[i][2]));
-            totalLayerWeight += m_layerWeights[i];
+    // choose closure to sample
+    float totalWeight = 0.0f;
+    for(int i=0; i<closureList.size(); i++){
+        totalWeight += closureList[i].m_weight;
+        closureList[i].m_accumWeight = totalWeight;
+    }
+    const void *data;
+    BRDF *brdf;
+    float sample = sampler.get1DSample();
+    sample *= totalWeight;
+    bool done = false;
+    for(int i=0; i<closureList.size(); i++){
+        ClosureDesc &desc = closureList[i];
+        if(sample <= desc.m_accumWeight && !done){
+            brdf = desc.m_brdf;
+            data = desc.m_data;
+            *reflectedMult = RGBA(desc.m_col[0],desc.m_col[1],desc.m_col[2],1.0f);
+            float pdf = desc.m_weight / totalWeight;
+            *reflectedMult /= pdf;
+            done = true;
         }
         else{
-            m_layerWeights[i] = 0.0f;
-            m_outColors[i] *= 0.0f;
+            delete desc.m_brdf;
         }
     }
 
-    float layerPdf = 0.0f;
-    float layerSample = totalLayerWeight * sampler.get1DSample();
-    int layer = 0;
-    float tmpAccum = 0.0f;
-    for(int i=0;i<m_numLayers;i++){
-        tmpAccum += m_layerWeights[i];
-        if(layerSample < tmpAccum){
-            layer = i;
-            layerPdf = m_layerWeights[i]/totalLayerWeight;
-            break;
-        }
-    }
-    *reflectedMult  = m_outColors[layer];
-    if(layerPdf > 0.0f)
-        *reflectedMult *= 1.0f/layerPdf;
+    // get normal
+    Vec3 normal = sr.m_normal;
+    //brdf->extractNormal(data, &normal);
+    Matrix4x4 normalMatrix(normal);
+    Matrix4x4 normalMatrixInv = normalMatrix.invert();
+    Vec3 invI = sr.getIncidentDirection();
+    invI *= -1.0f;
+    Vec3 invITrans = normalMatrix.multVec3(invI);
+
+    // sample brdf
+    float pdf;
+    Vec3 outDir;
+    float shade = brdf->sample_f(invITrans, &outDir, &pdf, sampler, data);
+    shade *= outDir[2];
+    shade /= pdf;
+    if(pdf <= 0.0f || shade < 0.0f)
+        shade = 0.0f;
+    *reflectedMult *= shade;
+
     
-    Vec3 reflectDir = normalMatrixInv.multVec3(m_outDirs[layer]);
+    // construct next ray
+    float delta = 0.0001f;
+    Vec3 reflectDir = normalMatrixInv.multVec3(outDir);
     reflectDir.normalize();
-    tmp = reflectDir * delta;
-    tmp = hitPos + tmp;
+    Vec3 tmp = reflectDir * delta;
+    tmp = sr.m_hitPos + tmp;
     *nextRay = Ray(tmp,reflectDir,false);
     nextRay->computePlucker();
     nextRay->m_depth = sr.m_depth+1;
-
+    delete brdf;
 }
 
-void Material::shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col, float pdf){
+void Material::shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col,
+        OSL::ShadingContext *shadingContext)
+{
     Matrix4x4 normalMatrix(sr.m_normal);
 	Vec3 inTrans  = normalMatrix.multVec3(in );
 	Vec3 outTrans = normalMatrix.multVec3(out);
+    float shade = outTrans[2];
+    std::vector<ClosureDesc> closureList;
+    getClosure(sr, shadingContext, col, closureList);
 
-    RGBA accumCol(1.0f,1.0f,1.0f,1.0f);
-	RGBA layerCol;
-    RGBA totalShade;
-    float shade = outTrans.m_d[2];
-    float a = shade;
-    RGBA debugTmp = *col;
-    if(shade > 0.0f){
-        for(int i=0;i<m_numLayers;i++){
-            MaterialLayer &layer = m_layers[i];
-            BRDF *brdf = layer.m_brdf;
-            float shade = brdf->f(inTrans, outTrans);
-            if(inTrans.m_d[2] < 0.0f || outTrans.m_d[2] < 0.0f)
-                shade = 0.0f;
-            layerCol = accumCol * shade;
-            Vec3 tmpIn  = inTrans;
-            Vec3 tmpOut = outTrans;
-            for(int j = i-1; j>=0; j--){
-                float nextIor = 1.0f;
-                if(j>0)
-                    nextIor = m_layers[j-1].m_ior;
-                layerCol *= 1.0f - brdf->fresnel(fabsf(tmpOut.m_d[2]), nextIor, m_layers[j].m_ior);
-                float cosTheta = fabsf(tmpIn.m_d[2]);
-                absorb(&layerCol, m_layers[j], cosTheta);
-                float eta = nextIor / m_layers[j].m_ior;
-                tmpIn  = brdf->snell(tmpIn, eta);
-                tmpOut = brdf->snell(tmpOut, eta);
-            }
-            if(i+1 < m_numLayers){
-                MaterialLayer &nextLayer = m_layers[i+1];
-                totalShade += layerCol;
-                float prevIor = 1.0f;
-                if(i>0)
-                    prevIor = m_layers[i-1].m_ior;
-                accumCol *= 1.0f - brdf->fresnel(fabsf(inTrans.m_d[2]),prevIor,layer.m_ior);
-                float eta = nextLayer.m_ior / layer.m_ior;
-                inTrans  = brdf->snell(inTrans, eta);
-                outTrans = brdf->snell(outTrans,eta);
-                absorb(&accumCol, layer, fabsf(inTrans.m_d[2]));
-            }
-            else{
-                totalShade += layerCol * getColor(sr);
-            }
-        }
-        shade /= pdf;
-        shade = std::max(0.0f,shade);
-        RGBA tmp = *col;
-        *col = *col * totalShade * shade;
+    RGBA accum = RGBA(0.0f);
+    for(int i=0; i<closureList.size(); i++){
+        ClosureDesc &desc = closureList[i];
+        accum += RGBA(desc.m_col[0],desc.m_col[1],desc.m_col[2],1.0f) * desc.m_brdf->f(inTrans, outTrans, desc.m_data);
+        delete desc.m_brdf;
     }
-    else{
-        *col = RGBA(0.0f,0.0f,0.0f,1.0f);
-    }
-}
 
-void Material::absorb(RGBA *col, MaterialLayer &layer, const float cosTheta)
-{
-    if(cosTheta > 0.0f){
-        for(int i=0;i<3;i++){
-            (*col)[i] *= expf(-((1.0f - layer.m_absorbColor[i])*layer.m_thickness*(1.0f/cosTheta)));
-        }
-    }
-    else{
-        for(int i=0;i<3;i++){
-            (*col)[i] = 0.0f;
-        }
-    }
+    *col *= accum * shade;
 }

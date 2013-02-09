@@ -26,7 +26,7 @@ float BRDF::fresnel(float cosI, float eta1, float eta2) const
 Vec3 BRDF::snell(Vec3 in, float eta) const
 {
 	Vec3 ret;
-	float cosTheta = fabsf(in.m_d[2]);
+	float cosTheta = fabsf(in[2]);
 	float sinTheta2 = std::max(0.0f, 1.0f - cosTheta * cosTheta);
 	sinTheta2 = sinTheta2 * eta * eta;
 	cosTheta = sqrtf(std::max(0.0f, 1.0f - sinTheta2));

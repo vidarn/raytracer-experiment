@@ -34,9 +34,9 @@ Matrix4x4::Matrix4x4(const Vec3 &vector)
 {
     Vec3 up;
     int a = 0;
-    if(abs(vector.m_d[1]) < abs(vector.m_d[0]))
+    if(abs(vector[1]) < abs(vector[0]))
         a = 1;
-    if(abs(vector.m_d[2]) < abs(vector.m_d[a]))
+    if(abs(vector[2]) < abs(vector[a]))
         a = 2;
     up[a] = 1.0f;
     Vec3 u = vector.cross(up);
@@ -44,19 +44,19 @@ Matrix4x4::Matrix4x4(const Vec3 &vector)
     Vec3 v = vector.cross(u);
 	v.normalize();
     a = 0;
-    m_entries[a + 0] = u.m_d[0];
-    m_entries[a + 1] = u.m_d[1];
-    m_entries[a + 2] = u.m_d[2];
+    m_entries[a + 0] = u[0];
+    m_entries[a + 1] = u[1];
+    m_entries[a + 2] = u[2];
     m_entries[a + 3] = 0;
     a += 4;
-    m_entries[a + 0] = v.m_d[0];
-    m_entries[a + 1] = v.m_d[1];
-    m_entries[a + 2] = v.m_d[2];
+    m_entries[a + 0] = v[0];
+    m_entries[a + 1] = v[1];
+    m_entries[a + 2] = v[2];
     m_entries[a + 3] = 0;
     a += 4;
-    m_entries[a + 0] = vector.m_d[0];
-    m_entries[a + 1] = vector.m_d[1];
-    m_entries[a + 2] = vector.m_d[2];
+    m_entries[a + 0] = vector[0];
+    m_entries[a + 1] = vector[1];
+    m_entries[a + 2] = vector[2];
     m_entries[a + 3] = 0;
     a += 4;
     m_entries[a + 0] = 0;
@@ -218,7 +218,7 @@ Vec3 Matrix4x4::multVec3(const Vec3 &vec)
 	for(int y=0;y<3;y++){
 		float val = 0;
 		for(int x=0;x<3;x++){
-			val += m_entries[x+y*4]*vec.m_d[x];
+			val += m_entries[x+y*4]*vec[x];
 		}
 		result[y] = val;
 	}

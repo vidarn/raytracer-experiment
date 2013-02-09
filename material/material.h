@@ -11,46 +11,36 @@
 #include "../brdf/torranceSparrow.h"
 #include "../lights/light.h"
 #include "../sampler/sampler.h"
-#include "../file/image.h"
+#include <OSL/oslexec.h>
+#include <OSL/oslclosure.h>
 
 class Scene;
-class MaterialLayer;
+struct ClosureDesc;
 
 class Material
 {
     public:
-        Material();
+        Material(OSL::ShadingSystem *shadingSys);
         ~Material();
-        Material(std::ifstream &stream, ImageHandler *imageHandler);
-		void setColor(RGBA color);
-        RGBA getColor(const ShadeRec &sr);
-		void shade(ShadeRec &shadeRec, Scene *scene, Sampler &sampler, Ray *nextRay, RGBA *reflectedMult, float *pdf);
-        void shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col, float pdf);
+        Material(std::ifstream &stream,OSL::ShadingSystem *shadingSys);
+        void getClosure(const ShadeRec &sr, OSL::ShadingContext *shadingContext,
+                RGBA *col, std::vector<ClosureDesc> &closureList);
+		void shade(ShadeRec &shadeRec, Scene *scene, Sampler &sampler, Ray *nextRay,
+                RGBA *reflectedMult, OSL::ShadingContext *shadingContext);
+        void shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col,
+                OSL::ShadingContext *shadingContext);
     private:
-		void absorb(RGBA *col, MaterialLayer &layer, const float cosTheta);
-        RGBA m_color;
-        RGBA m_coatingColor;
-        float m_reflectivity;
-        float m_glossiness;
-        float m_ior;
-		float m_thickness;
-        MaterialLayer *m_layers;
-        int m_numLayers;
-		RGBA *m_layerReflectionBuffers;
-		Vec3 *m_outDirs;
-		RGBA *m_outColors;
-		float *m_layerWeights;
-        ImageHandler* m_imageHandler;
-        int m_image;
+        void processClosure(const OSL::ClosureColor *clos, OSL::Color3 col, std::vector<ClosureDesc> &closureList);
+		OSL::ShadingAttribStateRef m_shader;
+        OSL::ShadingSystem *m_shadingSystem;
 };
 
-class MaterialLayer
+struct ClosureDesc
 {
-    public:
-        BRDF *m_brdf;
-        float m_thickness;
-        float m_ior;
-        RGBA m_absorbColor;
+    BRDF *m_brdf;
+    OSL::Color3 m_col;
+    const void *m_data;
+    float m_weight;
+    float m_accumWeight;
 };
-
 #endif /* end of include guard: __MATERIAL_H__ */
