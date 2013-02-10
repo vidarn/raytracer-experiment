@@ -126,12 +126,14 @@ void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
 
     // get normal
     Vec3 normal = sr.m_normal;
-    //brdf->extractNormal(data, &normal);
-    Matrix4x4 normalMatrix(normal);
+    brdf->extractNormal(data, &normal);
+    normal = sr.m_normal;
+    Matrix4x4 normalMatrix = matrixFromVector(normal);
     Matrix4x4 normalMatrixInv = normalMatrix.invert();
     Vec3 invI = sr.getIncidentDirection();
     invI *= -1.0f;
-    Vec3 invITrans = normalMatrix.multVec3(invI);
+    Vec3 invITrans;
+    normalMatrix.multDirMatrix(invI, invITrans);
 
     // sample brdf
     float pdf;
@@ -146,7 +148,8 @@ void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
     
     // construct next ray
     float delta = 0.0001f;
-    Vec3 reflectDir = normalMatrixInv.multVec3(outDir);
+    Vec3 reflectDir;
+    normalMatrixInv.multDirMatrix(outDir, reflectDir);
     reflectDir.normalize();
     Vec3 tmp = reflectDir * delta;
     tmp = sr.m_hitPos + tmp;
@@ -159,9 +162,11 @@ void Material::shade(ShadeRec &sr, Scene *scene, Sampler &sampler, Ray *nextRay,
 void Material::shade(const Vec3 &in, const Vec3 &out, const ShadeRec &sr, RGBA* col,
         OSL::ShadingContext *shadingContext)
 {
-    Matrix4x4 normalMatrix(sr.m_normal);
-	Vec3 inTrans  = normalMatrix.multVec3(in );
-	Vec3 outTrans = normalMatrix.multVec3(out);
+    Matrix4x4 normalMatrix = matrixFromVector(sr.m_normal);
+	Vec3 inTrans;
+    normalMatrix.multDirMatrix(in, inTrans);
+	Vec3 outTrans;
+    normalMatrix.multDirMatrix(out, outTrans);
     float shade = outTrans[2];
     std::vector<ClosureDesc> closureList;
     getClosure(sr, shadingContext, col, closureList);

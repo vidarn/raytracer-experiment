@@ -10,7 +10,7 @@ TorranceSparrowBRDF::TorranceSparrowBRDF(float ior)
 
 void TorranceSparrowBRDF::extractNormal(const void *data, Vec3 *normal) const
 {
-    struct TorranceSparrowParams *params = (struct TorranceSparrowParams *)data;
+    //struct TorranceSparrowParams *params = (struct TorranceSparrowParams *)data;
 }
 
 float TorranceSparrowBRDF::f(const Vec3 &in, const Vec3 &out, const void *data) const

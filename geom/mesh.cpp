@@ -14,7 +14,7 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
             stream.read( reinterpret_cast<char*>( &pos[j] ), sizeof pos[j] );
         }
         Vec3 point(pos[0],pos[1],pos[2]);
-        point = m_transform.multPoint(point);
+        m_transform.multVecMatrix(point,point);
         addPoint(point);
         Vec3 normal;
         addNormal(normal);

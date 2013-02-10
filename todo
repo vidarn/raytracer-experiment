@@ -8,6 +8,7 @@ use IMath classes for vectors etc.
 add other transformations
 add derivative information
 move to CMake?
+make the program possible to close in a nice way
 implement brdfs described in osl spec
 implement QMC
 implement refraction
@@ -17,3 +18,7 @@ implement motion blur
 implement bidirectional path tracing
 implement sss
 implement strand rendering
+
+
+mesh.cpp 17
+material.cpp 17

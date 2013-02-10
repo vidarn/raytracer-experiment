@@ -13,7 +13,7 @@ AreaLight::AreaLight(std::ifstream &stream, Matrix4x4 transform)
 	m_color[1] = pow(m_color[1],2.2f);
 	m_color[2] = pow(m_color[2],2.2f);
     m_normal = Vec3(0.0f,0.0f,1.0f);
-    m_normal = m_transform.multVec3(m_normal);
+    m_transform.multDirMatrix(m_normal, m_normal);
     m_area = m_size[0] * m_size[1];
 }
 
@@ -31,7 +31,7 @@ Vec3 AreaLight::computeDirection(ShadeRec &sr, Sampler &sampler)
 	Vec3 point = sampler.getSquareSample();
     point[0] = m_size[0]*(point[0] - 0.5f);
     point[1] = m_size[1]*(point[1] - 0.5f);
-	point = m_transform.multPoint(point);
+	m_transform.multVecMatrix(point,point);
     Vec3 ret = (point - sr.m_hitPos);
     ret.normalize();
 	return ret;
@@ -42,10 +42,10 @@ Ray AreaLight::getRay(Sampler &sampler)
 	Vec3 point = sampler.getSquareSample();
     point[0] = m_size[0]*(point[0] - 0.5f);
     point[1] = m_size[1]*(point[1] - 0.5f);
-	point = m_transform.multPoint(point);
+	m_transform.multVecMatrix(point,point);
 	Vec3 dir(0.0f,0.0f,-1.0f);
 	dir = sampler.getUniformHemisphereSample();
-	dir   = m_transform.multVec3(dir);
+    m_transform.multDirMatrix(dir, dir);
 	dir *= -1.0f;
 	Ray ray(point,dir,false);
 	ray.computePlucker();

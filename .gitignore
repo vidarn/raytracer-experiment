@@ -8,3 +8,4 @@ callgrind*
 *.blend*
 *.obj
 renderings/*
+shaders/*.oso

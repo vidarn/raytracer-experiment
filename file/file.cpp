@@ -48,7 +48,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
                     break;
                 case 1:
                     std::cout << "Mesh!\n";
-                    transform = Matrix4x4(stream);
+                    transform = matrixFromStream(stream);
                     stream.read( reinterpret_cast<char*>( &mat ), sizeof mat );
                     mat++;
                     mesh = new Mesh(stream, transform, materials[mat]);
@@ -62,7 +62,7 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
                     break;
                 case 3:
                     std::cout << "AreaLight\n";
-                    transform = Matrix4x4(stream);
+                    transform = matrixFromStream(stream);
                     areaLight = new AreaLight(stream,transform);
                     lights.push_back(areaLight);
                     break;

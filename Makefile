@@ -11,11 +11,11 @@ OBJ += shadeRec/shadeRec.o
 OBJ += bucket/bucket.o
 OBJ += material/material.o
 OBJ += brdf/brdf.o brdf/lambert.o brdf/phong.o brdf/specularReflection.o brdf/torranceSparrow.o
-OBJ += lights/light.o lights/directional.o lights/point.o lights/area.o
+OBJ += lights/light.o lights/area.o
 OBJ += settings/settings.o
 OBJ += file/file.o
 OBJ += osl/simplerend.o
-FLG = -pthread -fno-rtti -g -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
+FLG = -pthread -fno-rtti -O3 -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
 LIB = -lOpenImageIO -loslexec -lIex
 
 $(OUT):$(OBJ)
