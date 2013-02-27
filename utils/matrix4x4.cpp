@@ -43,6 +43,5 @@ Matrix4x4 matrixFromStream(std::ifstream &stream)
             stream.read( reinterpret_cast<char*>( &(mat[x][y]) ), sizeof(float));
         }
     }
-    std::cout << mat;
     return mat;
 }

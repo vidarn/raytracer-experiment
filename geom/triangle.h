@@ -18,6 +18,7 @@ class Triangle
 		void hit(Ray &ray, ShadeRec &sr) const;
         void shadeInfo(Ray &ray, ShadeRec &sr) const;
         void getBounds(float min[3], float max[3]) const;
+        void addBounds(float min[3], float max[3]) const;
 		void setMaterial(Material *material){m_material = material;};
 		Material *getMaterial(){return m_material;};
         void computePlucker();

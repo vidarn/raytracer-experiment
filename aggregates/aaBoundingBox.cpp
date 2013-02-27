@@ -6,6 +6,14 @@ AABoundingBox::AABoundingBox()
     clear();
 }
 
+AABoundingBox::AABoundingBox( float min[3], float max[3] )
+{
+    for(int i=0;i<3;i++){
+        m_min[i] = min[i];
+        m_max[i] = max[i];
+    }
+}
+
 AABoundingBox::AABoundingBox(Triangle *tri)
 {
     clear();
@@ -118,6 +126,20 @@ void AABoundingBox::setMin(float min[3])
 }
 
 void AABoundingBox::setMax(float max[3])
+{
+	for(int i = 0; i < 3; i++){
+		m_max[i] = max[i];
+	}
+}
+
+void AABoundingBox::setMin(Vec3 min)
+{
+	for(int i = 0; i < 3; i++){
+		m_min[i] = min[i];
+	}
+}
+
+void AABoundingBox::setMax(Vec3 max)
 {
 	for(int i = 0; i < 3; i++){
 		m_max[i] = max[i];

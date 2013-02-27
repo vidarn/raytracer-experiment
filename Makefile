@@ -2,7 +2,7 @@ OUT = raytracer
 OBJ = app.o
 OBJ += utils/vec3.o utils/ray.o utils/matrix4x4.o utils/rgba.o
 OBJ += geom/geometricObject.o geom/mesh.o geom/triangle.o
-OBJ += aggregates/aaBoundingBox.o aggregates/kdTree.o aggregates/bvh.o
+OBJ += aggregates/aaBoundingBox.o aggregates/instance.o aggregates/bvh.o
 OBJ += scene/scene.o
 OBJ += viewPlane/viewPlane.o
 OBJ += tracer/tracer.o
@@ -15,7 +15,7 @@ OBJ += lights/light.o lights/area.o
 OBJ += settings/settings.o
 OBJ += file/file.o
 OBJ += osl/simplerend.o
-FLG = -pthread -fno-rtti -O3 -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
+FLG = -pthread -fno-rtti -O2 -DBOOST_NO_RTTI -DBOOST_NO_TYPEID
 LIB = -lOpenImageIO -loslexec -lIex
 
 $(OUT):$(OBJ)

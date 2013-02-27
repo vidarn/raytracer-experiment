@@ -1,13 +1,20 @@
 #include "bvh.h"
 #include <algorithm>
 
-void BVH::build(std::vector<Triangle *> triangles)
+void BVH::build(std::vector<Triangle *> triangles, std::vector<Instance *> *instances)
 {
+    std::cout << "Building BVH" << std::endl;
 	m_buildData.reserve(triangles.size());
 	m_triangles = triangles;
 	for(int i=0;i<triangles.size();i++){
-		m_buildData.push_back(BVHTriangleInfo(i,AABoundingBox(triangles[i])));
+		m_buildData.push_back(BVHTriangleInfo(i,AABoundingBox(triangles[i]), 0, 1 ));
 	}
+    if(instances != 0){
+        m_instances = *instances;
+        for(int i=0;i<instances->size();i++){
+            m_buildData.push_back(BVHTriangleInfo(i,(*instances)[i]->m_bounds, 1, (*instances)[i]->getNumTris()));
+        }
+    }
     int numTotalNodes = 0;
 	BVHBuildNode *buildRoot = recursiveBuild(0,m_buildData.size(),&numTotalNodes);
     m_root = new BVHLinearNode[numTotalNodes];
@@ -15,7 +22,7 @@ void BVH::build(std::vector<Triangle *> triangles)
     flattenTree(buildRoot,&offset);
     recursiveDelete(buildRoot);
     m_buildData.clear();
-    //writeObjFile("/tmp/bvh.obj");
+    writeObjFile("/tmp/bvh.obj");
 }
 
 void BVH::recursiveDelete(BVHBuildNode *node)
@@ -34,7 +41,8 @@ int BVH::flattenTree(BVHBuildNode *buildNode, int *offset)
     int tmpOffset = (*offset)++;
     if(buildNode->m_numTris > 0){
         node->m_firstTriOffset = buildNode->m_firstTriOffset;
-        node->m_numTris = buildNode->m_numTris;
+		node->m_numTris = buildNode->m_numTris;
+        node->m_axis = buildNode->m_type;
     }
     else{
         node->m_axis = buildNode->m_splitAxis;
@@ -57,7 +65,7 @@ BVHBuildNode *BVH::recursiveBuild(int start, int end, int *numTotalNodes)
 	int numTriangles = end - start;
 
 	if(numTriangles == 1){
-		createLeafNode(start,end,bbox,node);
+		createLeafNode(start,end,bbox,node, numTotalNodes);
 	}
 	else{
 		AABoundingBox bboxCentroids;
@@ -66,7 +74,7 @@ BVHBuildNode *BVH::recursiveBuild(int start, int end, int *numTotalNodes)
 		}
 		int dim = bboxCentroids.getMaximumExtent();
 		if(bboxCentroids.min(dim) == bboxCentroids.max(dim)){
-			createLeafNode(start,end,bbox,node);
+			createLeafNode(start,end,bbox,node,numTotalNodes);
 		}
         else{
             float splitCost;
@@ -81,7 +89,7 @@ BVHBuildNode *BVH::recursiveBuild(int start, int end, int *numTotalNodes)
                 node->initInterior(dim, recursiveBuild(start,mid,numTotalNodes), recursiveBuild(mid,end,numTotalNodes));
             }
             else{
-                createLeafNode(start,end,bbox,node);
+                createLeafNode(start,end,bbox,node,numTotalNodes);
             }
         }
 	}
@@ -101,7 +109,7 @@ void BVH::findSAHSplit(int dim, int start, int end, AABoundingBox &bboxCentroids
             b = numBuckets - 1;
         SAHBucket &bucket = buckets[b];
         bucket.m_bbox.join(node.m_bbox);
-        bucket.m_numTris++;
+        bucket.m_numTris += node.m_intersectCost;
     }
 
     float cost[numBuckets-1];
@@ -135,14 +143,39 @@ void BVH::findSAHSplit(int dim, int start, int end, AABoundingBox &bboxCentroids
     *splitBucket = minCostSplit;
 }
 
-void BVH::createLeafNode(int start, int end, AABoundingBox &bbox, BVHBuildNode *node)
+void BVH::createLeafNode(int start, int end, AABoundingBox &bbox, BVHBuildNode *node, int *numTotalNodes)
 {
-	int firstTriOffset = m_orderedTriangles.size();
+	int firstTriOffset     = m_orderedTriangles.size();
+	int firstInstanceOffset = m_orderedInstances.size();
+    int numTris            = 0;
+    int numInstances       = 0;
 	for(int i=start; i<end;i++){
-		int triangleId = m_buildData[i].m_triangleId;
-		m_orderedTriangles.push_back(m_triangles[triangleId]);
+        if(m_buildData[i].m_type == 0){
+            int triangleId = m_buildData[i].m_triangleId;
+            m_orderedTriangles.push_back(m_triangles[triangleId]);
+            numTris++;
+        }
+        else{
+            int instanceId = m_buildData[i].m_triangleId;
+            m_orderedInstances.push_back(m_instances[instanceId]);
+            numInstances++;
+        }
 	}
-	node->initLeaf(firstTriOffset, end - start, bbox);
+    if(numInstances == 0)
+        node->initLeaf(firstTriOffset, numTris, bbox, 0);
+    else{
+        BVHBuildNode *leftNode;
+        BVHBuildNode *rightNode;
+        rightNode = node;
+        if(numTris > 0){
+            rightNode = new BVHBuildNode();
+            leftNode = new BVHBuildNode();
+            (*numTotalNodes)+=2;
+            leftNode->initLeaf(firstTriOffset, numTris, bbox, 0);
+            node->initInterior(0, leftNode, rightNode);
+        }
+        rightNode->initLeaf(firstInstanceOffset, numInstances, bbox, 1);
+    }
 }
 
 void BVH::hit(Ray &ray, ShadeRec &sr) const
@@ -158,8 +191,15 @@ void BVH::hit(Ray &ray, ShadeRec &sr) const
         numNodes++;
         const BVHLinearNode *node = &m_root[nodeNum];
         if(node->m_numTris > 0){
-            for(int i=0;i<node->m_numTris;i++){
-                m_orderedTriangles[node->m_firstTriOffset + i]->hit(ray,sr);
+            if(node->m_axis == 0){
+                for(int i=0;i<node->m_numTris;i++){
+                    m_orderedTriangles[node->m_firstTriOffset + i]->hit(ray,sr);
+                }
+            }
+            else{
+                for(int i=0;i<node->m_numTris;i++){
+					m_orderedInstances[node->m_firstTriOffset + i]->hit(ray,sr);
+				}
             }
             hitTests++;
             if(todoOffset == 0)

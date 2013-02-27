@@ -6,6 +6,7 @@ class AABoundingBox
 {
 	public:
 		AABoundingBox();
+		AABoundingBox(float min[3], float max[3]);
 		AABoundingBox(Triangle *tri);
 		void extend(Triangle *object);
         void getBounds(float min[3], float max[3]) const;
@@ -21,6 +22,8 @@ class AABoundingBox
         Vec3 max() const {return Vec3(m_max[0],m_max[1],m_max[2]);};
         void setMin(float min[3]);
         void setMax(float max[3]);
+        void setMin(Vec3 min);
+        void setMax(Vec3 max);
 		void join(const AABoundingBox &other);
 		void join(const Vec3 &other);
 	private:

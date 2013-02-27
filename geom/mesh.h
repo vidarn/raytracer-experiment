@@ -9,7 +9,7 @@
 class Mesh:public GeometricObject
 {
     public:
-		Mesh(){};
+		Mesh(){m_boundsCalculated = false; m_bvhCalculated = false;};
 		Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat);
         void addPoint(Vec3 &point){m_points.push_back(point);};
         void addTriangle(Triangle &triangle){m_triangles.push_back(triangle);};
@@ -19,6 +19,8 @@ class Mesh:public GeometricObject
         void calculateNormals();
         void addToNormal(int id, Vec3 normal);
 		virtual void refine(std::vector<Triangle *> &triangles);
+		virtual AABoundingBox getBounds();
+        virtual BVH *getBVH();
     private:
         std::vector<Vec3> m_uvs;
         std::vector<Vec3> m_points;

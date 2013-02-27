@@ -3,6 +3,7 @@
 #include "../geom/triangle.h"
 #include "../utils/ray.h"
 #include "aaBoundingBox.h"
+#include "instance.h"
 #include "../shadeRec/shadeRec.h"
 #include <vector>
 #include <stdint.h>
@@ -14,16 +15,19 @@ struct BVHLinearNode;
 class BVH
 {
 	public:
-		void build(std::vector<Triangle *> triangles);
+		void build(std::vector<Triangle *> triangles, std::vector<Instance *> *instances);
 		void hit(Ray &ray, ShadeRec &sr) const;
+        int  getNumTris(){return m_orderedTriangles.size();};
 	private:
         int flattenTree(BVHBuildNode *buildNode, int *offset);
         void recursiveDelete(BVHBuildNode *node);
         BVHBuildNode *recursiveBuild(int start, int end, int *numTotalNodes);
         void findSAHSplit(int dim, int start, int end, AABoundingBox &bboxCentroids, AABoundingBox &bbox, float *splitCost, int *splitBucket);
-		void createLeafNode(int start, int end, AABoundingBox &bbox, BVHBuildNode *node);
+		void createLeafNode(int start, int end, AABoundingBox &bbox, BVHBuildNode *node, int *numTotalNodes);
 		std::vector<Triangle *> m_triangles;
 		std::vector<Triangle *> m_orderedTriangles;
+		std::vector<Instance *> m_instances;
+		std::vector<Instance *> m_orderedInstances;
 		std::vector<BVHTriangleInfo> m_buildData;
         BVHLinearNode *m_root;
         void writeObjFile(const char *filename);
@@ -32,14 +36,16 @@ class BVH
 
 struct BVHTriangleInfo
 {
-	BVHTriangleInfo(int id, const AABoundingBox &bbox):
-		m_triangleId(id), m_bbox(bbox) {
+	BVHTriangleInfo(int id, const AABoundingBox &bbox, int type, int intersectCost):
+		m_triangleId(id), m_bbox(bbox), m_type(type), m_intersectCost(intersectCost){
 			m_centroid = bbox.min() * 0.5f;
 			m_centroid += bbox.max() * 0.5f;
 		}
 	int m_triangleId;
 	Vec3 m_centroid;
 	AABoundingBox m_bbox;
+    int m_type;
+    int m_intersectCost;
 };
 
 struct BVHLinearNode
@@ -48,6 +54,7 @@ struct BVHLinearNode
     union {
         uint32_t m_firstTriOffset;
         uint32_t m_secondChildOffset;
+        uint32_t m_instanceOffset;
     };
     uint8_t m_numTris;
     uint8_t m_axis;
@@ -64,14 +71,16 @@ struct BVHBuildNode
 		m_splitAxis = axis;
 		m_numTris = 0;
 	}
-	void initLeaf(int firstTriangle, int numTriangles, const AABoundingBox &bbox){
+	void initLeaf(int firstTriangle, int numTriangles, const AABoundingBox &bbox, int type){
 		m_firstTriOffset = firstTriangle;
 		m_numTris = numTriangles;
 		m_bbox = bbox;
+        m_type = type;
 	}
 	AABoundingBox m_bbox;
 	BVHBuildNode *m_children[2];
 	int m_splitAxis, m_firstTriOffset, m_numTris;
+    int m_type;
 };
 
 class CompareToMid

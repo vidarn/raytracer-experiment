@@ -83,18 +83,21 @@ class Mesh:
                 for j in range(2):
                     a = ctypes.c_float(v[j])
                     stream.write(bytes(a))
-                
-class PointLight():
-    def __init__(self,light,matrix):
-        self.matrix = matrix
-        self.strength = light.energy
         
+class Instance():
+    def __init__(self, matrix, mesh_id, material_id):
+        self.matrix      = matrix
+        self.mesh_id     = mesh_id
+        self.material_id = material_id
+    
     def to_stream(self,stream):
         type = ctypes.c_int(2)
         stream.write(bytes(type))
         self.matrix.to_stream(stream)
-        strength = ctypes.c_float(self.strength)
-        stream.write(bytes(strength))
+        mat_id = ctypes.c_int(self.material_id)
+        stream.write(bytes(mat_id))
+        mesh_id = ctypes.c_int(self.mesh_id)
+        stream.write(bytes(mesh_id))
       
       
 class AreaLight():
@@ -140,17 +143,21 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
             self.camera_matrix.invert()
             self.objects = []
             self.materials = []
+            self.instances = []
             for obj in bpy.data.objects:
                 m = Matrix(self.camera_matrix * obj.matrix_world)
-                if obj.type == 'MESH':
-                    s = Mesh(obj.data,m)
-                    self.objects.append(s)
-                    if len(obj.material_slots) > 0:
-                        mat = Material(obj.material_slots[0].material)
-                        s.material = len(self.materials)
-                        self.materials.append(mat)
-                    else:
-                        print("object " + obj.name + " does not have any material")
+                if obj.raytracer.instance_id == -1:
+                    if obj.type == 'MESH':
+                        s = Mesh(obj.data,m)
+                        self.objects.append(s)
+                        if len(obj.material_slots) > 0:
+                            mat = Material(obj.material_slots[0].material)
+                            s.material = len(self.materials)
+                            self.materials.append(mat)
+                        else:
+                            print("object " + obj.name + " does not have any material")
+                else:
+                    self.instances.append(Instance(m, obj.raytracer.instance_id, 0))
                         
         def export_camera(self,scene,stream):
             camera = scene.camera.data
@@ -191,6 +198,8 @@ class RaytracerRenderEngine(bpy.types.RenderEngine):
                         print("area light!")
                         l = AreaLight.to_stream(obj.data,m, stream)
                         self.objects.append(l)
+            for instance in self.instances:
+                instance.to_stream(stream)
             stream.close()
             print("--------- done exporting ------------")
             args = (self.path_to_executable,self.image_path)
@@ -237,10 +246,39 @@ properties_data_lamp.DATA_PT_area.COMPAT_ENGINES.add('RAYTRACER')
 from bl_ui import properties_render
 properties_render.RENDER_PT_render.COMPAT_ENGINES.add('RAYTRACER')
 properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('RAYTRACER')
+from bl_ui import properties_object
 
 
 del properties_material
 
+class ObjectButtonsPanel():
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "object"
+    # COMPAT_ENGINES must be defined in each subclass, external engines can add themselves here
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.object
+        rd = context.scene.render
+        return obj and (rd.use_game_engine is False) and (rd.engine in cls.COMPAT_ENGINES)
+    
+class OBJECT_PT_raytracer_instance(ObjectButtonsPanel, bpy.types.Panel):
+    bl_label = "Instance"
+    COMPAT_ENGINES = {'RAYTRACER'}
+
+    def draw_header(self, context):
+        scene = context.material
+
+    def draw(self, context):
+        layout = self.layout
+        
+        obj = context.object
+        layout.active = True
+        col = layout.column()
+        col.alignment = 'CENTER'
+        col.prop(obj.raytracer, "instance_id")
+        
 class MaterialButtonsPanel():
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
@@ -408,11 +446,20 @@ class RaytracerSettingsScene(bpy.types.PropertyGroup):
             default=4,
             min=1,
             max=200)
+            
+class RaytracerSettingsObject(bpy.types.PropertyGroup):
+    instance_id = bpy.props.IntProperty(
+            name="Instance Id",
+            description="Id of mesh to clone, -1 for none",
+            subtype='NONE',
+            default=-1,
+            min=-1)
         
 def register():
     bpy.utils.register_module(__name__)
     bpy.types.Material.raytracer = bpy.props.PointerProperty(type=RaytracerSettingsMaterial)
     bpy.types.Scene.raytracer = bpy.props.PointerProperty(type=RaytracerSettingsScene)
+    bpy.types.Object.raytracer = bpy.props.PointerProperty(type=RaytracerSettingsObject)
  
 if __name__ == "__main__":       
     bpy.utils.unregister_module(__name__)

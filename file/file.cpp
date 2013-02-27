@@ -10,7 +10,7 @@ File::File(const char *filename)
     m_filename[strlen(filename)] = '\0';
 }
 
-void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings, OSL::ShadingSystem *shadingSys)
+void File::read(std::vector<GeometricObject *> &objects, std::vector<Instance *> &instances, std::vector<Light *> &lights, ViewPlane &viewPlane, Settings &settings, OSL::ShadingSystem *shadingSys)
 {
     std::vector<Material *> materials;
     // default material
@@ -36,29 +36,33 @@ void File::read(std::vector<GeometricObject *> &objects, std::vector<Light *> &l
     while(stream.good()){
         stream.read( reinterpret_cast<char*>( &type ), sizeof type );
         if(stream.good()){
-            int mat;
+            int matId, meshId;
             Matrix4x4 transform;
             Mesh *mesh;
+            Instance *instance;
             //PointLight *pointLight;
             AreaLight *areaLight;
             switch(type){
                 case 0:
-                    std::cout << "Material!\n";
+                    std::cout << "Material\n";
                     materials.push_back(new Material(stream, shadingSys));
                     break;
                 case 1:
-                    std::cout << "Mesh!\n";
+                    std::cout << "Mesh\n";
                     transform = matrixFromStream(stream);
-                    stream.read( reinterpret_cast<char*>( &mat ), sizeof mat );
-                    mat++;
-                    mesh = new Mesh(stream, transform, materials[mat]);
+                    stream.read( reinterpret_cast<char*>( &matId ), sizeof matId );
+                    matId++;
+                    mesh = new Mesh(stream, transform, materials[matId]);
                     objects.push_back(mesh);
                     break;
                 case 2:
-                    std::cout << "PointLight\n";
-                    /*transform = Matrix4x4(stream);
-                    pointLight = new PointLight(stream,transform);
-                    lights.push_back(pointLight);*/
+                    std::cout << "Mesh Instance\n";
+                    transform = matrixFromStream(stream);
+                    stream.read( reinterpret_cast<char*>( &matId ), sizeof matId );
+                    matId++;
+                    stream.read( reinterpret_cast<char*>( &meshId ), sizeof meshId );
+                    instance = new Instance(matId, meshId, transform);
+                    instances.push_back(instance);
                     break;
                 case 3:
                     std::cout << "AreaLight\n";

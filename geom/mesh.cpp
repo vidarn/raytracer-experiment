@@ -1,9 +1,12 @@
 #include "mesh.h"
 #include <cfloat>
+#include "../aggregates/bvh.h"
 
 
 Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
 {
+    m_boundsCalculated = false;
+    m_bvhCalculated = false;
     m_transform = transform;
     m_material = mat;
     int num_verts;
@@ -16,7 +19,7 @@ Mesh::Mesh(std::ifstream &stream, Matrix4x4 transform, Material *mat)
         Vec3 point(pos[0],pos[1],pos[2]);
         m_transform.multVecMatrix(point,point);
         addPoint(point);
-        Vec3 normal;
+        Vec3 normal(0.0f,0.0f,0.0f);
         addNormal(normal);
     }
     int num_triangles;
@@ -66,4 +69,32 @@ void Mesh::refine(std::vector<Triangle *> &triangles)
 	for (int i = 0; i < m_triangles.size(); i++) {
 		triangles.push_back(&m_triangles[i]);
 	}
+}
+
+AABoundingBox Mesh::getBounds()
+{
+    if(!m_boundsCalculated){
+        float min[3], max[3];
+        for (int i = 0; i < 3; i++) {
+            min[i] = FLT_MAX;
+            max[i] = -FLT_MAX;
+        }
+        for (int i = 0; i < m_triangles.size(); i++){
+            m_triangles[i].addBounds(min,max);
+        }
+        m_bounds = AABoundingBox(min,max);
+    }
+    return m_bounds;
+}
+
+BVH *Mesh::getBVH()
+{
+    if(!m_bvhCalculated){
+        std::vector<Triangle *> triangles;
+        refine(triangles);
+        m_bvh = new BVH;
+        m_bvh->build(triangles, 0);
+        m_bvhCalculated = true;
+    }
+    return m_bvh;
 }

@@ -40,6 +40,22 @@ void Triangle::getBounds(float min[3], float max[3]) const
     }
 }
 
+void Triangle::addBounds(float min[3], float max[3]) const
+{
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++){
+            Vec3 * tmpPoint = m_points[j];
+            float val = (*tmpPoint)[i];
+            if(val < min[i]){
+                min[i] = val;
+            }
+            if(val > max[i]){
+                max[i] = val;
+            }
+        }
+    }
+}
+
 void Triangle::computePlucker()
 {
     Vec3 p, q;
@@ -86,14 +102,15 @@ void Triangle::hit(Ray &ray, ShadeRec &sr) const
             sr.m_hit = true;
             sr.m_hitT = t;
             sr.m_triangle = this;
+            sr.m_calculated = false;
         }
     }
 }
 
 void Triangle::shadeInfo(Ray &ray, ShadeRec &sr) const
 {
-    int x = (m_maxNormalDir+1)%3;
-    int y = (m_maxNormalDir+2)%3;
+    int x    = (m_maxNormalDir+1)%3;
+    int y    = (m_maxNormalDir+2)%3;
     float b0 = sr.m_hitPos[x] - (*m_points[2])[x];
     float b1 = sr.m_hitPos[y] - (*m_points[2])[y];
     b0 *= m_barry[0];
@@ -115,12 +132,12 @@ void Triangle::shadeInfo(Ray &ray, ShadeRec &sr) const
 
     sr.setMaterial(m_material);
     Vec3 normal = *(m_normals[0]) * b0;
-    normal +=*(m_normals[1]) * b1;
-    normal +=*(m_normals[2]) * (1.0f - b1 - b0);
+    normal += *(m_normals[1]) * b1;
+    normal += *(m_normals[2]) * (1.0f - b1 - b0);
     normal.normalize();
     Vec3 uv = *(m_uvs[0]) * b0;
-    uv +=*(m_uvs[1]) * b1;
-    uv +=*(m_uvs[2]) * (1.0f - b1 - b0);
+    uv += *(m_uvs[1]) * b1;
+    uv += *(m_uvs[2]) * (1.0f - b1 - b0);
     sr.m_uv = uv;
     sr.m_normal = normal;
 }

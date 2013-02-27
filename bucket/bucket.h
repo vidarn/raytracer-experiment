@@ -22,7 +22,7 @@ class Bucket
 		Scene *m_scene;
 	private:
 		void getCol(ShadeRec &sr, RGBA &finalCol);
-		void buildPath(PathNode* &path, Ray &ray, int &numNodes,
+		void buildPath(PathNode* &path, Ray *ray, int &numNodes,
 				const RGBA &startColor, int start, int end);
 		void sample(int x, int y);
 		Sampler *m_sampler;

@@ -52,7 +52,7 @@ void Bucket::getCol(ShadeRec &sr, RGBA &finalCol)
 	sg.v = sr.m_uv[1];
 }
 
-void Bucket::buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &startColor, int start, int end)
+void Bucket::buildPath(PathNode* &path, Ray *ray, int &numNodes,const RGBA &startColor, int start, int end)
 {
     RGBA col;
     RGBA tmpCol;
@@ -62,11 +62,11 @@ void Bucket::buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &star
         node.m_sr.m_hit = false;
         node.m_sr.m_hitT = FLT_MAX;
         node.m_sr.m_depth = i;
-        m_scene->trace(ray,&node.m_sr);
+        m_scene->trace(*ray,&node.m_sr);
 		if(node.m_sr.m_hit){
-			node.m_incident = ray.m_dir.normalized();
+			node.m_incident = ray->m_dir.normalized();
 			node.m_incident *= -1.0f;
-			node.m_sr.m_material->shade(node.m_sr,m_scene, *m_sampler, &ray, &tmpCol, m_shadingContext);
+			node.m_sr.m_material->shade(node.m_sr,m_scene, *m_sampler, ray, &tmpCol, m_shadingContext);
 			node.m_accumColor = nextCol;
 			nextCol *= tmpCol;
 			numNodes++;
@@ -79,6 +79,7 @@ void Bucket::buildPath(PathNode* &path, Ray &ray, int &numNodes,const RGBA &star
 
 void Bucket::sample(int x, int y)
 {
+    Vec3 sample = m_sampler->getSquareSample();
 	int lightBounces = m_scene->m_settings.m_lightBounces;
 	int cameraBounces = m_scene->m_settings.m_cameraBounces;
     Ray ray = m_viewPlane->getPixelRay(x,y,*m_sampler);
@@ -87,7 +88,7 @@ void Bucket::sample(int x, int y)
 	int numCameraNodes = 0;
 	int numLightNodes = 1;
 
-	buildPath(m_cameraPath,ray,numCameraNodes, RGBA(1.0f,1.0f,1.0f,1.0f), 0, cameraBounces);
+	buildPath(m_cameraPath,&ray,numCameraNodes, RGBA(1.0f,1.0f,1.0f,1.0f), 0, cameraBounces);
 
 	int lightIndex = floor(m_sampler->get1DSample()*m_scene->m_lights.size());
 	Light *light = m_scene->m_lights[lightIndex];

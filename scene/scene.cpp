@@ -21,15 +21,19 @@ void Scene::build(ViewPlane &viewPlane)
 	m_shadingSys = OSL::ShadingSystem::create(&m_rend, 0, &m_errorhandler);
 	registerClosures();
 
-	std::vector<GeometricObject *> objects;
+	std::vector<  GeometricObject* > objects;
+	std::vector<  Instance*        > instances;
     File file("/tmp/test.scn");
-    file.read(objects, m_lights,viewPlane,m_settings,m_shadingSys);
+    file.read(objects, instances, m_lights,viewPlane,m_settings,m_shadingSys);
+	for(int i=0; i<instances.size();i++){
+		instances[i]->prepare(objects);
+	}
 	std::vector<Triangle *> triangles;
 	for(int i=0; i<objects.size();i++){
 		objects[i]->refine(triangles);
 	}
 	std::cout << "num triangles: " << triangles.size() << std::endl;
-	m_triangles.build(triangles);
+	m_triangles.build(triangles, &instances);
     m_numRays = 0;
 }
 
@@ -43,14 +47,14 @@ void Scene::registerClosures()
 		OSL::ClosureParam params[MaxParams]; // upper bound
     };
     BuiltinClosures builtins[] = {
-        { "diffuse"    , DIFFUSE_ID,            { CLOSURE_VECTOR_PARAM(DiffuseParams, N),
-                                                  CLOSURE_FINISH_PARAM(DiffuseParams) } },
-        { "reflection"   , SPECULAR_ID,          { CLOSURE_VECTOR_PARAM(SpecularParams, N),
-                                                  CLOSURE_FLOAT_PARAM (SpecularParams, ior),
-                                                  CLOSURE_FINISH_PARAM(SpecularParams) } },
-        { "phong"   , TORRANCE_SPARROW_ID,   { CLOSURE_VECTOR_PARAM(TorranceSparrowParams, N),
-                                                  CLOSURE_FLOAT_PARAM (TorranceSparrowParams, e),
-                                                  CLOSURE_FINISH_PARAM(TorranceSparrowParams) } },
+        { "diffuse"    , DIFFUSE_ID, {      CLOSURE_VECTOR_PARAM(DiffuseParams, N),
+                                            CLOSURE_FINISH_PARAM(DiffuseParams) } },
+        { "reflection"   , SPECULAR_ID,{    CLOSURE_VECTOR_PARAM(SpecularParams, N),
+                                            CLOSURE_FLOAT_PARAM (SpecularParams, ior),
+                                            CLOSURE_FINISH_PARAM(SpecularParams) } },
+        { "phong"   , TORRANCE_SPARROW_ID,{ CLOSURE_VECTOR_PARAM(TorranceSparrowParams, N),
+                                            CLOSURE_FLOAT_PARAM (TorranceSparrowParams, e),
+                                            CLOSURE_FINISH_PARAM(TorranceSparrowParams) } },
         // mark end of the array
         { NULL, 0, {} }
     };
@@ -72,8 +76,10 @@ void Scene::trace(Ray &ray, ShadeRec *shadeRec)
 		m_triangles.hit(ray,*shadeRec);
 		if(shadeRec->m_hit)
 		{
-			shadeRec->m_hitPos = ray.getPointAtPos(shadeRec->m_hitT);
-			shadeRec->m_triangle->shadeInfo(ray,*shadeRec);
+            if(!shadeRec->m_calculated){
+                shadeRec->m_hitPos = ray.getPointAtPos(shadeRec->m_hitT);
+                shadeRec->m_triangle->shadeInfo(ray,*shadeRec);
+            }
 			shadeRec->setIncidentDirection(ray.m_dir.normalized());
 		}
 	}
